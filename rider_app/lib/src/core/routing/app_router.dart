@@ -8,6 +8,9 @@ import 'package:shared_core/core/ui/widgets/custom_button.dart';
 import 'package:shared_core/core/ui/widgets/custom_svg_picture.dart';
 import 'package:shared_core/gen/assets.gen.dart';
 
+import '../../modules/auth/login/login_screen.dart';
+import '../../modules/auth/signup/register_screen.dart';
+import '../../modules/auth/splash/splash_screen.dart';
 import '../../modules/home/bottom_nav_scaffold.dart';
 import '../../modules/home/home_screen.dart';
 import '../../modules/home/profile_screen.dart';
@@ -20,7 +23,7 @@ class AppRouter {
 
   late final GoRouter router = GoRouter(
     navigatorKey: AppGlobal.navigatorKey,
-    initialLocation: AppRoutes.home,
+    initialLocation: AppRoutes.splash,
     redirect: _guard,
     routes: _routes,
     errorBuilder: (context, state) => const ErrorPage(),
@@ -30,14 +33,30 @@ class AppRouter {
   // ── Auth guard ────────────────────────────────────────────────────────────
 
   String? _guard(BuildContext context, GoRouterState state) {
-    final _ =
-        _localStorageService.getBool(LocalStorageKeys.isLoggedIn) ?? false;
+    // Splash screen dispatches routes based on AuthCubit state
+    final _ = _localStorageService.getBool(LocalStorageKeys.isLoggedIn);
     return null;
   }
 
   // ── Route definitions ─────────────────────────────────────────────────────
 
   List<RouteBase> get _routes => [
+    GoRoute(
+      path: AppRoutes.splash,
+      name: 'splash',
+      builder: (context, state) => const SplashScreen(),
+    ),
+    GoRoute(
+      path: AppRoutes.login,
+      name: 'login',
+      builder: (context, state) => const LoginScreen(),
+    ),
+    GoRoute(
+      path: AppRoutes.signup,
+      name: 'signup',
+      builder: (context, state) => const RegisterScreen(),
+    ),
+
     /// ShellRoute for BottomNavigation
     ShellRoute(
       navigatorKey: shellNavigatorKey,

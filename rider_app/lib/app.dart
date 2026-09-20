@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:rider_app/src/modules/auth/blocs/login_cubit.dart';
+import 'package:rider_app/src/modules/auth/blocs/register_cubit.dart';
 import 'package:shared_core/shared_core.dart' hide AppRouter;
+
 import 'src/core/routing/app_router.dart';
 
 /// Root widget of the application.
@@ -11,10 +14,7 @@ import 'src/core/routing/app_router.dart';
 /// - Setting up localisation delegates.
 /// - Applying the design-system theme.
 class App extends StatelessWidget {
-  const App({
-    required this.flavor,
-    super.key,
-  });
+  const App({required this.flavor, super.key});
 
   final AppFlavor flavor;
 
@@ -34,25 +34,22 @@ class App extends StatelessWidget {
       routeInformationProvider: appRouter.router.routeInformationProvider,
       routeInformationParser: appRouter.router.routeInformationParser,
 
-       // ── Builder for SafeArea + fixed text scaling ──────────
+      // ── Builder for SafeArea + fixed text scaling ──────────
       builder: (context, child) {
         return MultiBlocProvider(
           providers: _globalProviders,
           child: BlocBuilder<NetworkCubit, NetworkState>(
             builder: (context, state) {
               return MediaQuery(
-                data: MediaQuery.of(
-                  context,
-                ).copyWith(textScaler: TextScaler.noScaling),
+                data: MediaQuery.of(context)
+                    .copyWith(textScaler: TextScaler.noScaling),
                 child: SafeArea(
                   top: false,
                   child: Stack(
                     children: [
                       child ?? const SizedBox.shrink(),
                       if (state is NetworkStatusChanged && !state.isConnected)
-                        const Positioned.fill(
-                          child: NoInternetScreen(),
-                        ),
+                        const Positioned.fill(child: NoInternetScreen()),
                     ],
                   ),
                 ),
@@ -66,12 +63,12 @@ class App extends StatelessWidget {
 
   /// Global BLoC / Cubit providers accessible throughout the widget tree.
   List<BlocProvider> get _globalProviders => [
-    BlocProvider<NetworkCubit>(
-      create: (_) => sl<NetworkCubit>(),
+    BlocProvider<NetworkCubit>(create: (_) => sl<NetworkCubit>(), lazy: false),
+    BlocProvider<LoginCubit>(create: (_) => sl<LoginCubit>(), lazy: false),
+    BlocProvider<RegisterCubit>(
+      create: (_) => sl<RegisterCubit>(),
       lazy: false,
     ),
-    // Example: BlocProvider<ThemeCubit>(create: (_) => sl<ThemeCubit>()),
-    // Example: BlocProvider<AuthBloc>(create: (_) => sl<AuthBloc>()),
   ];
 
   String get _appTitle => switch (flavor) {

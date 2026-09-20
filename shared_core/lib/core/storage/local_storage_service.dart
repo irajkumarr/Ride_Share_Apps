@@ -21,7 +21,7 @@ abstract class LocalStorageService {
   Future<void> setString(String key, {required String value});
   Future<void> setInt(String key, {required int value});
   Future<void> setDouble(String key, {required double value});
-  Future<void> setBool(String key, {required bool value});
+  Future<void> setBool(String key,  {required bool value});
   Future<void> setStringList(String key, {required List<String> value});
 
   String? getString(String key);

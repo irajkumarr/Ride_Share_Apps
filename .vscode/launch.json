@@ -1,0 +1,68 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "driver_app",
+            "cwd": "driver_app",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "driver_app (profile mode)",
+            "cwd": "driver_app",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "driver_app (release mode)",
+            "cwd": "driver_app",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "rider_app",
+            "cwd": "rider_app",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "rider_app (profile mode)",
+            "cwd": "rider_app",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "rider_app (release mode)",
+            "cwd": "rider_app",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "shared_core",
+            "cwd": "shared_core",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "shared_core (profile mode)",
+            "cwd": "shared_core",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "shared_core (release mode)",
+            "cwd": "shared_core",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        }
+    ]
+}

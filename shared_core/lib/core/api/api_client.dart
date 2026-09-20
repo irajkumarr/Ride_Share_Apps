@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+
 import '../error/exceptions.dart';
 import '../utils/app_logger.dart';
 
@@ -178,7 +179,7 @@ class ApiClient {
 
     return switch (statusCode) {
       400 => BadRequestException(message: message),
-      401 => const UnauthorizedException(),
+      401 => UnauthorizedException(message: message),
       403 => const ForbiddenException(),
       404 => NotFoundException(message: message),
       409 => ConflictException(message: message),
@@ -194,7 +195,9 @@ class ApiClient {
 
   static String _extractErrorMessage(dynamic data) {
     if (data is Map<String, dynamic>) {
-      return data['message'] as String? ?? data['error'] as String? ?? 'An error occurred';
+      return data['message'] as String? ??
+          data['error'] as String? ??
+          'An error occurred';
     }
     return 'An error occurred';
   }

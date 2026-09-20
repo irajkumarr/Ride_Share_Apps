@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_core/gen/assets.gen.dart';
+
 import '../../config/global/app_global.dart';
 
 class LoadingOverlay {
@@ -57,7 +58,7 @@ class LoadingOverlay {
                 height: 50,
                 padding: const EdgeInsets.all(12),
                 child: Image.asset(
-                  Assets.images.locationPin.path,
+                  Assets.images.flags.npl.path,
 
                   /// TODO: change image
                   // colorFilter: const ColorFilter.mode(
