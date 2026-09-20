@@ -31,11 +31,6 @@ export 'models/location/lat_lng_model.dart';
 export 'models/location/route_model.dart';
 
 // ── Core Infrastructure ─────────────────────────────────────────────────────
-// Analytics
-export 'core/analytics/analytics_event.dart';
-export 'core/analytics/analytics_observer.dart';
-export 'core/analytics/analytics_parameter.dart';
-export 'core/analytics/analytics_service.dart';
 
 // API & Network
 export 'core/api/api_client.dart';
@@ -52,9 +47,6 @@ export 'core/cache/hive_cache_service.dart';
 export 'core/storage/local_storage_service.dart';
 export 'core/storage/secure_storage_service.dart';
 
-// Deep Linking
-export 'core/config/deeplink/app_deep_link_service.dart';
-
 // Dependency Injection
 export 'core/di/injection.dart';
 
@@ -67,9 +59,6 @@ export 'core/error/failures.dart';
 export 'core/helpers/format_number.dart';
 export 'core/helpers/show_app_sheet.dart';
 export 'core/helpers/show_dialog.dart';
-
-// Manager
-export 'core/manager/firebase_manager.dart';
 
 // Routing
 export 'core/routing/app_route_observer.dart';
@@ -180,3 +169,6 @@ export 'gen/fonts.gen.dart';
 // ── Services ────────────────────────────────────────────────────────────────
 export 'services/location/location_service.dart';
 export 'services/web_socket_service.dart';
+
+// ── Third-party Exports ─────────────────────────────────────────────────────
+export 'package:google_maps_flutter/google_maps_flutter.dart';

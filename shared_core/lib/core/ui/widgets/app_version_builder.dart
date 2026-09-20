@@ -1,5 +1,6 @@
+import 'dart:io';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 
 class AppVersionBuilder extends StatefulWidget {
   final TextStyle? style;
@@ -20,10 +21,27 @@ class _AppVersionBuilderState extends State<AppVersionBuilder> {
   }
 
   Future<void> _loadVersion() async {
-    final info = await PackageInfo.fromPlatform();
-    setState(() {
-      version = info.version; // already clean
-    });
+    final deviceInfo = DeviceInfoPlugin();
+    String infoText = '';
+    try {
+      if (Platform.isAndroid) {
+        final androidInfo = await deviceInfo.androidInfo;
+        infoText = 'Android ${androidInfo.version.release} (SDK ${androidInfo.version.sdkInt})';
+      } else if (Platform.isIOS) {
+        final iosInfo = await deviceInfo.iosInfo;
+        infoText = '${iosInfo.systemName} ${iosInfo.systemVersion}';
+      } else {
+        infoText = 'v1.0.0';
+      }
+    } catch (_) {
+      infoText = 'v1.0.0';
+    }
+
+    if (mounted) {
+      setState(() {
+        version = infoText;
+      });
+    }
   }
 
   @override

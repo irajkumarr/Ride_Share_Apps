@@ -1,4 +1,4 @@
-import 'package:connectivity/connectivity.dart';
+// import 'package:connectivity/connectivity.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:get_it/get_it.dart';
@@ -42,7 +42,7 @@ Future<void> _registerExternalDependencies() async {
   final sharedPrefs = await SharedPreferences.getInstance();
   sl.registerSingleton<SharedPreferences>(sharedPrefs);
 
-  sl.registerLazySingleton<Connectivity>(() => Connectivity());
+  // sl.registerLazySingleton<Connectivity>(() => Connectivity());
   sl.registerLazySingleton<InternetConnection>(() => InternetConnection());
 
   // FirebaseMessaging
