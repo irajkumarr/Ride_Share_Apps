@@ -28,15 +28,17 @@
               android:name="io.flutter.embedding.android.NormalTheme"
               android:resource="@style/NormalTheme"
               />
-               <!-- Add your Google Maps API Key here -->
-        <meta-data 
-            android:name="com.google.android.geo.API_KEY" 
-            android:value="AIzaSyYourActualAPIKeyHereXXXXXXXX" />
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+
+        <!-- Google Maps API Key MUST be directly inside <application>, NOT inside <activity> -->
+        <meta-data 
+            android:name="com.google.android.geo.API_KEY" 
+            android:value="AIzaSyD0AMrQORoPNFH9REaDHaLGwXeaZegyfRQ" />
+
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data

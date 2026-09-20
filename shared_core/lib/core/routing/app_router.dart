@@ -1,9 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:shared_core/config/global/app_global.dart';
-import 'package:shared_core/core/analytics/analytics_observer.dart';
 import 'package:shared_core/core/routing/app_routes.dart';
 import 'package:shared_core/core/storage/local_storage_service.dart';
 import 'package:shared_core/core/ui/widgets/custom_button.dart';
@@ -29,8 +27,6 @@ class AppRouter {
     routes: _routes,
     errorBuilder: (context, state) => const ErrorPage(),
     observers: [
-      AnalyticsObserver(),
-      SentryNavigatorObserver(),
       // AppRouterObserver(),
     ],
   );

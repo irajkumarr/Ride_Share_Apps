@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import '../storage/local_storage_service.dart';
-import '../config/deeplink/app_deep_link_service.dart';
 import 'app_logger.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
@@ -192,12 +191,12 @@ class PushNotificationService {
     final id = message.data['id'] as String?;
 
     if (route != null) {
-      final deepLink = DeepLinkData(
-        path: route,
-        queryParams: id != null ? {'id': id} : {},
-        payload: message.data,
-      );
-      debugPrint(deepLink.toString());
+      // final deepLink = DeepLinkData(
+      //   path: route,
+      //   queryParams: id != null ? {'id': id} : {},
+      //   payload: message.data,
+      // );
+      // debugPrint(deepLink.toString());
       _messageController.add(message);
       // Note: Actual navigation should be handled in your router or main app
       // DeepLinkService.instance.navigateToDeepLink(context, deepLink);

@@ -1,5 +1,4 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:sentry_flutter/sentry_flutter.dart';
 import '../../core/utils/app_logger.dart';
 
 /// Global [BlocObserver] that logs all BLoC/Cubit transitions and errors.
@@ -19,13 +18,7 @@ class AppBlocObserver extends BlocObserver {
   void onEvent(Bloc<dynamic, dynamic> bloc, Object? event) {
     super.onEvent(bloc, event);
     AppLogger.debug('BLoC event: ${bloc.runtimeType} → $event');
-    Sentry.addBreadcrumb(
-      Breadcrumb(
-        message: 'BLoC event: ${bloc.runtimeType}',
-        category: 'bloc.event',
-        data: {'event': event.toString()},
-      ),
-    );
+    
   }
 
   @override
@@ -50,17 +43,7 @@ class AppBlocObserver extends BlocObserver {
       '${transition.currentState.runtimeType} '
       '→ ${transition.nextState.runtimeType}',
     );
-    Sentry.addBreadcrumb(
-      Breadcrumb(
-        message: 'BLoC transition: ${bloc.runtimeType}',
-        category: 'bloc.transition',
-        data: {
-          'event': transition.event.toString(),
-          'currentState': transition.currentState.toString(),
-          'nextState': transition.nextState.toString(),
-        },
-      ),
-    );
+    
   }
 
   @override
@@ -70,14 +53,7 @@ class AppBlocObserver extends BlocObserver {
       error: error,
       stackTrace: stackTrace,
     );
-    Sentry.addBreadcrumb(
-      Breadcrumb(
-        message: 'BLoC error in ${bloc.runtimeType}',
-        category: 'bloc.error',
-        level: SentryLevel.error,
-        data: {'error': error.toString()},
-      ),
-    );
+    
     super.onError(bloc, error, stackTrace);
   }
 
