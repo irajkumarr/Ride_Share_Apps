@@ -1,0 +1,72 @@
+import 'dart:ui' as ui;
+import 'package:flutter/services.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import '../../models/location/lat_lng_model.dart';
+
+/// Helper utilities for Google Maps operations like markers, styling, bounds, and coordinates.
+class MapUtils {
+  MapUtils._();
+
+  /// Converts [LatLngModel] to Google Maps [LatLng].
+  static LatLng toGoogleLatLng(LatLngModel model) {
+    return LatLng(model.latitude, model.longitude);
+  }
+
+  /// Converts Google Maps [LatLng] to [LatLngModel].
+  static LatLngModel fromGoogleLatLng(LatLng latLng, {double? heading, double? speed}) {
+    return LatLngModel(
+      latitude: latLng.latitude,
+      longitude: latLng.longitude,
+      heading: heading,
+      speed: speed,
+    );
+  }
+
+  /// Loads map theme JSON from asset path into [GoogleMapController].
+  static Future<void> setMapStyle(GoogleMapController controller, String assetPath) async {
+    try {
+      final style = await rootBundle.loadString(assetPath);
+      // ignore: deprecated_member_use
+      await controller.setMapStyle(style);
+    } catch (_) {
+      // Graceful fallback if style fails to load
+    }
+  }
+
+  /// Calculates a [LatLngBounds] containing all points in [coordinates].
+  static LatLngBounds boundsFromLatLngList(List<LatLng> coordinates) {
+    assert(coordinates.isNotEmpty, 'coordinates list must not be empty');
+
+    double x0 = coordinates.first.latitude;
+    double x1 = coordinates.first.latitude;
+    double y0 = coordinates.first.longitude;
+    double y1 = coordinates.first.longitude;
+
+    for (final latLng in coordinates) {
+      if (latLng.latitude > x1) x1 = latLng.latitude;
+      if (latLng.latitude < x0) x0 = latLng.latitude;
+      if (latLng.longitude > y1) y1 = latLng.longitude;
+      if (latLng.longitude < y0) y0 = latLng.longitude;
+    }
+    return LatLngBounds(
+      northeast: LatLng(x1, y1),
+      southwest: LatLng(x0, y0),
+    );
+  }
+
+  /// Creates a [BitmapDescriptor] from custom bytes (e.g. SVG or resized PNG).
+  static Future<BitmapDescriptor> getMarkerIconFromAsset(
+    String path, {
+    int width = 96,
+  }) async {
+    final byteData = await rootBundle.load(path);
+    final codec = await ui.instantiateImageCodec(
+      byteData.buffer.asUint8List(),
+      targetWidth: width,
+    );
+    final frameInfo = await codec.getNextFrame();
+    final byteDataResized = await frameInfo.image.toByteData(format: ui.ImageByteFormat.png);
+    final bytes = byteDataResized!.buffer.asUint8List();
+    return BitmapDescriptor.bytes(bytes);
+  }
+}
