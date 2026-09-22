@@ -14,6 +14,7 @@ import 'package:shared_core/core/storage/secure_storage_service.dart';
 import 'package:shared_core/core/ui/blocs/network_cubit.dart';
 import 'package:shared_core/core/utils/push_notification_service.dart';
 import 'package:shared_core/services/location/location_service.dart';
+import 'package:shared_core/services/web_socket_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Global service-locator instance.
@@ -111,4 +112,5 @@ void _registerNavigation() {
 
 void _registerLocation() {
   sl.registerLazySingleton<LocationService>(() => LocationServiceImpl());
+  sl.registerLazySingleton<WebSocketService>(() => WebSocketServiceImpl());
 }

@@ -9,7 +9,7 @@ import 'package:shared_core/core/ui/widgets/custom_svg_picture.dart';
 import 'package:shared_core/gen/assets.gen.dart';
 
 import '../../modules/auth/login/login_screen.dart';
-import '../../modules/auth/signup/register_screen.dart';
+import '../../modules/auth/register/register_screen.dart';
 import '../../modules/auth/splash/splash_screen.dart';
 import '../../modules/home/bottom_nav_scaffold.dart';
 import '../../modules/home/home_screen.dart';
@@ -56,26 +56,36 @@ class AppRouter {
       name: 'signup',
       builder: (context, state) => const RegisterScreen(),
     ),
+    GoRoute(
+      path: AppRoutes.home,
+      name: 'home',
+      builder: (context, state) => const HomeScreen(),
+    ),
+    GoRoute(
+      path: AppRoutes.profile,
+      name: 'profile',
+      builder: (context, state) => const ProfileScreen(),
+    ),
 
     /// ShellRoute for BottomNavigation
-    ShellRoute(
-      navigatorKey: shellNavigatorKey,
-      builder: (context, state, child) {
-        return BottomNavScaffold(child: child);
-      },
-      routes: [
-        GoRoute(
-          path: AppRoutes.home,
-          name: 'home',
-          builder: (context, state) => const HomeScreen(),
-        ),
-        GoRoute(
-          path: AppRoutes.profile,
-          name: 'profile',
-          builder: (context, state) => const ProfileScreen(),
-        ),
-      ],
-    ),
+    // ShellRoute(
+    //   navigatorKey: shellNavigatorKey,
+    //   // builder: (context, state, child) {
+    //   //   return BottomNavScaffold(child: child);
+    //   // },
+    //   routes: [
+    //     GoRoute(
+    //       path: AppRoutes.home,
+    //       name: 'home',
+    //       builder: (context, state) => const HomeScreen(),
+    //     ),
+    //     GoRoute(
+    //       path: AppRoutes.profile,
+    //       name: 'profile',
+    //       builder: (context, state) => const ProfileScreen(),
+    //     ),
+    //   ],
+    // ),
   ];
 }
 

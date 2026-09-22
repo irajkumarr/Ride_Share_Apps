@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rider_app/src/modules/auth/blocs/login_cubit.dart';
 import 'package:rider_app/src/modules/auth/blocs/register_cubit.dart';
+import 'package:rider_app/src/modules/home/blocs/active_ride_cubit.dart';
+import 'package:rider_app/src/modules/home/blocs/ride_search_cubit.dart';
 import 'package:shared_core/shared_core.dart' hide AppRouter;
 
 import 'src/core/routing/app_router.dart';
@@ -67,6 +69,14 @@ class App extends StatelessWidget {
     BlocProvider<LoginCubit>(create: (_) => sl<LoginCubit>(), lazy: false),
     BlocProvider<RegisterCubit>(
       create: (_) => sl<RegisterCubit>(),
+      lazy: false,
+    ),
+    BlocProvider<RideSearchCubit>(
+      create: (_) => sl<RideSearchCubit>(),
+      lazy: false,
+    ),
+    BlocProvider<ActiveRideCubit>(
+      create: (_) => sl<ActiveRideCubit>(),
       lazy: false,
     ),
   ];

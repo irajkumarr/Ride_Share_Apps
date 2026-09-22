@@ -60,28 +60,30 @@ class _LoginScreenState extends State<LoginScreen> with FormMixin {
                     const SizedBox(height: 24),
                     // Ride share header icon badge
                     Container(
-                      width: 54,
-                      height: 54,
+                      width: 100,
+                      height: 100,
                       decoration: BoxDecoration(
                         color: Colors.black,
                         borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.1),
-                            blurRadius: 12,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
+                        // boxShadow: [
+                        //   BoxShadow(
+                        //     color: Colors.black.withValues(alpha: 0.1),
+                        //     blurRadius: 12,
+                        //     offset: const Offset(0, 4),
+                        //   ),
+                        // ],
                       ),
-                      child: const Icon(
-                        Icons.local_taxi_rounded,
-                        color: AppColor.primary,
-                        size: 30,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(16),
+                        child: Image.asset(
+                          'assets/icons/ridenest_logo.png',
+                          fit: BoxFit.cover,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 28),
                     Text(
-                      'Welcome to Rider',
+                      'Welcome Back!',
                       style: theme.textTheme.headlineMedium?.copyWith(
                         fontWeight: FontWeight.w800,
                         color: Colors.black,
