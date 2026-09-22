@@ -1,0 +1,45 @@
+targets:
+  $default:
+    builders:
+      flutter_gen_runner: # or flutter_gen
+        options:
+          output: lib/gen/ # Optional (default: lib/gen/)
+          line_length: 120 # Optional (default: 80)
+          assets:
+            exclude:
+              - .env.dev
+              - .env.staging
+              - .env.prod
+              - assets/countryCodes/
+          integrations:
+            flutter_svg: true
+            lottie: true
+            rive: true
+      source_gen|combining_builder:
+        generate_for:
+          - lib/**/*_dto.dart
+          - lib/**/*_client.dart
+          - lib/**/*_dao.dart
+          - lib/**/*_model.dart
+          - lib/**/*_service.dart
+          - lib/**/*_entity.dart
+          - lib/**/*_database.dart
+        options:
+          build_extensions:
+            "^lib/{{}}.dart": "lib/gen/{{}}.g.dart"
+      freezed|freezed:
+        generate_for:
+          - lib/**/*_dto.dart
+          - lib/**/*_client.dart
+          - lib/**/*_dao.dart
+          - lib/**/*_model.dart
+          - lib/**/*_service.dart
+          - lib/**/*_entity.dart
+          - lib/**/*_database.dart
+        enabled: true
+        options:
+          build_extensions:
+            "^lib/{{}}.dart": "lib/gen/{{}}.freezed.dart"
+          # Disable generation of hashCode, ==, copyWith functions
+          copy_with: true
+          equal: false
