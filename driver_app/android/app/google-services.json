@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "596143227669",
+    "project_id": "ridenest-6642f",
+    "storage_bucket": "ridenest-6642f.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:596143227669:android:1994fc9c74e36119639f1c",
+        "android_client_info": {
+          "package_name": "com.rajkumartimalsina.ridenest"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyADKs5HhV3WhP2UPKJkMomD7r8yWEiYysY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:596143227669:android:7eabd8b13acb22df639f1c",
+        "android_client_info": {
+          "package_name": "com.rajkumartimalsina.ridenestpro"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyADKs5HhV3WhP2UPKJkMomD7r8yWEiYysY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

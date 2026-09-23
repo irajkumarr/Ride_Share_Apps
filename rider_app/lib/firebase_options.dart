@@ -57,19 +57,18 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyDrIlVov_bpKhMGKzHcqr1I5X8yMBdevC0',
-    appId: '1:594485651294:android:7639168e55bcd72cf6d1cf',
-    messagingSenderId: '594485651294',
-    projectId: 'rider-app-44187',
-    storageBucket: 'rider-app-44187.firebasestorage.app',
+    apiKey: 'AIzaSyADKs5HhV3WhP2UPKJkMomD7r8yWEiYysY',
+    appId: '1:596143227669:android:1994fc9c74e36119639f1c',
+    messagingSenderId: '596143227669',
+    projectId: 'ridenest-6642f',
+    storageBucket: 'ridenest-6642f.firebasestorage.app',
   );
-
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyDsBRfn1orI1DXCAlQArfSkom_S1TGnXBk',
-    appId: '1:594485651294:ios:548038d03ef4b4ecf6d1cf',
-    messagingSenderId: '594485651294',
-    projectId: 'rider-app-44187',
-    storageBucket: 'rider-app-44187.firebasestorage.app',
-    iosBundleId: 'com.example.riderApp',
+    apiKey: 'AIzaSyChqL2nCKyuStlchRyWld_JAnCrxbO-UmI',
+    appId: '1:596143227669:ios:024cc42521e30023639f1c',
+    messagingSenderId: '596143227669',
+    projectId: 'ridenest-6642f',
+    storageBucket: 'ridenest-6642f.firebasestorage.app',
+    iosBundleId: 'com.rajkumartimalsina.ridenest',
   );
 }

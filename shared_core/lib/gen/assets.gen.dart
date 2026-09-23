@@ -41,6 +41,16 @@ class $AssetsCountryCodesGen {
   List<String> get values => [countryCodes];
 }
 
+class $AssetsIconsGen {
+  const $AssetsIconsGen();
+
+  /// File path: assets/icons/ridenest_logo.png
+  AssetGenImage get ridenestLogo => const AssetGenImage('assets/icons/ridenest_logo.png');
+
+  /// List of all assets
+  List<AssetGenImage> get values => [ridenestLogo];
+}
+
 class $AssetsImagesGen {
   const $AssetsImagesGen();
 
@@ -1486,6 +1496,7 @@ class Assets {
 
   static const $AssetsAnimationGen animation = $AssetsAnimationGen();
   static const $AssetsCountryCodesGen countryCodes = $AssetsCountryCodesGen();
+  static const $AssetsIconsGen icons = $AssetsIconsGen();
   static const $AssetsImagesGen images = $AssetsImagesGen();
   static const $AssetsMapThemeGen mapTheme = $AssetsMapThemeGen();
 }

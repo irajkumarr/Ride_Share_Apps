@@ -1,21 +1,21 @@
 {
   "project_info": {
-    "project_number": "594485651294",
-    "project_id": "rider-app-44187",
-    "storage_bucket": "rider-app-44187.firebasestorage.app"
+    "project_number": "596143227669",
+    "project_id": "ridenest-6642f",
+    "storage_bucket": "ridenest-6642f.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:594485651294:android:7639168e55bcd72cf6d1cf",
+        "mobilesdk_app_id": "1:596143227669:android:1994fc9c74e36119639f1c",
         "android_client_info": {
-          "package_name": "com.example.rider_app"
+          "package_name": "com.rajkumartimalsina.ridenest"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyDrIlVov_bpKhMGKzHcqr1I5X8yMBdevC0"
+          "current_key": "AIzaSyADKs5HhV3WhP2UPKJkMomD7r8yWEiYysY"
         }
       ],
       "services": {

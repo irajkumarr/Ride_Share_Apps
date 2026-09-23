@@ -146,6 +146,7 @@ export 'core/ui/widgets/responsive_layout.dart';
 export 'core/ui/widgets/rounded_widget.dart';
 export 'core/ui/widgets/scrolling_text.dart';
 export 'core/ui/widgets/shimmer_loader.dart';
+export 'core/ui/widgets/slide_to_act_button.dart';
 export 'core/ui/widgets/vertical_tabs.dart';
 
 // Common Widgets
