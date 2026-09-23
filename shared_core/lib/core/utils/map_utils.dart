@@ -1,6 +1,7 @@
 import 'dart:ui' as ui;
 import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../models/location/lat_lng_model.dart';
 
 /// Helper utilities for Google Maps operations like markers, styling, bounds, and coordinates.
@@ -68,5 +69,31 @@ class MapUtils {
     final byteDataResized = await frameInfo.image.toByteData(format: ui.ImageByteFormat.png);
     final bytes = byteDataResized!.buffer.asUint8List();
     return BitmapDescriptor.bytes(bytes);
+  }
+
+  /// Launches external Google Maps with turn-by-turn navigation from [origin] (or current position)
+  /// to [destination] (e.g. pickup or destination lat/lng).
+  static Future<bool> launchGoogleMapsNavigation({
+    required double destLat,
+    required double destLng,
+    double? originLat,
+    double? originLng,
+  }) async {
+    final String url;
+    if (originLat != null && originLng != null) {
+      url =
+          'https://www.google.com/maps/dir/?api=1&origin=$originLat,$originLng&destination=$destLat,$destLng&travelmode=driving';
+    } else {
+      url =
+          'https://www.google.com/maps/dir/?api=1&destination=$destLat,$destLng&travelmode=driving';
+    }
+
+    try {
+      final uri = Uri.parse(url);
+      if (await canLaunchUrl(uri)) {
+        return await launchUrl(uri, mode: LaunchMode.externalApplication);
+      }
+    } catch (_) {}
+    return false;
   }
 }

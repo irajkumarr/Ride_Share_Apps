@@ -57,16 +57,23 @@ class LoadingOverlay {
                 width: 50,
                 height: 50,
                 padding: const EdgeInsets.all(12),
-                child: Image.asset(
-                  Assets.images.flags.npl.path,
+                // child: Image.asset(
+                //   Assets.icons.ridenestLogo.path,
 
-                  /// TODO: change image
-                  // colorFilter: const ColorFilter.mode(
-                  //   AppColor.black,
-                  //   BlendMode.srcIn,
-                  // ),
+                //   /// TODO: change image
+                //   // colorFilter: const ColorFilter.mode(
+                //   //   AppColor.black,
+                //   //   BlendMode.srcIn,
+                //   // ),
+                // ),
+                child: Assets.icons.ridenestLogo.image(
+                  package: 'shared_core',
+                  errorBuilder: (context, error, stackTrace) => const Icon(
+                    Icons.local_taxi_rounded,
+                    color: Color(0xFF00B4A0),
+                    size: 26,
+                  ),
                 ),
-                //Assets.images.icAppLogoCircle.image(),
               ),
             ),
           ],

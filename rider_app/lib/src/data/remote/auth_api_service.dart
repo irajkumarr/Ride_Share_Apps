@@ -17,10 +17,11 @@ class AuthApiService {
   Future<UserDto> login({
     required String phone,
     required String password,
+    required String fcmToken,
   }) async {
     final data = await _apiClient.post<Map<String, dynamic>>(
       ApiUrls.login,
-      data: {'phone': phone, 'password': password},
+      data: {'phone': phone, 'password': password,'fcmToken': fcmToken},
       options: skipAuthOptions,
     );
     return UserDto.fromJson(data);
