@@ -205,7 +205,7 @@ class _HomeScreenState extends State<HomeScreen> {
     _mapController?.animateCamera(
       CameraUpdate.newLatLngBounds(
         MapUtils.boundsFromLatLngList(targetBoundsPoints),
-        100,
+        48.0,
       ),
     );
   }
@@ -374,7 +374,7 @@ class _HomeScreenState extends State<HomeScreen> {
     _mapController?.animateCamera(
       CameraUpdate.newLatLngBounds(
         MapUtils.boundsFromLatLngList([pLatLng, dLatLng]),
-        110,
+        48.0,
       ),
     );
   }
@@ -462,7 +462,7 @@ class _HomeScreenState extends State<HomeScreen> {
     _mapController?.animateCamera(
       CameraUpdate.newLatLngBounds(
         MapUtils.boundsFromLatLngList([_currentLocation, pLatLng, dLatLng]),
-        0,
+        48.0,
       ),
     );
   }
@@ -481,6 +481,19 @@ class _HomeScreenState extends State<HomeScreen> {
     final name = _driverProfile?.fullName?.trim();
     if (name == null || name.isEmpty) return 'Aarav';
     return name.split(' ').first;
+  }
+
+  /// Dynamically computes bottom sheet height in driver app depending on dispatch state.
+  double _getDriverBottomSheetHeight(RideDispatchState dispatchState) {
+    if (dispatchState is RideRequestReceivedState) {
+      return 410.0;
+    } else if (dispatchState is ActiveTripState) {
+      return _isFullScreenMap ? 95.0 : 360.0;
+    } else if (dispatchState is TripCompletedSummaryState) {
+      return 390.0;
+    }
+    // Default online/offline slider dashboard sheet
+    return 270.0;
   }
 
   @override
@@ -529,25 +542,35 @@ class _HomeScreenState extends State<HomeScreen> {
       ],
       child: Scaffold(
         backgroundColor: Colors.white,
-        body: Stack(
-          children: [
-            // 1. Google Map View with dynamic styling
-            CustomMapView(
-              initialCameraPosition: _currentLocation,
-              initialZoom: 16.0,
-              markers: _markers,
-              polylines: _polylines,
-              circles: _circles,
-              myLocationEnabled:
-                  false, // Custom puck marker used for high design fidelity
-              myLocationButtonEnabled: false,
-              customMapStyleAsset: _isDarkMap
-                  ? 'packages/shared_core/assets/mapTheme/darkMap.json'
-                  : null,
-              onMapCreated: (controller) {
-                _mapController = controller;
-              },
-            ),
+        body: BlocBuilder<RideDispatchCubit, RideDispatchState>(
+          builder: (context, dispatchState) {
+            final bottomSheetHeight = _getDriverBottomSheetHeight(dispatchState);
+
+            return Stack(
+              children: [
+                // 1. Google Map View with dynamic styling and responsive viewport padding
+                CustomMapView(
+                  initialCameraPosition: _currentLocation,
+                  initialZoom: 16.0,
+                  markers: _markers,
+                  polylines: _polylines,
+                  circles: _circles,
+                  myLocationEnabled:
+                      false, // Custom puck marker used for high design fidelity
+                  myLocationButtonEnabled: false,
+                  padding: EdgeInsets.only(
+                    top: MediaQuery.of(context).padding.top + 75,
+                    bottom: bottomSheetHeight + 16,
+                    left: 24,
+                    right: 24,
+                  ),
+                  customMapStyleAsset: _isDarkMap
+                      ? 'packages/shared_core/assets/mapTheme/darkMap.json'
+                      : null,
+                  onMapCreated: (controller) {
+                    _mapController = controller;
+                  },
+                ),
 
             // 2. Top Header: Navigation HUD if ActiveTripState, or DriverStatusTopBar otherwise
             BlocBuilder<RideDispatchCubit, RideDispatchState>(
@@ -608,14 +631,17 @@ class _HomeScreenState extends State<HomeScreen> {
 
                 return Positioned(
                   right: 16,
-                  bottom:
-                      345, // positioned right above the bottom active trip card
+                  bottom: _isFullScreenMap
+                      ? 110.0
+                      : 360.0, // positioned right above the active trip card or fullscreen pill
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       // Target Recenter button
                       GestureDetector(
-                        onTap: _fetchCurrentLocation,
+                        onTap: () {
+                          _updateTripMap(dispatchState);
+                        },
                         child: Container(
                           width: 46,
                           height: 46,
@@ -1012,6 +1038,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                   setState(() {
                                     _isFullScreenMap = false;
                                   });
+                                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                                    _updateTripMap(state);
+                                  });
                                 },
                                 icon: const Icon(
                                   Icons.fullscreen_exit_rounded,
@@ -1053,6 +1082,9 @@ class _HomeScreenState extends State<HomeScreen> {
                         setState(() {
                           _isFullScreenMap = !_isFullScreenMap;
                         });
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          _updateTripMap(state);
+                        });
                       },
                       onOpenGoogleMaps: () async {
                         // When in progress, navigate to destination; otherwise to pickup
@@ -1088,10 +1120,12 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: TripSummarySheet(summary: state),
                   );
                 }
-                return const SizedBox.shrink();
-              },
-            ),
-          ],
+                    return const SizedBox.shrink();
+                  },
+                ),
+              ],
+            );
+          },
         ),
       ),
     );

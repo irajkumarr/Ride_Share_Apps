@@ -38,14 +38,13 @@ class ActiveDriverCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Determine whether we are in "Driver Accepted / On the way" vs "Driver Arrived / Heading to Destination"
-    final bool isOnTrip =
-        booking.status == RideStatus.tripInProgress ||
-        booking.status == RideStatus.driverArriving;
-
-    return isOnTrip
-        ? _buildOnTripView(context)
-        : _buildDriverAcceptedView(context);
+    if (booking.status == RideStatus.driverArriving) {
+      return _buildDriverArrivedView(context);
+    } else if (booking.status == RideStatus.tripInProgress) {
+      return _buildOnTripView(context);
+    } else {
+      return _buildDriverAcceptedView(context);
+    }
   }
 
   // ═════════════════════════════════════════════════════════════════════════════
@@ -654,7 +653,470 @@ class ActiveDriverCard extends StatelessWidget {
   }
 
   // ═════════════════════════════════════════════════════════════════════════════
-  // UI #2: DRIVER ARRIVED / ON TRIP (Screenshot 1)
+  // UI #2: DRIVER ARRIVED AT PICKUP
+  // ═════════════════════════════════════════════════════════════════════════════
+  Widget _buildDriverArrivedView(BuildContext context) {
+    final driverName = driver.name.isNotEmpty ? driver.name : 'Bikash Sharma';
+    final vehicleDetails = _getVehicleModel(driver);
+    final licensePlate = _formatPlate(driver.licensePlate);
+    final rating = driver.rating > 0 ? driver.rating : 4.9;
+    final tripsCount = driver.totalRides > 0
+        ? '${driver.totalRides}+'
+        : '1,240+';
+
+    final pinCode = booking.id.length >= 4
+        ? booking.id.substring(booking.id.length - 4)
+        : '5824';
+
+    final fareDisplay = booking.fareNpr > 0
+        ? 'Rs. ${booking.fareNpr.toStringAsFixed(0)}'
+        : 'Rs. 46';
+
+    final paymentDisplay = booking.paymentMethod.isNotEmpty
+        ? (booking.paymentMethod.toLowerCase() == 'cash'
+              ? 'Cash / eSewa'
+              : booking.paymentMethod)
+        : 'Cash / eSewa';
+
+    final pickupTitle = booking.pickup.title.isNotEmpty
+        ? booking.pickup.title
+        : 'Your Pickup Point';
+
+    return Container(
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 26,
+            offset: Offset(0, -6),
+          ),
+        ],
+      ),
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 10, 20, 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Top drag handle
+              Center(
+                child: Container(
+                  width: 44,
+                  height: 4.5,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFD1D5DB),
+                    borderRadius: BorderRadius.circular(3),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 14),
+
+              // 1. Status Header Row: "🟢 Driver has arrived" + Vehicle License Plate
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              width: 9,
+                              height: 9,
+                              decoration: const BoxDecoration(
+                                color: Color(0xFF10B981), // Vibrant Green
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            const Expanded(
+                              child: Text(
+                                'Driver has arrived!',
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w900,
+                                  color: Color(0xFF0F172A),
+                                  letterSpacing: -0.4,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        const Text(
+                          'Waiting at your pickup location',
+                          style: TextStyle(
+                            fontSize: 13.5,
+                            color: Color(0xFF64748B),
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+
+                  // License Plate Pill Card
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF1F5F9),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text(
+                          licensePlate,
+                          style: const TextStyle(
+                            fontSize: 12.5,
+                            fontWeight: FontWeight.w900,
+                            color: Color(0xFF0F172A),
+                            letterSpacing: 0.8,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          vehicleDetails,
+                          style: const TextStyle(
+                            fontSize: 10.5,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF64748B),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+
+              // 2. Prominent START PIN Card to share with driver
+              // Container(
+              //   padding: const EdgeInsets.symmetric(
+              //     horizontal: 16,
+              //     vertical: 12,
+              //   ),
+              //   decoration: BoxDecoration(
+              //     color: const Color(0xFFFFFBEB), // Amber soft tint
+              //     borderRadius: BorderRadius.circular(18),
+              //     border: Border.all(
+              //       color: const Color(0xFFFDE68A),
+              //       width: 1.4,
+              //     ),
+              //   ),
+              //   child: Row(
+              //     children: [
+              //       Container(
+              //         width: 42,
+              //         height: 42,
+              //         decoration: const BoxDecoration(
+              //           color: Color(0xFFFEF3C7),
+              //           shape: BoxShape.circle,
+              //         ),
+              //         child: const Center(
+              //           child: Icon(
+              //             Icons.pin_rounded,
+              //             color: Color(0xFFD97706),
+              //             size: 22,
+              //           ),
+              //         ),
+              //       ),
+              //       const SizedBox(width: 12),
+              //       Expanded(
+              //         child: Column(
+              //           crossAxisAlignment: CrossAxisAlignment.start,
+              //           children: const [
+              //             Text(
+              //               'SHARE PIN TO START TRIP',
+              //               style: TextStyle(
+              //                 fontSize: 10.5,
+              //                 fontWeight: FontWeight.w800,
+              //                 color: Color(0xFFD97706),
+              //                 letterSpacing: 0.5,
+              //               ),
+              //             ),
+              //             SizedBox(height: 2),
+              //             Text(
+              //               'Show this PIN to your driver',
+              //               style: TextStyle(
+              //                 fontSize: 12,
+              //                 color: Color(0xFF78350F),
+              //                 fontWeight: FontWeight.w500,
+              //               ),
+              //             ),
+              //           ],
+              //         ),
+              //       ),
+              //       Container(
+              //         padding: const EdgeInsets.symmetric(
+              //           horizontal: 14,
+              //           vertical: 6,
+              //         ),
+              //         decoration: BoxDecoration(
+              //           color: const Color(0xFF0F172A),
+              //           borderRadius: BorderRadius.circular(12),
+              //         ),
+              //         child: Text(
+              //           pinCode,
+              //           style: const TextStyle(
+              //             fontSize: 19,
+              //             fontWeight: FontWeight.w900,
+              //             color: Color(0xFFFBBF24),
+              //             letterSpacing: 2.5,
+              //           ),
+              //         ),
+              //       ),
+              //     ],
+              //   ),
+              // ),
+              const SizedBox(height: 16),
+
+              // 3. Driver Info Row (Avatar with green check, Name & rating, Call, Chat)
+              Row(
+                children: [
+                  // Driver Avatar with teal-green ring & verified checkmark
+                  Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      Container(
+                        width: 50,
+                        height: 50,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: const Color(0xFF10B981),
+                            width: 2.2,
+                          ),
+                          color: const Color(0xFFF1F5F9),
+                        ),
+                        child: ClipOval(
+                          child: driver.photoUrl.isNotEmpty
+                              ? Image.network(
+                                  driver.photoUrl,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (_, __, ___) => const Center(
+                                    child: Icon(
+                                      Icons.person,
+                                      size: 30,
+                                      color: Color(0xFF64748B),
+                                    ),
+                                  ),
+                                )
+                              : const Center(
+                                  child: Icon(
+                                    Icons.person,
+                                    size: 30,
+                                    color: Color(0xFF64748B),
+                                  ),
+                                ),
+                        ),
+                      ),
+                      Positioned(
+                        bottom: 0,
+                        right: -2,
+                        child: Container(
+                          width: 16,
+                          height: 16,
+                          decoration: const BoxDecoration(
+                            color: Color(0xFF10B981),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.check,
+                            color: Colors.white,
+                            size: 10,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(width: 12),
+
+                  // Driver Name & Rating
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          driverName,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w900,
+                            color: Color(0xFF0F172A),
+                            letterSpacing: -0.2,
+                          ),
+                        ),
+                        const SizedBox(height: 3),
+                        Row(
+                          children: [
+                            const Icon(
+                              Icons.star_rounded,
+                              color: Color(0xFFFF9800),
+                              size: 15,
+                            ),
+                            const SizedBox(width: 3),
+                            Text(
+                              rating.toStringAsFixed(1),
+                              style: const TextStyle(
+                                fontSize: 12.5,
+                                fontWeight: FontWeight.w800,
+                                color: Color(0xFF0F172A),
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              '($tripsCount rides)',
+                              style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                                color: Color(0xFF94A3B8),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+
+                  // Circular Call Button
+                  InkWell(
+                    onTap: () {
+                      final phone = driver.phoneNumber.isNotEmpty
+                          ? driver.phoneNumber
+                          : '9801234567';
+                      ToastOverlay.show(
+                        'Calling driver: $phone',
+                        type: ToastType.normal,
+                      );
+                    },
+                    borderRadius: BorderRadius.circular(22),
+                    child: Container(
+                      width: 44,
+                      height: 44,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFF1F5F9),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.phone_rounded,
+                        color: Color(0xFF334155),
+                        size: 20,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                ],
+              ),
+              const SizedBox(height: 16),
+
+              // 4. Pickup Location & Fare Container Card
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 12,
+                ),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF8FAFC),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 8,
+                      height: 8,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFF10B981),
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        pickupTitle,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF334155),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Container(
+                      width: 1,
+                      height: 28,
+                      color: const Color(0xFFE2E8F0),
+                    ),
+                    const SizedBox(width: 12),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          fareDisplay,
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w900,
+                            color: Color(0xFF0F172A),
+                          ),
+                        ),
+                        Text(
+                          paymentDisplay,
+                          style: const TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w800,
+                            color: Color(0xFF10B981),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 14),
+
+              // 5. Red "Cancel ride" text button
+              Center(
+                child: TextButton(
+                  onPressed: onCancel,
+                  style: TextButton.styleFrom(
+                    foregroundColor: const Color(0xFFEF4444),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 6,
+                    ),
+                  ),
+                  child: const Text(
+                    'Cancel ride',
+                    style: TextStyle(
+                      fontSize: 14.5,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFFEF4444),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ═════════════════════════════════════════════════════════════════════════════
+  // UI #3: START TRIP / TRIP IN PROGRESS (Screenshot 1)
   // ═════════════════════════════════════════════════════════════════════════════
   Widget _buildOnTripView(BuildContext context) {
     final driverName = driver.name.isNotEmpty ? driver.name : 'Bikash Sharma';

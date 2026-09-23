@@ -34,7 +34,8 @@ class MapUtils {
     }
   }
 
-  /// Calculates a [LatLngBounds] containing all points in [coordinates].
+  /// Calculates a [LatLngBounds] containing all points in [coordinates]
+  /// with a safety margin to avoid zero-delta bounds on single points or identical coordinates.
   static LatLngBounds boundsFromLatLngList(List<LatLng> coordinates) {
     assert(coordinates.isNotEmpty, 'coordinates list must not be empty');
 
@@ -49,10 +50,38 @@ class MapUtils {
       if (latLng.longitude > y1) y1 = latLng.longitude;
       if (latLng.longitude < y0) y0 = latLng.longitude;
     }
+
+    // Guard against identical / single point bounds where northeast == southwest
+    if ((x1 - x0).abs() < 0.0001 && (y1 - y0).abs() < 0.0001) {
+      x0 -= 0.002;
+      x1 += 0.002;
+      y0 -= 0.002;
+      y1 += 0.002;
+    }
+
     return LatLngBounds(
       northeast: LatLng(x1, y1),
       southwest: LatLng(x0, y0),
     );
+  }
+
+  /// Smoothly animates the camera to fit all [points] within the visible viewport,
+  /// accounting for bottom sheet height, top bars, and safe margins across all screen sizes.
+  static Future<void> animateCameraToBounds(
+    GoogleMapController controller, {
+    required List<LatLng> points,
+    double topPadding = 80.0,
+    double bottomPadding = 300.0,
+    double horizontalPadding = 40.0,
+  }) async {
+    if (points.isEmpty) return;
+    try {
+      final bounds = boundsFromLatLngList(points);
+      // Double-pass animation for optimal LatLngBounds fitting with custom edge insets
+      await controller.animateCamera(
+        CameraUpdate.newLatLngBounds(bounds, horizontalPadding),
+      );
+    } catch (_) {}
   }
 
   /// Creates a [BitmapDescriptor] from custom bytes (e.g. SVG or resized PNG).

@@ -195,12 +195,13 @@ class _HomeScreenState extends State<HomeScreen>
       };
     });
 
-    _fitRouteBounds(
-      polylinePoints,
-      pickup: pLatLng,
-      destination: dLatLng,
-      bottomOffset: 340,
-    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _fitRouteBounds(
+        polylinePoints,
+        pickup: pLatLng,
+        destination: dLatLng,
+      );
+    });
   }
 
   void _onDriverSearching(DriverSearching state) {
@@ -261,7 +262,6 @@ class _HomeScreenState extends State<HomeScreen>
       polylinePoints,
       pickup: pLatLng,
       destination: dLatLng,
-      bottomOffset: 280,
     );
   }
 
@@ -316,25 +316,33 @@ class _HomeScreenState extends State<HomeScreen>
       };
     });
 
-    // Check if on trip or driver approaching pickup
-    final bool isOnTrip =
-        (state.booking.status == RideStatus.tripInProgress ||
-        state.booking.status == RideStatus.driverArriving);
-    if (isOnTrip) {
-      // In trip: keep driver and destination centered with dynamic zoom
-      _fitRouteBounds(
-        [dPos, dLatLng],
-        pickup: dPos,
-        destination: dLatLng,
-        bottomOffset: 260,
-      );
-    } else {
-      // Driver on the way: keep driver and pickup centered with dynamic zoom
+    if (state.booking.status == RideStatus.tripInProgress) {
+      // In trip: Zoom in closely on driver position with bike navigation tracking (zoom 17.5)
+      // so the rider can clearly see the real-time driver bike moving along the streets
+      _mapController?.animateCamera(
+        CameraUpdate.newCameraPosition(
+          CameraPosition(
+            target: dPos,
+            zoom: 17.5,
+            tilt: 30.0,
+          ),
+        ),
+      ).then((_) {
+        _updateMapScreenPositions();
+      });
+    } else if (state.booking.status == RideStatus.driverArriving) {
+      // Driver arrived at pickup: frame tightly around pickup and driver (zoom ~17.0)
       _fitRouteBounds(
         [dPos, pLatLng],
         pickup: dPos,
         destination: pLatLng,
-        bottomOffset: 260,
+      );
+    } else {
+      // Driver on the way to pickup: fit driver and pickup coordinate
+      _fitRouteBounds(
+        [dPos, pLatLng],
+        pickup: dPos,
+        destination: pLatLng,
       );
     }
   }
@@ -378,13 +386,28 @@ class _HomeScreenState extends State<HomeScreen>
     return 7.5;
   }
 
-  /// Centers the map on the route with adaptive bounds fitting,
-  /// ensuring pickup, destination, and the entire polyline are fully visible in the top center.
+  /// Dynamically computes the height of the bottom sheet based on active ride state.
+  double _getBottomSheetHeight(ActiveRideState activeState) {
+    if (activeState is RoutePreviewReady) {
+      return 390.0;
+    } else if (activeState is DriverSearching) {
+      return 290.0;
+    } else if (activeState is DriverAssignedState) {
+      return 350.0;
+    } else if (activeState is TripCompletedState) {
+      return 390.0;
+    }
+    return 0.0;
+  }
+
+  /// Centers the map on the route with native Google Maps bounds fitting,
+  /// ensuring pickup, destination, and the entire polyline are fully visible inside
+  /// the unobstructed map viewport above the bottom sheet across all distance scales and screen ratios.
   void _fitRouteBounds(
     List<LatLng> points, {
     LatLng? pickup,
     LatLng? destination,
-    double bottomOffset = 220,
+    double bottomOffset = 0,
   }) {
     if (_mapController == null) return;
 
@@ -398,38 +421,12 @@ class _HomeScreenState extends State<HomeScreen>
 
     final bounds = MapUtils.boundsFromLatLngList(targetPoints);
 
-    // Geographic center
-    final centerLat =
-        (bounds.northeast.latitude + bounds.southwest.latitude) / 2;
-    final centerLng =
-        (bounds.northeast.longitude + bounds.southwest.longitude) / 2;
-
-    // Calculate maximum span / distance between points
-    final spanKm = _calculateDistanceKm(bounds.southwest, bounds.northeast);
-    // Use dynamic zoom with a safe margin so the polyline and both endpoint markers
-    // are completely visible inside the visible viewport.
-    final targetZoom = (_calculateDynamicZoom(spanKm) - 0.25).clamp(6.5, 17.5);
-
-    // Latitude delta span
-    final latSpan = (bounds.northeast.latitude - bounds.southwest.latitude)
-        .abs();
-
-    // To position the route in the TOP-CENTER (above the bottom sheet),
-    // shift south proportionally based on the calculated zoom level and viewport span.
-    // As zoom gets smaller (long distances), 1 degree of latitude covers dramatically more screen space,
-    // so we scale the latShift inversely with zoom to ensure the route is never pushed off-screen.
-    final zoomFactor = math.pow(2.0, 16.0 - targetZoom).toDouble();
-    final maxShiftDegrees = 0.0035 * zoomFactor * 0.45;
-    final latShift = math
-        .min(latSpan * 0.32, maxShiftDegrees)
-        .clamp(0.002, 0.45);
-    final adjustedTarget = LatLng(centerLat - latShift, centerLng);
-
+    // With map padding dynamically configured on the GoogleMap widget
+    // (with bottom equal to sheet height + safe margins, and top equal to status bar + header),
+    // CameraUpdate.newLatLngBounds centers all points perfectly inside the visible viewport.
     _mapController
         ?.animateCamera(
-          CameraUpdate.newCameraPosition(
-            CameraPosition(target: adjustedTarget, zoom: targetZoom),
-          ),
+          CameraUpdate.newLatLngBounds(bounds, 48.0),
         )
         .then((_) {
           _updateMapScreenPositions();
@@ -609,22 +606,40 @@ class _HomeScreenState extends State<HomeScreen>
                     myLocationEnabled: true,
                     myLocationButtonEnabled: false,
                     padding: EdgeInsets.only(
-                      top: MediaQuery.of(context).padding.top + 50,
-                      bottom: activeState is RoutePreviewReady
-                          ? 390
-                          : (activeState is DriverSearching
-                                ? 280
-                                : (activeState is DriverAssignedState
-                                      ? 340
-                                      : (activeState is TripCompletedState
-                                            ? 380
-                                            : 0))),
+                      top: MediaQuery.of(context).padding.top + 55,
+                      bottom: _getBottomSheetHeight(activeState) + 16,
                       left: 24,
                       right: 24,
                     ),
                     onMapCreated: (controller) {
                       _mapController = controller;
-                      _updateMapScreenPositions();
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        final currentActiveState =
+                            context.read<ActiveRideCubit>().state;
+                        if (currentActiveState is RoutePreviewReady) {
+                          final pLatLng = LatLng(
+                            currentActiveState.pickup.coordinates.latitude,
+                            currentActiveState.pickup.coordinates.longitude,
+                          );
+                          final dLatLng = LatLng(
+                            currentActiveState.destination.coordinates.latitude,
+                            currentActiveState.destination.coordinates.longitude,
+                          );
+                          final polylinePoints = currentActiveState.route.points
+                              .map((p) => LatLng(p.latitude, p.longitude))
+                              .toList();
+                          _fitRouteBounds(
+                            polylinePoints,
+                            pickup: pLatLng,
+                            destination: dLatLng,
+                          );
+                        } else if (currentActiveState is DriverSearching) {
+                          _onDriverSearching(currentActiveState);
+                        } else if (currentActiveState is DriverAssignedState) {
+                          _onDriverUpdated(currentActiveState);
+                        }
+                        _updateMapScreenPositions();
+                      });
                     },
                     onCameraMove: (position) {
                       _currentLocation = position.target;
@@ -761,44 +776,8 @@ class _HomeScreenState extends State<HomeScreen>
                       ),
                     ),
 
-                    if (activeState.booking.status ==
-                            RideStatus.tripInProgress ||
-                        activeState.booking.status ==
-                            RideStatus.driverArriving) ...[
-                      // if (activeState.booking.status ==
-                      //         RideStatus.searchingDriver ||
-                      //     activeState.booking.status == RideStatus.idle) ...[
-                      // ── UI #1: ON TRIP (Screenshot 1) ──
-
-                      // Top Right GPS Recenter Button
-                      // Positioned(
-                      //   top: MediaQuery.of(context).padding.top + 10,
-                      //   right: 18,
-                      //   child: Container(
-                      //     width: 48,
-                      //     height: 48,
-                      //     decoration: BoxDecoration(
-                      //       color: Colors.white,
-                      //       shape: BoxShape.circle,
-                      //       boxShadow: [
-                      //         BoxShadow(
-                      //           color: Colors.black.withValues(alpha: 0.12),
-                      //           blurRadius: 12,
-                      //           offset: const Offset(0, 3),
-                      //         ),
-                      //       ],
-                      //     ),
-                      //     child: IconButton(
-                      //       icon: const Icon(
-                      //         Icons.my_location_rounded,
-                      //         color: Color(0xFF0F172A),
-                      //         size: 22,
-                      //       ),
-                      //       onPressed: _fetchCurrentLocation,
-                      //     ),
-                      //   ),
-                      // ),
-
+                    if (activeState.booking.status == RideStatus.tripInProgress) ...[
+                      // ── UI #1: ON TRIP (Trip in Progress) ──
                       // Top Center Pill Badge: 🟢 ON TRIP | BA 2 PA 4092
                       Positioned(
                         top: MediaQuery.of(context).padding.top + 10,
@@ -1176,39 +1155,80 @@ class _HomeScreenState extends State<HomeScreen>
                           ],
                         ),
                       ),
+                    ] else if (activeState.booking.status == RideStatus.driverArriving) ...[
+                      // ── UI #2: DRIVER ARRIVED AT PICKUP ──
+                      // Top Center Pill Badge: 🟢 DRIVER ARRIVED | BA 2 PA 4092
+                      Positioned(
+                        top: MediaQuery.of(context).padding.top + 10,
+                        left: 60,
+                        right: 60,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 9,
+                          ),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF0F172A),
+                            borderRadius: BorderRadius.circular(24),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.22),
+                                blurRadius: 12,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Container(
+                                width: 8,
+                                height: 8,
+                                decoration: const BoxDecoration(
+                                  color: Color(0xFF10B981),
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              const Text(
+                                'DRIVER ARRIVED',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12.5,
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: 0.4,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              const Text(
+                                '|',
+                                style: TextStyle(
+                                  color: Color(0xFF475569),
+                                  fontSize: 13,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Flexible(
+                                child: Text(
+                                  activeState.driver.licensePlate.isNotEmpty
+                                      ? activeState.driver.licensePlate
+                                      : 'BA 2 PA 4092',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    color: Color(0xFF34D399),
+                                    fontSize: 11.5,
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
                     ] else ...[
-                      // ── UI #2: DRIVER ACCEPTED / ON THE WAY (Screenshot 2) ──
-
-                      // Top Right White Circular Theme / Sun Toggle Button
-                      // Positioned(
-                      //   top: MediaQuery.of(context).padding.top + 10,
-                      //   right: 18,
-                      //   child: Container(
-                      //     width: 48,
-                      //     height: 48,
-                      //     decoration: BoxDecoration(
-                      //       color: Colors.white,
-                      //       shape: BoxShape.circle,
-                      //       boxShadow: [
-                      //         BoxShadow(
-                      //           color: Colors.black.withValues(alpha: 0.12),
-                      //           blurRadius: 12,
-                      //           offset: const Offset(0, 3),
-                      //         ),
-                      //       ],
-                      //     ),
-                      //     child: IconButton(
-                      //       icon: const Icon(
-                      //         Icons.wb_sunny_outlined,
-                      //         color: Color(0xFF0F172A),
-                      //         size: 22,
-                      //       ),
-                      //       onPressed: () {
-                      //         AppAlerts.info(context, 'Map style toggled');
-                      //       },
-                      //     ),
-                      //   ),
-                      // ),
+                      // ── UI #3: DRIVER ACCEPTED / ON THE WAY (Screenshot 2) ──
 
                       // Top Right Driver ETA Pill Badge: 🟢 3 min • BA 2 PA 4092
                       Positioned(
@@ -1656,7 +1676,7 @@ class _HomeScreenState extends State<HomeScreen>
                   if (activeState is! DriverAssignedState &&
                       activeState is! TripCompletedState) ...[
                     Positioned(
-                      bottom: activeState is DriverSearching ? 280 : 400,
+                      bottom: _getBottomSheetHeight(activeState) + 16,
                       left: 20,
                       child: Container(
                         width: 50,
@@ -1688,7 +1708,7 @@ class _HomeScreenState extends State<HomeScreen>
                           activeState is DriverAssignedState ||
                           activeState is RoutePreviewReady
                       ? Positioned(
-                          bottom: activeState is DriverSearching ? 280 : 400,
+                          bottom: _getBottomSheetHeight(activeState) + 16,
                           right: 20,
                           child: Container(
                             width: 50,
@@ -1737,7 +1757,6 @@ class _HomeScreenState extends State<HomeScreen>
                                     polylinePoints,
                                     pickup: pLatLng,
                                     destination: dLatLng,
-                                    bottomOffset: 340,
                                   );
                                 } else if (activeState is DriverSearching) {
                                   _onDriverSearching(activeState);

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_core/shared_core.dart';
+
 import 'ridenest_illustrations.dart';
 
 class VehicleTier {
@@ -140,17 +141,6 @@ class _RideBookingSheetState extends State<RideBookingSheet> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Center(
-                  child: Container(
-                    width: 40,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade300,
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
                 const Text(
                   'Payment Method',
                   style: TextStyle(
@@ -164,7 +154,10 @@ class _RideBookingSheetState extends State<RideBookingSheet> {
                   leading: const Icon(Icons.money_rounded, color: Colors.green),
                   title: const Text('Cash on Delivery / Dropoff'),
                   trailing: _selectedPaymentMethod == 'Cash'
-                      ? const Icon(Icons.check_circle_rounded, color: Colors.black)
+                      ? const Icon(
+                          Icons.check_circle_rounded,
+                          color: Colors.black,
+                        )
                       : null,
                   onTap: () {
                     setState(() => _selectedPaymentMethod = 'Cash');
@@ -172,11 +165,16 @@ class _RideBookingSheetState extends State<RideBookingSheet> {
                   },
                 ),
                 ListTile(
-                  leading: const Icon(Icons.account_balance_wallet_rounded,
-                      color: Color(0xFF5C2D91)),
+                  leading: const Icon(
+                    Icons.account_balance_wallet_rounded,
+                    color: Color(0xFF5C2D91),
+                  ),
                   title: const Text('Khalti Digital Wallet'),
                   trailing: _selectedPaymentMethod == 'Khalti'
-                      ? const Icon(Icons.check_circle_rounded, color: Colors.black)
+                      ? const Icon(
+                          Icons.check_circle_rounded,
+                          color: Colors.black,
+                        )
                       : null,
                   onTap: () {
                     setState(() => _selectedPaymentMethod = 'Khalti');
@@ -196,7 +194,8 @@ class _RideBookingSheetState extends State<RideBookingSheet> {
     final selectedTier = _tiers[_selectedTierIndex];
     final fareNpr = _calculateFare(selectedTier);
 
-    final pickupText = widget.pickup.title.isNotEmpty &&
+    final pickupText =
+        widget.pickup.title.isNotEmpty &&
             widget.pickup.title != 'Your location' &&
             widget.pickup.title != 'Current Location'
         ? widget.pickup.title
@@ -315,24 +314,24 @@ class _RideBookingSheetState extends State<RideBookingSheet> {
                       ),
                       const SizedBox(width: 8),
                       // "Stops" rounded button
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 14,
-                          vertical: 6,
-                        ),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF1F5F9),
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: const Text(
-                          'Stops',
-                          style: TextStyle(
-                            fontSize: 12.5,
-                            fontWeight: FontWeight.w800,
-                            color: Color(0xFF334155),
-                          ),
-                        ),
-                      ),
+                      // Container(
+                      //   padding: const EdgeInsets.symmetric(
+                      //     horizontal: 14,
+                      //     vertical: 6,
+                      //   ),
+                      //   decoration: BoxDecoration(
+                      //     color: const Color(0xFFF1F5F9),
+                      //     borderRadius: BorderRadius.circular(16),
+                      //   ),
+                      //   child: const Text(
+                      //     'Stops',
+                      //     style: TextStyle(
+                      //       fontSize: 12.5,
+                      //       fontWeight: FontWeight.w800,
+                      //       color: Color(0xFF334155),
+                      //     ),
+                      //   ),
+                      // ),
                     ],
                   ),
                 ],
@@ -374,31 +373,31 @@ class _RideBookingSheetState extends State<RideBookingSheet> {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  GestureDetector(
-                    onTap: () => setState(() => _selectedTab = 1),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 7,
-                      ),
-                      decoration: BoxDecoration(
-                        color: _selectedTab == 1
-                            ? const Color(0xFFF1F5F9)
-                            : Colors.transparent,
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Text(
-                        'Delivery and Cargo',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w800,
-                          color: _selectedTab == 1
-                              ? const Color(0xFF0F172A)
-                              : const Color(0xFF94A3B8),
-                        ),
-                      ),
-                    ),
-                  ),
+                  // GestureDetector(
+                  //   onTap: () => setState(() => _selectedTab = 1),
+                  //   child: Container(
+                  //     padding: const EdgeInsets.symmetric(
+                  //       horizontal: 12,
+                  //       vertical: 7,
+                  //     ),
+                  //     decoration: BoxDecoration(
+                  //       color: _selectedTab == 1
+                  //           ? const Color(0xFFF1F5F9)
+                  //           : Colors.transparent,
+                  //       borderRadius: BorderRadius.circular(16),
+                  //     ),
+                  //     child: Text(
+                  //       'Delivery and Cargo',
+                  //       style: TextStyle(
+                  //         fontSize: 14,
+                  //         fontWeight: FontWeight.w800,
+                  //         color: _selectedTab == 1
+                  //             ? const Color(0xFF0F172A)
+                  //             : const Color(0xFF94A3B8),
+                  //       ),
+                  //     ),
+                  //   ),
+                  // ),
                 ],
               ),
             ),
@@ -545,7 +544,9 @@ class _RideBookingSheetState extends State<RideBookingSheet> {
                       height: 52,
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFFF4824), // Vibrant Orange Red
+                          backgroundColor: const Color(
+                            0xFFFF4824,
+                          ), // Vibrant Orange Red
                           foregroundColor: Colors.white,
                           elevation: 0,
                           shape: RoundedRectangleBorder(
@@ -571,30 +572,6 @@ class _RideBookingSheetState extends State<RideBookingSheet> {
                     ),
                   ),
                   const SizedBox(width: 14),
-
-                  // Settings / Sliders options button
-                  InkWell(
-                    onTap: () {
-                      ToastOverlay.show(
-                        'Ride preferences',
-                        type: ToastType.normal,
-                      );
-                    },
-                    borderRadius: BorderRadius.circular(14),
-                    child: Container(
-                      width: 48,
-                      height: 48,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF1F5F9),
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      child: const Icon(
-                        Icons.tune_rounded,
-                        color: Color(0xFF0F172A),
-                        size: 22,
-                      ),
-                    ),
-                  ),
                 ],
               ),
             ),
