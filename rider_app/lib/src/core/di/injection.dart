@@ -5,10 +5,12 @@ import 'package:rider_app/src/data/remote/ride_api_service.dart';
 import 'package:rider_app/src/data/repo/auth_repo.dart';
 import 'package:rider_app/src/data/repo/places_repo.dart';
 import 'package:rider_app/src/data/repo/ride_repo.dart';
+import 'package:rider_app/src/modules/auth/blocs/current_user_cubit.dart';
 import 'package:rider_app/src/modules/auth/blocs/login_cubit.dart';
 import 'package:rider_app/src/modules/auth/blocs/register_cubit.dart';
 import 'package:rider_app/src/modules/home/blocs/active_ride_cubit.dart';
 import 'package:rider_app/src/modules/home/blocs/ride_search_cubit.dart';
+import 'package:rider_app/src/modules/ride_history/blocs/rider_ride_history_cubit.dart';
 import 'package:shared_core/shared_core.dart' hide AppRouter;
 
 import '../../data/local/auth_local_data_source.dart';
@@ -52,9 +54,10 @@ Future<void> configureRiderDependencies() async {
     () => RideRepo(api: sl<RideApiService>()),
   );
 
-  // ── Blocs / Cubits (Presentation) ──────────────────────────────────────────
   sl.registerFactory<LoginCubit>(() => LoginCubit(sl<AuthRepo>()));
   sl.registerFactory<RegisterCubit>(() => RegisterCubit(sl<AuthRepo>()));
+  sl.registerFactory<CurrentUserCubit>(() => CurrentUserCubit(sl<AuthRepo>()));
+  sl.registerFactory<RiderRideHistoryCubit>(() => RiderRideHistoryCubit(sl<RideRepo>()));
   sl.registerFactory<RideSearchCubit>(() => RideSearchCubit(sl<PlacesRepo>()));
   sl.registerFactory<ActiveRideCubit>(
     () => ActiveRideCubit(

@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:rider_app/src/data/remote/ride_api_service.dart';
 import 'package:shared_core/shared_core.dart';
 
@@ -1967,12 +1968,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         ),
         IconButton(
           onPressed: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Menu clicked'),
-                duration: Duration(seconds: 1),
-              ),
-            );
+            context.push(AppRoutes.profile);
           },
           padding: EdgeInsets.zero,
           constraints: const BoxConstraints(),

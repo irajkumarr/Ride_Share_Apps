@@ -11,9 +11,9 @@ import 'package:shared_core/gen/assets.gen.dart';
 import '../../modules/auth/login/login_screen.dart';
 import '../../modules/auth/register/register_screen.dart';
 import '../../modules/auth/splash/splash_screen.dart';
-import '../../modules/home/bottom_nav_scaffold.dart';
 import '../../modules/home/home_screen.dart';
 import '../../modules/home/profile_screen.dart';
+import '../../modules/ride_history/views/rider_ride_history_screen.dart';
 
 /// Configures and owns the application's [GoRouter] instance.
 class AppRouter {
@@ -65,6 +65,11 @@ class AppRouter {
       path: AppRoutes.profile,
       name: 'profile',
       builder: (context, state) => const ProfileScreen(),
+    ),
+    GoRoute(
+      path: '/ride-history',
+      name: 'ride-history',
+      builder: (context, state) => const RiderRideHistoryScreen(),
     ),
 
     /// ShellRoute for BottomNavigation

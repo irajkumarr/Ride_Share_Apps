@@ -20,6 +20,7 @@ class ApiUrls {
       '$baseURL/rides/$rideId/status?status=$status';
   static final driverActiveRide = '$baseURL/rides/driver/active';
   static final driverAllRides = '$baseURL/rides/driver/all';
+  static final riderAllRides = '$baseURL/rides/rider/all';
   static final nearbyDrivers = '$baseURL/locations/nearby';
 
   // Driver Location & Status

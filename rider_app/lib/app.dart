@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:rider_app/src/modules/auth/blocs/current_user_cubit.dart';
 import 'package:rider_app/src/modules/auth/blocs/login_cubit.dart';
 import 'package:rider_app/src/modules/auth/blocs/register_cubit.dart';
 import 'package:rider_app/src/modules/home/blocs/active_ride_cubit.dart';
 import 'package:rider_app/src/modules/home/blocs/ride_search_cubit.dart';
+import 'package:rider_app/src/modules/ride_history/blocs/rider_ride_history_cubit.dart';
 import 'package:shared_core/shared_core.dart' hide AppRouter;
 
 import 'src/core/routing/app_router.dart';
@@ -66,6 +68,7 @@ class App extends StatelessWidget {
   /// Global BLoC / Cubit providers accessible throughout the widget tree.
   List<BlocProvider> get _globalProviders => [
     BlocProvider<NetworkCubit>(create: (_) => sl<NetworkCubit>(), lazy: false),
+    BlocProvider<CurrentUserCubit>(create: (_) => sl<CurrentUserCubit>(), lazy: false),
     BlocProvider<LoginCubit>(create: (_) => sl<LoginCubit>(), lazy: false),
     BlocProvider<RegisterCubit>(
       create: (_) => sl<RegisterCubit>(),
@@ -77,6 +80,10 @@ class App extends StatelessWidget {
     ),
     BlocProvider<ActiveRideCubit>(
       create: (_) => sl<ActiveRideCubit>(),
+      lazy: false,
+    ),
+    BlocProvider<RiderRideHistoryCubit>(
+      create: (_) => sl<RiderRideHistoryCubit>(),
       lazy: false,
     ),
   ];

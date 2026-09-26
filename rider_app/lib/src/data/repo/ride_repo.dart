@@ -1,4 +1,5 @@
 import 'package:shared_core/shared_core.dart';
+import '../remote/dto/rider_ride_history_dto.dart';
 import '../remote/ride_api_service.dart';
 
 class RideRepo {
@@ -22,6 +23,11 @@ class RideRepo {
 
   Future<String?> cancelRide(String rideId) {
     return _api.cancelRide(rideId);
+  }
+
+  Future<List<RiderRideHistoryDto>> getAllRidesForRider() async {
+    final list = await _api.getAllRidesForRider();
+    return list.map((json) => RiderRideHistoryDto.fromJson(json)).toList();
   }
 }
 

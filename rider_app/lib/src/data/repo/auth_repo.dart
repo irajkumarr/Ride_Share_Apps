@@ -19,6 +19,14 @@ class AuthRepo {
     return ResultSuccess(result);
   }
 
+  Future<UserDataDto> fetchCurrentUser() async {
+    final response = await _api.getCurrentUser();
+    if (response.data != null) {
+      await _local.cacheUser(response.data!);
+    }
+    return response.data!;
+  }
+
   Future<UserDataDto> login({
     required String phone,
     required String password,

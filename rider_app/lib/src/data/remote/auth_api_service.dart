@@ -49,4 +49,12 @@ class AuthApiService {
     );
     return UserDto.fromJson(data);
   }
+
+  /// Gets the currently authenticated rider's profile.
+  Future<UserDto> getCurrentUser() async {
+    final data = await _apiClient.get<Map<String, dynamic>>(
+      ApiUrls.currentUser,
+    );
+    return UserDto.fromJson(data);
+  }
 }
