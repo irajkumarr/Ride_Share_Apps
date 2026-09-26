@@ -22,8 +22,7 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen>
-    with TickerProviderStateMixin {
+class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   GoogleMapController? _mapController;
   LatLng _currentLocation = const LatLng(27.7172, 85.3240);
   bool _isLoadingLocation = true;
@@ -194,7 +193,7 @@ class _HomeScreenState extends State<HomeScreen>
           Polyline(
             polylineId: const PolylineId('trip_route_backdrop'),
             points: polylinePoints,
-            color: const Color(0xFFE2E8F0),
+            color: Colors.black,
             width: 7,
             startCap: Cap.roundCap,
             endCap: Cap.roundCap,
@@ -203,11 +202,7 @@ class _HomeScreenState extends State<HomeScreen>
     });
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _fitRouteBounds(
-        polylinePoints,
-        pickup: pLatLng,
-        destination: dLatLng,
-      );
+      _fitRouteBounds(polylinePoints, pickup: pLatLng, destination: dLatLng);
       _startRouteAnimation(polylinePoints);
     });
   }
@@ -231,7 +226,10 @@ class _HomeScreenState extends State<HomeScreen>
       if (!mounted || _fullRoutePoints.isEmpty) return;
       final progress = animation.value;
       final totalPoints = _fullRoutePoints.length;
-      final currentPointCount = (totalPoints * progress).ceil().clamp(1, totalPoints);
+      final currentPointCount = (totalPoints * progress).ceil().clamp(
+        1,
+        totalPoints,
+      );
       final currentPath = _fullRoutePoints.take(currentPointCount).toList();
 
       setState(() {
@@ -315,11 +313,7 @@ class _HomeScreenState extends State<HomeScreen>
       }
     });
 
-    _fitRouteBounds(
-      polylinePoints,
-      pickup: pLatLng,
-      destination: dLatLng,
-    );
+    _fitRouteBounds(polylinePoints, pickup: pLatLng, destination: dLatLng);
   }
 
   void _onDriverUpdated(DriverAssignedState state) {
@@ -376,31 +370,21 @@ class _HomeScreenState extends State<HomeScreen>
     if (state.booking.status == RideStatus.tripInProgress) {
       // In trip: Zoom in closely on driver position with bike navigation tracking (zoom 17.5)
       // so the rider can clearly see the real-time driver bike moving along the streets
-      _mapController?.animateCamera(
-        CameraUpdate.newCameraPosition(
-          CameraPosition(
-            target: dPos,
-            zoom: 17.5,
-            tilt: 30.0,
-          ),
-        ),
-      ).then((_) {
-        _updateMapScreenPositions();
-      });
+      _mapController
+          ?.animateCamera(
+            CameraUpdate.newCameraPosition(
+              CameraPosition(target: dPos, zoom: 17.5, tilt: 30.0),
+            ),
+          )
+          .then((_) {
+            _updateMapScreenPositions();
+          });
     } else if (state.booking.status == RideStatus.driverArriving) {
       // Driver arrived at pickup: frame tightly around pickup and driver (zoom ~17.0)
-      _fitRouteBounds(
-        [dPos, pLatLng],
-        pickup: dPos,
-        destination: pLatLng,
-      );
+      _fitRouteBounds([dPos, pLatLng], pickup: dPos, destination: pLatLng);
     } else {
       // Driver on the way to pickup: fit driver and pickup coordinate
-      _fitRouteBounds(
-        [dPos, pLatLng],
-        pickup: dPos,
-        destination: pLatLng,
-      );
+      _fitRouteBounds([dPos, pLatLng], pickup: dPos, destination: pLatLng);
     }
   }
 
@@ -482,9 +466,7 @@ class _HomeScreenState extends State<HomeScreen>
     // (with bottom equal to sheet height + safe margins, and top equal to status bar + header),
     // CameraUpdate.newLatLngBounds centers all points perfectly inside the visible viewport.
     _mapController
-        ?.animateCamera(
-          CameraUpdate.newLatLngBounds(bounds, 48.0),
-        )
+        ?.animateCamera(CameraUpdate.newLatLngBounds(bounds, 48.0))
         .then((_) {
           _updateMapScreenPositions();
         });
@@ -677,8 +659,9 @@ class _HomeScreenState extends State<HomeScreen>
                     onMapCreated: (controller) {
                       _mapController = controller;
                       WidgetsBinding.instance.addPostFrameCallback((_) {
-                        final currentActiveState =
-                            context.read<ActiveRideCubit>().state;
+                        final currentActiveState = context
+                            .read<ActiveRideCubit>()
+                            .state;
                         if (currentActiveState is RoutePreviewReady) {
                           final pLatLng = LatLng(
                             currentActiveState.pickup.coordinates.latitude,
@@ -686,7 +669,10 @@ class _HomeScreenState extends State<HomeScreen>
                           );
                           final dLatLng = LatLng(
                             currentActiveState.destination.coordinates.latitude,
-                            currentActiveState.destination.coordinates.longitude,
+                            currentActiveState
+                                .destination
+                                .coordinates
+                                .longitude,
                           );
                           final polylinePoints = currentActiveState.route.points
                               .map((p) => LatLng(p.latitude, p.longitude))
@@ -839,7 +825,8 @@ class _HomeScreenState extends State<HomeScreen>
                       ),
                     ),
 
-                    if (activeState.booking.status == RideStatus.tripInProgress) ...[
+                    if (activeState.booking.status ==
+                        RideStatus.tripInProgress) ...[
                       // ── UI #1: ON TRIP (Trip in Progress) ──
                       // Top Center Pill Badge: 🟢 ON TRIP | BA 2 PA 4092
                       Positioned(
@@ -1045,180 +1032,181 @@ class _HomeScreenState extends State<HomeScreen>
                       ),
 
                       // Driver Position Floating Badge: 🟢 Driver Name • 35 km/h anchored above driver
-                      if (_driverScreenOffset != null)
-                        Builder(
-                          builder: (context) {
-                            final screenSize = MediaQuery.of(context).size;
-                            final topPadding = MediaQuery.of(context)
-                                .padding
-                                .top;
-                            const badgeWidth = 130.0;
-                            final posX =
-                                (_driverScreenOffset!.dx - (badgeWidth / 2))
-                                    .clamp(
-                                      16.0,
-                                      screenSize.width - badgeWidth - 16.0,
-                                    );
-                            final posY = (_driverScreenOffset!.dy - 46.0).clamp(
-                              topPadding + 65.0,
-                              screenSize.height - 380.0,
-                            );
+                      // if (_driverScreenOffset != null)
+                      //   Builder(
+                      //     builder: (context) {
+                      //       final screenSize = MediaQuery.of(context).size;
+                      //       final topPadding = MediaQuery.of(context)
+                      //           .padding
+                      //           .top;
+                      //       const badgeWidth = 130.0;
+                      //       final posX =
+                      //           (_driverScreenOffset!.dx - (badgeWidth / 2))
+                      //               .clamp(
+                      //                 16.0,
+                      //                 screenSize.width - badgeWidth - 16.0,
+                      //               );
+                      //       final posY = (_driverScreenOffset!.dy - 46.0).clamp(
+                      //         topPadding + 65.0,
+                      //         screenSize.height - 380.0,
+                      //       );
 
-                            return Positioned(
-                              left: posX,
-                              top: posY,
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 10,
-                                  vertical: 4,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFF0A0F1D),
-                                  borderRadius: BorderRadius.circular(14),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withValues(
-                                        alpha: 0.18,
-                                      ),
-                                      blurRadius: 8,
-                                    ),
-                                  ],
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Container(
-                                      width: 6,
-                                      height: 6,
-                                      decoration: const BoxDecoration(
-                                        color: Color(0xFF10B981),
-                                        shape: BoxShape.circle,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 5),
-                                    Text(
-                                      activeState.driver.name.isNotEmpty
-                                          ? activeState.driver.name
-                                                .split(' ')
-                                                .first
-                                          : 'Driver',
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 11.5,
-                                        fontWeight: FontWeight.w800,
-                                      ),
-                                    ),
-                                    const Text(
-                                      ' • 35 km/h',
-                                      style: TextStyle(
-                                        color: Color(0xFF94A3B8),
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            );
-                          },
-                        ),
+                      //       return Positioned(
+                      //         left: posX,
+                      //         top: posY,
+                      //         child: Container(
+                      //           padding: const EdgeInsets.symmetric(
+                      //             horizontal: 10,
+                      //             vertical: 4,
+                      //           ),
+                      //           decoration: BoxDecoration(
+                      //             color: const Color(0xFF0A0F1D),
+                      //             borderRadius: BorderRadius.circular(14),
+                      //             boxShadow: [
+                      //               BoxShadow(
+                      //                 color: Colors.black.withValues(
+                      //                   alpha: 0.18,
+                      //                 ),
+                      //                 blurRadius: 8,
+                      //               ),
+                      //             ],
+                      //           ),
+                      //           child: Row(
+                      //             mainAxisSize: MainAxisSize.min,
+                      //             children: [
+                      //               Container(
+                      //                 width: 6,
+                      //                 height: 6,
+                      //                 decoration: const BoxDecoration(
+                      //                   color: Color(0xFF10B981),
+                      //                   shape: BoxShape.circle,
+                      //                 ),
+                      //               ),
+                      //               const SizedBox(width: 5),
+                      //               Text(
+                      //                 activeState.driver.name.isNotEmpty
+                      //                     ? activeState.driver.name
+                      //                           .split(' ')
+                      //                           .first
+                      //                     : 'Driver',
+                      //                 style: const TextStyle(
+                      //                   color: Colors.white,
+                      //                   fontSize: 11.5,
+                      //                   fontWeight: FontWeight.w800,
+                      //                 ),
+                      //               ),
+                      //               const Text(
+                      //                 ' • 35 km/h',
+                      //                 style: TextStyle(
+                      //                   color: Color(0xFF94A3B8),
+                      //                   fontSize: 11,
+                      //                   fontWeight: FontWeight.w600,
+                      //                 ),
+                      //               ),
+                      //             ],
+                      //           ),
+                      //         ),
+                      //       );
+                      //     },
+                      //   ),
 
                       // Live Speedometer Capsule & Motorcycle Halo Marker
                       // Reasonably anchored above the active driver card
-                      Positioned(
-                        bottom: 330,
-                        left: 20,
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 14,
-                                vertical: 8,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(20),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.12),
-                                    blurRadius: 10,
-                                    offset: const Offset(0, 3),
-                                  ),
-                                ],
-                              ),
-                              child: Row(
-                                children: [
-                                  Container(
-                                    width: 7,
-                                    height: 7,
-                                    decoration: const BoxDecoration(
-                                      color: Color(0xFF10B981),
-                                      shape: BoxShape.circle,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 6),
-                                  const Text(
-                                    '2.1 km left',
-                                    style: TextStyle(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w900,
-                                      color: Color(0xFF0F172A),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  const Text(
-                                    '•',
-                                    style: TextStyle(
-                                      color: Color(0xFFCBD5E1),
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  const Text(
-                                    '35 km/h',
-                                    style: TextStyle(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w800,
-                                      color: Color(0xFFF97316),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            // Orange ring with black motorcycle icon
-                            Container(
-                              width: 44,
-                              height: 44,
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF0F172A),
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: const Color(0xFFFF9800),
-                                  width: 2.5,
-                                ),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: const Color(0xFFFF9800)
-                                        .withValues(alpha: 0.35),
-                                    blurRadius: 8,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ],
-                              ),
-                              child: const Center(
-                                child: Icon(
-                                  Icons.two_wheeler_rounded,
-                                  color: Color(0xFFFF9800),
-                                  size: 22,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ] else if (activeState.booking.status == RideStatus.driverArriving) ...[
+                      // Positioned(
+                      //   bottom: 330,
+                      //   left: 20,
+                      //   child: Row(
+                      //     mainAxisSize: MainAxisSize.min,
+                      //     children: [
+                      //       Container(
+                      //         padding: const EdgeInsets.symmetric(
+                      //           horizontal: 14,
+                      //           vertical: 8,
+                      //         ),
+                      //         decoration: BoxDecoration(
+                      //           color: Colors.white,
+                      //           borderRadius: BorderRadius.circular(20),
+                      //           boxShadow: [
+                      //             BoxShadow(
+                      //               color: Colors.black.withValues(alpha: 0.12),
+                      //               blurRadius: 10,
+                      //               offset: const Offset(0, 3),
+                      //             ),
+                      //           ],
+                      //         ),
+                      //         child: Row(
+                      //           children: [
+                      //             Container(
+                      //               width: 7,
+                      //               height: 7,
+                      //               decoration: const BoxDecoration(
+                      //                 color: Color(0xFF10B981),
+                      //                 shape: BoxShape.circle,
+                      //               ),
+                      //             ),
+                      //             const SizedBox(width: 6),
+                      //             const Text(
+                      //               '2.1 km left',
+                      //               style: TextStyle(
+                      //                 fontSize: 13,
+                      //                 fontWeight: FontWeight.w900,
+                      //                 color: Color(0xFF0F172A),
+                      //               ),
+                      //             ),
+                      //             const SizedBox(width: 8),
+                      //             const Text(
+                      //               '•',
+                      //               style: TextStyle(
+                      //                 color: Color(0xFFCBD5E1),
+                      //                 fontSize: 12,
+                      //               ),
+                      //             ),
+                      //             const SizedBox(width: 8),
+                      //             const Text(
+                      //               '35 km/h',
+                      //               style: TextStyle(
+                      //                 fontSize: 13,
+                      //                 fontWeight: FontWeight.w800,
+                      //                 color: Color(0xFFF97316),
+                      //               ),
+                      //             ),
+                      //           ],
+                      //         ),
+                      //       ),
+                      //       const SizedBox(width: 8),
+                      //       // Orange ring with black motorcycle icon
+                      //       Container(
+                      //         width: 44,
+                      //         height: 44,
+                      //         decoration: BoxDecoration(
+                      //           color: const Color(0xFF0F172A),
+                      //           shape: BoxShape.circle,
+                      //           border: Border.all(
+                      //             color: const Color(0xFFFF9800),
+                      //             width: 2.5,
+                      //           ),
+                      //           boxShadow: [
+                      //             BoxShadow(
+                      //               color: const Color(0xFFFF9800)
+                      //                   .withValues(alpha: 0.35),
+                      //               blurRadius: 8,
+                      //               offset: const Offset(0, 2),
+                      //             ),
+                      //           ],
+                      //         ),
+                      //         child: const Center(
+                      //           child: Icon(
+                      //             Icons.two_wheeler_rounded,
+                      //             color: Color(0xFFFF9800),
+                      //             size: 22,
+                      //           ),
+                      //         ),
+                      //       ),
+                      //     ],
+                      //   ),
+                      // ),
+                    ] else if (activeState.booking.status ==
+                        RideStatus.driverArriving) ...[
                       // ── UI #2: DRIVER ARRIVED AT PICKUP ──
                       // Top Center Pill Badge: 🟢 DRIVER ARRIVED | BA 2 PA 4092
                       Positioned(
