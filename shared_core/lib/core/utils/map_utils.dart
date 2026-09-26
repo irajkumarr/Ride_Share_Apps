@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'dart:ui' as ui;
 import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -32,6 +33,22 @@ class MapUtils {
     } catch (_) {
       // Graceful fallback if style fails to load
     }
+  }
+
+  /// Calculates the Haversine distance in kilometers between two [LatLngModel] coordinates.
+  static double calculateDistance(LatLngModel start, LatLngModel end) {
+    const double earthRadiusKm = 6371.0;
+    final double dLat = (end.latitude - start.latitude) * (math.pi / 180.0);
+    final double dLng = (end.longitude - start.longitude) * (math.pi / 180.0);
+
+    final double lat1Rad = start.latitude * (math.pi / 180.0);
+    final double lat2Rad = end.latitude * (math.pi / 180.0);
+
+    final double a = math.sin(dLat / 2) * math.sin(dLat / 2) +
+        math.cos(lat1Rad) * math.cos(lat2Rad) * math.sin(dLng / 2) * math.sin(dLng / 2);
+    final double c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a));
+
+    return earthRadiusKm * c;
   }
 
   /// Calculates a [LatLngBounds] containing all points in [coordinates]

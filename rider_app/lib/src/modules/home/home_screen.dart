@@ -23,7 +23,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   GoogleMapController? _mapController;
   LatLng _currentLocation = const LatLng(27.7172, 85.3240);
   bool _isLoadingLocation = true;
@@ -38,6 +38,8 @@ class _HomeScreenState extends State<HomeScreen>
   bool _isUpdatingOffsets = false;
 
   late final AnimationController _radarAnimation;
+  AnimationController? _routeAnimationController;
+  List<LatLng> _fullRoutePoints = [];
 
   final List<_RecentPlaceItem> _defaultRecents = const [
     _RecentPlaceItem(
@@ -73,6 +75,7 @@ class _HomeScreenState extends State<HomeScreen>
   @override
   void dispose() {
     _radarAnimation.dispose();
+    _routeAnimationController?.dispose();
     super.dispose();
   }
 
@@ -162,6 +165,8 @@ class _HomeScreenState extends State<HomeScreen>
         .map((p) => LatLng(p.latitude, p.longitude))
         .toList();
 
+    _fullRoutePoints = polylinePoints;
+
     setState(() {
       _markers = {
         Marker(
@@ -183,15 +188,17 @@ class _HomeScreenState extends State<HomeScreen>
         ),
       };
 
+      // Subtle dashed/faded background polyline showing complete path
       _polylines = {
-        Polyline(
-          polylineId: const PolylineId('trip_route_line'),
-          points: polylinePoints,
-          color: Colors.black,
-          width: 5,
-          startCap: Cap.roundCap,
-          endCap: Cap.roundCap,
-        ),
+        if (polylinePoints.isNotEmpty)
+          Polyline(
+            polylineId: const PolylineId('trip_route_backdrop'),
+            points: polylinePoints,
+            color: const Color(0xFFE2E8F0),
+            width: 7,
+            startCap: Cap.roundCap,
+            endCap: Cap.roundCap,
+          ),
       };
     });
 
@@ -201,7 +208,57 @@ class _HomeScreenState extends State<HomeScreen>
         pickup: pLatLng,
         destination: dLatLng,
       );
+      _startRouteAnimation(polylinePoints);
     });
+  }
+
+  /// Progressively animates the polyline from pickup to destination for a sleek, premium experience
+  void _startRouteAnimation(List<LatLng> points) {
+    if (points.isEmpty) return;
+
+    _routeAnimationController?.dispose();
+    _routeAnimationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1400),
+    );
+
+    final animation = CurvedAnimation(
+      parent: _routeAnimationController!,
+      curve: Curves.easeOutCubic,
+    );
+
+    animation.addListener(() {
+      if (!mounted || _fullRoutePoints.isEmpty) return;
+      final progress = animation.value;
+      final totalPoints = _fullRoutePoints.length;
+      final currentPointCount = (totalPoints * progress).ceil().clamp(1, totalPoints);
+      final currentPath = _fullRoutePoints.take(currentPointCount).toList();
+
+      setState(() {
+        _polylines = {
+          // 1. Subtle light backdrop path
+          Polyline(
+            polylineId: const PolylineId('trip_route_backdrop'),
+            points: _fullRoutePoints,
+            color: const Color(0xFFE2E8F0),
+            width: 7,
+            startCap: Cap.roundCap,
+            endCap: Cap.roundCap,
+          ),
+          // 2. Animated active gradient-look polyline expanding smoothly to destination
+          Polyline(
+            polylineId: const PolylineId('trip_route_line'),
+            points: currentPath,
+            color: const Color(0xFF0F172A),
+            width: 5,
+            startCap: Cap.roundCap,
+            endCap: Cap.roundCap,
+          ),
+        };
+      });
+    });
+
+    _routeAnimationController?.forward();
   }
 
   void _onDriverSearching(DriverSearching state) {
@@ -512,6 +569,8 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   void _clearTrip() {
+    _routeAnimationController?.stop();
+    _fullRoutePoints.clear();
     context.read<RideSearchCubit>().clearDestination();
     context.read<ActiveRideCubit>().cancelRide();
     setState(() {
@@ -527,6 +586,8 @@ class _HomeScreenState extends State<HomeScreen>
 
   /// Cleanly completes and resets after a finished trip without calling cancel
   void _finishTrip() {
+    _routeAnimationController?.stop();
+    _fullRoutePoints.clear();
     context.read<RideSearchCubit>().clearDestination();
     context.read<ActiveRideCubit>().resetTrip();
     setState(() {
@@ -541,6 +602,8 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   void _onRideCancelled(String message) {
+    _routeAnimationController?.stop();
+    _fullRoutePoints.clear();
     context.read<RideSearchCubit>().clearDestination();
     setState(() {
       _markers.clear();

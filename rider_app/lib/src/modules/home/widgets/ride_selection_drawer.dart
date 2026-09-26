@@ -68,9 +68,16 @@ class _RideSelectionDrawerState extends State<RideSelectionDrawer> {
   ];
 
   double _calculateFare(double multiplier) {
-    // Basic estimated calculation based on distance
-    const baseFare = 3.50;
-    return (baseFare * multiplier * 2.8);
+    // Real distance-based fare calculation in NPR
+    final double distKm = MapUtils.calculateDistance(
+      widget.pickup.coordinates,
+      widget.destination.coordinates,
+    );
+    final distance = distKm > 0 ? distKm : 1.0;
+    const baseFare = 30.0;
+    const perKmRate = 18.0;
+    final raw = (baseFare + (distance * perKmRate)) * multiplier;
+    return raw.clamp(45.0, 99999.0).roundToDouble();
   }
 
   @override

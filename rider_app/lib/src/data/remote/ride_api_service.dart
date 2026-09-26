@@ -178,6 +178,8 @@ class RideApiService {
           ? request.destination.formattedAddress
           : request.destination.title,
       'vehicleType': backendVehicleType,
+      'estimatedFare': request.fareNpr,
+      'distanceKm': request.route != null ? (request.route!.distanceInMeters / 1000.0) : null,
     };
 
     AppLogger.info('Sending ride request to API: $payload');

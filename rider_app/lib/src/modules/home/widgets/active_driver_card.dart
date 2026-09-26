@@ -391,48 +391,6 @@ class ActiveDriverCard extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(width: 8),
-
-                  // Circular Chat Button with red unread notification badge
-                  InkWell(
-                    onTap: () {
-                      ToastOverlay.show(
-                        'Chat with $driverName',
-                        type: ToastType.normal,
-                      );
-                    },
-                    borderRadius: BorderRadius.circular(22),
-                    child: Container(
-                      width: 44,
-                      height: 44,
-                      decoration: const BoxDecoration(
-                        color: Color(0xFFF1F5F9),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          const Icon(
-                            Icons.chat_bubble_rounded,
-                            color: Color(0xFF334155),
-                            size: 19,
-                          ),
-                          Positioned(
-                            top: 8,
-                            right: 9,
-                            child: Container(
-                              width: 8,
-                              height: 8,
-                              decoration: const BoxDecoration(
-                                color: Color(0xFFFF3B30),
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
                 ],
               ),
               const SizedBox(height: 16),
@@ -547,81 +505,81 @@ class ActiveDriverCard extends StatelessWidget {
               const SizedBox(height: 14),
 
               // 4. Dual Bottom Pill Buttons: [🛡️ Safety Kit] and [🔗 Share Trip]
-              Row(
-                children: [
-                  Expanded(
-                    child: SizedBox(
-                      height: 48,
-                      child: ElevatedButton.icon(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFF1F5F9),
-                          foregroundColor: const Color(0xFF0F172A),
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                        ),
-                        onPressed: () {
-                          ToastOverlay.show(
-                            'Emergency contacts & Police 100 notified',
-                            type: ToastType.warning,
-                          );
-                        },
-                        icon: const Icon(
-                          Icons.shield_rounded,
-                          color: Color(0xFF475569),
-                          size: 18,
-                        ),
-                        label: const Text(
-                          'Safety Kit',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w800,
-                            color: Color(0xFF0F172A),
-                            letterSpacing: -0.2,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: SizedBox(
-                      height: 48,
-                      child: ElevatedButton.icon(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFF1F5F9),
-                          foregroundColor: const Color(0xFF0F172A),
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                        ),
-                        onPressed: () {
-                          ToastOverlay.show(
-                            'Live trip tracking link copied to clipboard!',
-                            type: ToastType.success,
-                          );
-                        },
-                        icon: const Icon(
-                          Icons.share_rounded,
-                          color: Color(0xFF475569),
-                          size: 18,
-                        ),
-                        label: const Text(
-                          'Share Trip',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w800,
-                            color: Color(0xFF0F172A),
-                            letterSpacing: -0.2,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+              // Row(
+              //   children: [
+              //     Expanded(
+              //       child: SizedBox(
+              //         height: 48,
+              //         child: ElevatedButton.icon(
+              //           style: ElevatedButton.styleFrom(
+              //             backgroundColor: const Color(0xFFF1F5F9),
+              //             foregroundColor: const Color(0xFF0F172A),
+              //             elevation: 0,
+              //             shape: RoundedRectangleBorder(
+              //               borderRadius: BorderRadius.circular(16),
+              //             ),
+              //           ),
+              //           onPressed: () {
+              //             ToastOverlay.show(
+              //               'Emergency contacts & Police 100 notified',
+              //               type: ToastType.warning,
+              //             );
+              //           },
+              //           icon: const Icon(
+              //             Icons.shield_rounded,
+              //             color: Color(0xFF475569),
+              //             size: 18,
+              //           ),
+              //           label: const Text(
+              //             'Safety Kit',
+              //             style: TextStyle(
+              //               fontSize: 14,
+              //               fontWeight: FontWeight.w800,
+              //               color: Color(0xFF0F172A),
+              //               letterSpacing: -0.2,
+              //             ),
+              //           ),
+              //         ),
+              //       ),
+              //     ),
+              //     const SizedBox(width: 12),
+              //     Expanded(
+              //       child: SizedBox(
+              //         height: 48,
+              //         child: ElevatedButton.icon(
+              //           style: ElevatedButton.styleFrom(
+              //             backgroundColor: const Color(0xFFF1F5F9),
+              //             foregroundColor: const Color(0xFF0F172A),
+              //             elevation: 0,
+              //             shape: RoundedRectangleBorder(
+              //               borderRadius: BorderRadius.circular(16),
+              //             ),
+              //           ),
+              //           onPressed: () {
+              //             ToastOverlay.show(
+              //               'Live trip tracking link copied to clipboard!',
+              //               type: ToastType.success,
+              //             );
+              //           },
+              //           icon: const Icon(
+              //             Icons.share_rounded,
+              //             color: Color(0xFF475569),
+              //             size: 18,
+              //           ),
+              //           label: const Text(
+              //             'Share Trip',
+              //             style: TextStyle(
+              //               fontSize: 14,
+              //               fontWeight: FontWeight.w800,
+              //               color: Color(0xFF0F172A),
+              //               letterSpacing: -0.2,
+              //             ),
+              //           ),
+              //         ),
+              //       ),
+              //     ),
+              //   ],
+              // ),
               const SizedBox(height: 14),
 
               // 5. Red "Cancel ride" text button
@@ -1476,35 +1434,35 @@ class ActiveDriverCard extends StatelessWidget {
                     const SizedBox(width: 8),
 
                     // Circular Message Button
-                    InkWell(
-                      onTap: () {
-                        ToastOverlay.show(
-                          'Chat with $driverName',
-                          type: ToastType.normal,
-                        );
-                      },
-                      borderRadius: BorderRadius.circular(22),
-                      child: Container(
-                        width: 44,
-                        height: 44,
-                        decoration: const BoxDecoration(
-                          color: Colors.white,
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black12,
-                              blurRadius: 4,
-                              offset: Offset(0, 1),
-                            ),
-                          ],
-                        ),
-                        child: const Icon(
-                          Icons.chat_bubble_outline_rounded,
-                          color: Color(0xFF334155),
-                          size: 19,
-                        ),
-                      ),
-                    ),
+                    // InkWell(
+                    //   onTap: () {
+                    //     ToastOverlay.show(
+                    //       'Chat with $driverName',
+                    //       type: ToastType.normal,
+                    //     );
+                    //   },
+                    //   borderRadius: BorderRadius.circular(22),
+                    //   child: Container(
+                    //     width: 44,
+                    //     height: 44,
+                    //     decoration: const BoxDecoration(
+                    //       color: Colors.white,
+                    //       shape: BoxShape.circle,
+                    //       boxShadow: [
+                    //         BoxShadow(
+                    //           color: Colors.black12,
+                    //           blurRadius: 4,
+                    //           offset: Offset(0, 1),
+                    //         ),
+                    //       ],
+                    //     ),
+                    //     child: const Icon(
+                    //       Icons.chat_bubble_outline_rounded,
+                    //       color: Color(0xFF334155),
+                    //       size: 19,
+                    //     ),
+                    //   ),
+                    // ),
                   ],
                 ),
               ),
@@ -1689,135 +1647,135 @@ class ActiveDriverCard extends StatelessWidget {
               const SizedBox(height: 14),
 
               // 4. Dual Action Buttons: [🛡️ Safety Kit] and [🎯 Share Live Trip]
-              Row(
-                children: [
-                  Expanded(
-                    child: SizedBox(
-                      height: 48,
-                      child: ElevatedButton.icon(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFF8FAFC),
-                          foregroundColor: const Color(0xFF0F172A),
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                        ),
-                        onPressed: () {
-                          ToastOverlay.show(
-                            'Emergency contacts & Police 100 notified',
-                            type: ToastType.warning,
-                          );
-                        },
-                        icon: const Icon(
-                          Icons.shield_outlined,
-                          color: Color(0xFFF59E0B),
-                          size: 19,
-                        ),
-                        label: const Text(
-                          'Safety Kit',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w800,
-                            color: Color(0xFF0F172A),
-                            letterSpacing: -0.2,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: SizedBox(
-                      height: 48,
-                      child: ElevatedButton.icon(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFF8FAFC),
-                          foregroundColor: const Color(0xFF0F172A),
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                        ),
-                        onPressed: () {
-                          ToastOverlay.show(
-                            'Live trip tracking link copied to clipboard!',
-                            type: ToastType.success,
-                          );
-                        },
-                        icon: const Icon(
-                          Icons.track_changes_rounded,
-                          color: Color(0xFF0F172A),
-                          size: 19,
-                        ),
-                        label: const Text(
-                          'Share Live Trip',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w800,
-                            color: Color(0xFF0F172A),
-                            letterSpacing: -0.2,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
+              // Row(
+              //   children: [
+              //     Expanded(
+              //       child: SizedBox(
+              //         height: 48,
+              //         child: ElevatedButton.icon(
+              //           style: ElevatedButton.styleFrom(
+              //             backgroundColor: const Color(0xFFF8FAFC),
+              //             foregroundColor: const Color(0xFF0F172A),
+              //             elevation: 0,
+              //             shape: RoundedRectangleBorder(
+              //               borderRadius: BorderRadius.circular(16),
+              //             ),
+              //           ),
+              //           onPressed: () {
+              //             ToastOverlay.show(
+              //               'Emergency contacts & Police 100 notified',
+              //               type: ToastType.warning,
+              //             );
+              //           },
+              //           icon: const Icon(
+              //             Icons.shield_outlined,
+              //             color: Color(0xFFF59E0B),
+              //             size: 19,
+              //           ),
+              //           label: const Text(
+              //             'Safety Kit',
+              //             style: TextStyle(
+              //               fontSize: 14,
+              //               fontWeight: FontWeight.w800,
+              //               color: Color(0xFF0F172A),
+              //               letterSpacing: -0.2,
+              //             ),
+              //           ),
+              //         ),
+              //       ),
+              //     ),
+              //     const SizedBox(width: 12),
+              //     Expanded(
+              //       child: SizedBox(
+              //         height: 48,
+              //         child: ElevatedButton.icon(
+              //           style: ElevatedButton.styleFrom(
+              //             backgroundColor: const Color(0xFFF8FAFC),
+              //             foregroundColor: const Color(0xFF0F172A),
+              //             elevation: 0,
+              //             shape: RoundedRectangleBorder(
+              //               borderRadius: BorderRadius.circular(16),
+              //             ),
+              //           ),
+              //           onPressed: () {
+              //             ToastOverlay.show(
+              //               'Live trip tracking link copied to clipboard!',
+              //               type: ToastType.success,
+              //             );
+              //           },
+              //           icon: const Icon(
+              //             Icons.track_changes_rounded,
+              //             color: Color(0xFF0F172A),
+              //             size: 19,
+              //           ),
+              //           label: const Text(
+              //             'Share Live Trip',
+              //             style: TextStyle(
+              //               fontSize: 14,
+              //               fontWeight: FontWeight.w800,
+              //               color: Color(0xFF0F172A),
+              //               letterSpacing: -0.2,
+              //             ),
+              //           ),
+              //         ),
+              //       ),
+              //     ),
+              //   ],
+              // ),
+              // const SizedBox(height: 12),
 
-              // 5. Emergency Assist Banner with Red Star Icon & Instant Response ->
-              InkWell(
-                onTap: () {
-                  ToastOverlay.show(
-                    'Connecting to RideNest Emergency Hotline 100 / SOS',
-                    type: ToastType.warning,
-                  );
-                },
-                borderRadius: BorderRadius.circular(16),
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 12,
-                  ),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFEF2F2), // Soft pink-red
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: const Color(0xFFFECACA),
-                      width: 1.0,
-                    ),
-                  ),
-                  child: Row(
-                    children: const [
-                      Icon(
-                        Icons.emergency_rounded,
-                        color: Color(0xFFDC2626),
-                        size: 20,
-                      ),
-                      SizedBox(width: 10),
-                      Text(
-                        'Emergency Assist',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w800,
-                          color: Color(0xFFDC2626),
-                        ),
-                      ),
-                      Spacer(),
-                      Text(
-                        'Instant Response →',
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
-                          color: Color(0xFFDC2626),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+              // // 5. Emergency Assist Banner with Red Star Icon & Instant Response ->
+              // InkWell(
+              //   onTap: () {
+              //     ToastOverlay.show(
+              //       'Connecting to RideNest Emergency Hotline 100 / SOS',
+              //       type: ToastType.warning,
+              //     );
+              //   },
+              //   borderRadius: BorderRadius.circular(16),
+              //   child: Container(
+              //     width: double.infinity,
+              //     padding: const EdgeInsets.symmetric(
+              //       horizontal: 16,
+              //       vertical: 12,
+              //     ),
+              //     decoration: BoxDecoration(
+              //       color: const Color(0xFFFEF2F2), // Soft pink-red
+              //       borderRadius: BorderRadius.circular(16),
+              //       border: Border.all(
+              //         color: const Color(0xFFFECACA),
+              //         width: 1.0,
+              //       ),
+              //     ),
+              //     child: Row(
+              //       children: const [
+              //         Icon(
+              //           Icons.emergency_rounded,
+              //           color: Color(0xFFDC2626),
+              //           size: 20,
+              //         ),
+              //         SizedBox(width: 10),
+              //         Text(
+              //           'Emergency Assist',
+              //           style: TextStyle(
+              //             fontSize: 14,
+              //             fontWeight: FontWeight.w800,
+              //             color: Color(0xFFDC2626),
+              //           ),
+              //         ),
+              //         Spacer(),
+              //         Text(
+              //           'Instant Response →',
+              //           style: TextStyle(
+              //             fontSize: 13,
+              //             fontWeight: FontWeight.w700,
+              //             color: Color(0xFFDC2626),
+              //           ),
+              //         ),
+              //       ],
+              //     ),
+              // ),
+              // ),
             ],
           ),
         ),

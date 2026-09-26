@@ -119,11 +119,12 @@ class _RideBookingSheetState extends State<RideBookingSheet> {
   ];
 
   double _calculateFare(VehicleTier tier) {
-    if (tier.id == 'bike' || tier.id == 'fastest') {
-      return 46.0;
-    }
-    final raw = tier.baseFareNpr + (widget.distanceKm * tier.perKmRate);
-    return raw.clamp(46.0, 9999.0);
+    // Real distance-based fare calculation in NPR
+    // Formula: baseFare + (distanceKm * perKmRate), rounded to nearest integer with sensible minimums
+    final distance = widget.distanceKm > 0 ? widget.distanceKm : 1.0;
+    final rawFare = tier.baseFareNpr + (distance * tier.perKmRate);
+    final minFare = tier.id == 'bike' || tier.id == 'fastest' ? 45.0 : tier.baseFareNpr;
+    return rawFare.clamp(minFare, 99999.0).roundToDouble();
   }
 
   void _showPaymentSelection() {
