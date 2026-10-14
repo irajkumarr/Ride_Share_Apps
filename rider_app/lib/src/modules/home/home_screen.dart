@@ -41,26 +41,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   AnimationController? _routeAnimationController;
   List<LatLng> _fullRoutePoints = [];
 
-  final List<_RecentPlaceItem> _defaultRecents = const [
-    _RecentPlaceItem(
-      title: 'Ward 2',
-      subtitle: 'Madhyapur Thimi Mu...pur District, Bagmati',
-      etaText: '10 min',
-      latLng: LatLngModel(latitude: 27.6802, longitude: 85.3855),
-    ),
-    _RecentPlaceItem(
-      title: 'Kaushaltar - Biruwa Rd 3',
-      subtitle: 'Ward 1, Suryabinayak ...pur District, Bagmati',
-      etaText: '12 min',
-      latLng: LatLngModel(latitude: 27.6745, longitude: 85.3720),
-    ),
-    _RecentPlaceItem(
-      title: 'Balkot Chowk',
-      subtitle: 'Bagmati, Bhaktapur ...shaltar - Biruwa Road',
-      etaText: '17 min',
-      latLng: LatLngModel(latitude: 27.6690, longitude: 85.3650),
-    ),
-  ];
 
   @override
   void initState() {
@@ -2227,22 +2207,63 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   Widget _buildRecentDestinations() {
     return BlocBuilder<RideSearchCubit, RideSearchState>(
       builder: (context, state) {
-        List<_RecentPlaceItem> items = [];
+        final recents = (state is RideSearchInitial)
+            ? state.recents
+            : context.read<RideSearchCubit>().cachedRecents;
 
-        if (state is RideSearchInitial && state.recents.isNotEmpty) {
-          final times = ['10 min', '12 min', '17 min', '20 min'];
-          items = state.recents.take(3).toList().asMap().entries.map((e) {
-            final place = e.value;
-            return _RecentPlaceItem(
-              title: place.title,
-              subtitle: place.formattedAddress,
-              etaText: times[e.key % times.length],
-              latLng: place.coordinates,
-            );
-          }).toList();
-        } else {
-          items = _defaultRecents;
+        if (recents.isEmpty) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            child: InkWell(
+              onTap: () => _openSearchSheet(focusDestination: true),
+              borderRadius: BorderRadius.circular(16),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF8FAFC),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                ),
+                child: const Row(
+                  children: [
+                    Icon(
+                      Icons.history_rounded,
+                      color: Color(0xFF94A3B8),
+                      size: 22,
+                    ),
+                    SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'Recent destinations will appear here',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF64748B),
+                        ),
+                      ),
+                    ),
+                    Icon(
+                      Icons.search_rounded,
+                      color: Color(0xFF94A3B8),
+                      size: 18,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
         }
+
+        final times = ['8 min', '12 min', '15 min', '20 min', '25 min'];
+        final items = recents.take(3).toList().asMap().entries.map((e) {
+          final place = e.value;
+          return _RecentPlaceItem(
+            title: place.title,
+            subtitle: place.formattedAddress,
+            etaText: times[e.key % times.length],
+            latLng: place.coordinates,
+          );
+        }).toList();
 
         return Column(
           children: items.map((item) {

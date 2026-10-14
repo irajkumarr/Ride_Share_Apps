@@ -1,10 +1,16 @@
 import 'package:shared_core/shared_core.dart';
+import '../local/recent_places_local_data_source.dart';
 import '../remote/places_api_service.dart';
 
 class PlacesRepo {
-  PlacesRepo({required PlacesApiService api}) : _api = api;
+  PlacesRepo({
+    required PlacesApiService api,
+    required RecentPlacesLocalDataSource local,
+  })  : _api = api,
+        _local = local;
 
   final PlacesApiService _api;
+  final RecentPlacesLocalDataSource _local;
 
   Future<List<AddressModel>> searchPlaces(
     String query, {
@@ -36,29 +42,20 @@ class PlacesRepo {
     ];
   }
 
-  List<AddressModel> getRecentPlaces() {
-    return const [
-      AddressModel(
-        id: 'rec_1',
-        title: 'Civil Mall',
-        formattedAddress: 'Sundhara, Kathmandu, Nepal',
-        coordinates: LatLngModel(latitude: 27.7005, longitude: 85.3135),
-        country: 'Nepal',
-      ),
-      AddressModel(
-        id: 'rec_2',
-        title: 'Tribhuvan International Airport',
-        formattedAddress: 'Ring Road, Kathmandu, Nepal',
-        coordinates: LatLngModel(latitude: 27.6966, longitude: 85.3591),
-        country: 'Nepal',
-      ),
-      AddressModel(
-        id: 'rec_3',
-        title: 'Jhamsikhel Restaurant Row',
-        formattedAddress: 'Jhamsikhel, Lalitpur, Nepal',
-        coordinates: LatLngModel(latitude: 27.6740, longitude: 85.3110),
-        country: 'Nepal',
-      ),
-    ];
+  Future<List<AddressModel>> getRecentPlaces() async {
+    return _local.getRecentPlaces();
+  }
+
+  List<AddressModel> getRecentPlacesSync() {
+    return _local.getRecentPlacesSync();
+  }
+
+  Future<void> saveRecentPlace(AddressModel place) async {
+    await _local.saveRecentPlace(place);
+  }
+
+  Future<void> clearRecentPlaces() async {
+    await _local.clearRecentPlaces();
   }
 }
+

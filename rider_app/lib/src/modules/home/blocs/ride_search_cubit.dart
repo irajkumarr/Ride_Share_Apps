@@ -53,17 +53,46 @@ class RideSearchCubit extends BaseCubit<RideSearchState> {
 
   AddressModel? _currentPickup;
   AddressModel? _currentDestination;
+  List<AddressModel> _cachedRecents = [];
 
   RideSearchCubit(this._repo)
       : super(
           RideSearchInitial(
             favorites: _repo.getFavoritePlaces(),
-            recents: _repo.getRecentPlaces(),
+            recents: _repo.getRecentPlacesSync(),
           ),
-        );
+        ) {
+    _cachedRecents = _repo.getRecentPlacesSync();
+    loadRecents();
+  }
 
   AddressModel? get currentPickup => _currentPickup;
   AddressModel? get currentDestination => _currentDestination;
+  List<AddressModel> get cachedRecents => _cachedRecents;
+
+  Future<void> loadRecents() async {
+    try {
+      final recents = await _repo.getRecentPlaces();
+      _cachedRecents = recents;
+      if (state is RideSearchInitial) {
+        emit(
+          RideSearchInitial(
+            pickup: _currentPickup,
+            destination: _currentDestination,
+            favorites: _repo.getFavoritePlaces(),
+            recents: _cachedRecents,
+          ),
+        );
+      }
+    } catch (_) {}
+  }
+
+  Future<void> recordRecentPlace(AddressModel place) async {
+    try {
+      await _repo.saveRecentPlace(place);
+      await loadRecents();
+    } catch (_) {}
+  }
 
   void setPickup(AddressModel pickup) {
     _currentPickup = pickup;
@@ -72,6 +101,7 @@ class RideSearchCubit extends BaseCubit<RideSearchState> {
 
   void setDestination(AddressModel destination) {
     _currentDestination = destination;
+    recordRecentPlace(destination);
     _checkBothSelected();
   }
 
@@ -82,7 +112,7 @@ class RideSearchCubit extends BaseCubit<RideSearchState> {
         pickup: _currentPickup,
         destination: null,
         favorites: _repo.getFavoritePlaces(),
-        recents: _repo.getRecentPlaces(),
+        recents: _cachedRecents,
       ),
     );
   }
@@ -93,7 +123,7 @@ class RideSearchCubit extends BaseCubit<RideSearchState> {
         pickup: _currentPickup,
         destination: _currentDestination,
         favorites: _repo.getFavoritePlaces(),
-        recents: _repo.getRecentPlaces(),
+        recents: _cachedRecents,
       ),
     );
   }
@@ -139,7 +169,7 @@ class RideSearchCubit extends BaseCubit<RideSearchState> {
           pickup: _currentPickup,
           destination: _currentDestination,
           favorites: _repo.getFavoritePlaces(),
-          recents: _repo.getRecentPlaces(),
+          recents: _cachedRecents,
         ),
       );
     }

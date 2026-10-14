@@ -14,6 +14,7 @@ import 'package:rider_app/src/modules/ride_history/blocs/rider_ride_history_cubi
 import 'package:shared_core/shared_core.dart' hide AppRouter;
 
 import '../../data/local/auth_local_data_source.dart';
+import '../../data/local/recent_places_local_data_source.dart';
 import '../routing/app_router.dart';
 
 /// Registers rider-specific dependencies, overriding or augmenting shared_core.
@@ -42,13 +43,19 @@ Future<void> configureRiderDependencies() async {
       sl<SecureStorageService>(),
     ),
   );
+  sl.registerLazySingleton<RecentPlacesLocalDataSource>(
+    () => RecentPlacesLocalDataSource(),
+  );
 
   // ── Repositories ───────────────────────────────────────────────────────────
   sl.registerLazySingleton<AuthRepo>(
     () => AuthRepo(api: sl<AuthApiService>(), local: sl<AuthLocalDataSource>()),
   );
   sl.registerLazySingleton<PlacesRepo>(
-    () => PlacesRepo(api: sl<PlacesApiService>()),
+    () => PlacesRepo(
+      api: sl<PlacesApiService>(),
+      local: sl<RecentPlacesLocalDataSource>(),
+    ),
   );
   sl.registerLazySingleton<RideRepo>(
     () => RideRepo(api: sl<RideApiService>()),

@@ -503,81 +503,60 @@ class _DestinationSearchSheetState extends State<DestinationSearchSheet> {
       );
     }
 
-    // Default mock places matching screenshot if none returned yet
-    final defaultPlaces = const [
-      AddressModel(
-        id: 'ward_2',
-        title: 'Ward 2',
-        formattedAddress:
-            'Madhyapur Thimi Municipality, Bhaktapur District, ...',
-        coordinates: LatLngModel(latitude: 27.6802, longitude: 85.3855),
-        country: 'Nepal',
-      ),
-      AddressModel(
-        id: 'kaushaltar',
-        title: 'Kaushaltar - Biruwa Rd 3',
-        formattedAddress:
-            'Ward 1, Suryabinayak Municipality, Bhaktapur Distr...',
-        coordinates: LatLngModel(latitude: 27.6745, longitude: 85.3720),
-        country: 'Nepal',
-      ),
-      AddressModel(
-        id: 'balkot',
-        title: 'Balkot Chowk',
-        formattedAddress:
-            'Bagmati, Bhaktapur District, Suryabinayak Municip...',
-        coordinates: LatLngModel(latitude: 27.6690, longitude: 85.3650),
-        country: 'Nepal',
-      ),
-      AddressModel(
-        id: 'breeze',
-        title: 'The Breeze Collection',
-        formattedAddress:
-            'Bagmati, Bhaktapur District, Suryabinayak Municip...',
-        coordinates: LatLngModel(latitude: 27.6710, longitude: 85.3680),
-        country: 'Nepal',
-      ),
-      AddressModel(
-        id: 'nh03',
-        title: 'NH03',
-        formattedAddress: 'Ward 32, Kathmandu',
-        coordinates: LatLngModel(latitude: 27.6880, longitude: 85.3470),
-        country: 'Nepal',
-      ),
-      AddressModel(
-        id: 'high_vision',
-        title: 'High Vision Records',
-        formattedAddress:
-            'Bagmati, Bhaktapur District, Suryabinayak Municip...',
-        coordinates: LatLngModel(latitude: 27.6730, longitude: 85.3690),
-        country: 'Nepal',
-      ),
-      AddressModel(
-        id: 'civil_hospital',
-        title: 'Civil Service Hospital of Nepal',
-        formattedAddress: 'Ward 31, Kathmandu',
-        coordinates: LatLngModel(latitude: 27.6850, longitude: 85.3400),
-        country: 'Nepal',
-      ),
-      AddressModel(
-        id: 'city_centre',
-        title: 'City Centre',
-        formattedAddress: 'Ward 1, Kathmandu',
-        coordinates: LatLngModel(latitude: 27.7085, longitude: 85.3255),
-        country: 'Nepal',
-      ),
-      AddressModel(
-        id: 'sanchaya_kosh',
-        title: 'Sanchaya Kosh Thamel',
-        formattedAddress: 'Thamel, Kathmandu',
-        coordinates: LatLngModel(latitude: 27.7150, longitude: 85.3120),
-        country: 'Nepal',
-      ),
-    ];
-
-    final recents = (state is RideSearchInitial && state.recents.isNotEmpty)
+    final List<AddressModel> recents = (state is RideSearchInitial)
         ? state.recents
-        : defaultPlaces;
+        : context.read<RideSearchCubit>().cachedRecents;
+
+    if (recents.isEmpty) {
+      return ListView(
+        controller: scrollController,
+        physics: const BouncingScrollPhysics(
+          parent: AlwaysScrollableScrollPhysics(),
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
+        children: [
+          Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 56,
+                  height: 56,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF1F5F9),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: const Icon(
+                    Icons.history_rounded,
+                    size: 28,
+                    color: Color(0xFF94A3B8),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'No recent searches',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF0F172A),
+                  ),
+                ),
+                const SizedBox(height: 6),
+                const Text(
+                  'Search and select a destination to see your history here.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Color(0xFF94A3B8),
+                    height: 1.4,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      );
+    }
 
     return ListView.separated(
       controller: scrollController,
