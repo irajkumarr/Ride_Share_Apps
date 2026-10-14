@@ -249,7 +249,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               const SizedBox(height: 10),
               _buildCardGroup([
                 _buildNavTile(
-                  icon: Icons.info_outline_rounded,
+                  icon: Icons.info,
                   tileIconBgColor: const Color(0xFFF1F5F9),
                   tileIconColor: Colors.transparent,
                   title: 'About RideNest & Terms',
@@ -583,11 +583,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     borderRadius: BorderRadius.circular(14),
                   ),
                   child: Center(
-                    child: Icon(
-                      icon,
-                      size: 22,
-                      color: tileIconColor ?? const Color(0xFF1E293B),
-                    ),
+                    child: Icon(icon, size: 22, color: const Color(0xFF1E293B)),
                   ),
                 ),
                 const SizedBox(width: 14),

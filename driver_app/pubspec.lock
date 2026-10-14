@@ -790,7 +790,7 @@ packages:
     source: hosted
     version: "8.3.0"
   google_maps_flutter:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: google_maps_flutter
       sha256: "392492775b6928b7419bd1d04c7562dab73a543e71078088a40ae7324acd3641"
@@ -1882,7 +1882,7 @@ packages:
     source: hosted
     version: "2.4.0"
   vibration:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: vibration
       sha256: "3424f7856b971a2ce94d22be3a3abfb5b9b5984562fdedd621f4e67574be7254"

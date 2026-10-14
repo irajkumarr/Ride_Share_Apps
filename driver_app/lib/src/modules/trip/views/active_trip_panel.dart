@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:driver_app/src/data/remote/dto/ride_dispatch_dto.dart';
 import 'package:driver_app/src/modules/ride/blocs/ride_dispatch_cubit.dart';
 import 'package:driver_app/src/modules/trip/utils/trip_location_utils.dart';
 import 'package:shared_core/shared_core.dart';
@@ -66,8 +65,8 @@ class ActiveTripPanel extends StatelessWidget {
       distanceToPickupMeters,
     );
 
-    // Geofence check: Must be within 100 meters to slide "ARRIVED AT PICKUP"
-    final isWithinPickupGeofence = distanceToPickupMeters <= 100.0;
+    // Geofence check: Recommended 150 meters to avoid getting trapped by urban GPS drift
+    final isWithinPickupGeofence = distanceToPickupMeters <= 150.0;
 
     return Container(
       decoration: BoxDecoration(
@@ -382,47 +381,49 @@ class ActiveTripPanel extends StatelessWidget {
             const SizedBox(height: 14),
 
             // 3. Rider Note Banner
-            // Container(
-            //   width: double.infinity,
-            //   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            //   decoration: BoxDecoration(
-            //     color: const Color(0xFFFFFBEB),
-            //     borderRadius: BorderRadius.circular(14),
-            //     border: Border.all(color: const Color(0xFFFEF3C7)),
-            //   ),
-            //   child: Row(
-            //     children: [
-            //       const Icon(
-            //         Icons.auto_awesome_rounded,
-            //         size: 16,
-            //         color: Color(0xFFD97706),
-            //       ),
-            //       const SizedBox(width: 8),
-            //       const Text(
-            //         'Rider Note:',
-            //         style: TextStyle(
-            //           color: Color(0xFFB45309),
-            //           fontSize: 12,
-            //           fontWeight: FontWeight.w900,
+            // if (riderNote.isNotEmpty) ...[
+            //   Container(
+            //     width: double.infinity,
+            //     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            //     decoration: BoxDecoration(
+            //       color: const Color(0xFFFFFBEB),
+            //       borderRadius: BorderRadius.circular(14),
+            //       border: Border.all(color: const Color(0xFFFEF3C7)),
+            //     ),
+            //     child: Row(
+            //       children: [
+            //         const Icon(
+            //           Icons.auto_awesome_rounded,
+            //           size: 16,
+            //           color: Color(0xFFD97706),
             //         ),
-            //       ),
-            //       const SizedBox(width: 5),
-            //       Expanded(
-            //         child: Text(
-            //           '"$riderNote"',
-            //           style: const TextStyle(
-            //             color: Color(0xFF78350F),
+            //         const SizedBox(width: 8),
+            //         const Text(
+            //           'Rider Note:',
+            //           style: TextStyle(
+            //             color: Color(0xFFB45309),
             //             fontSize: 12,
-            //             fontWeight: FontWeight.w600,
+            //             fontWeight: FontWeight.w900,
             //           ),
-            //           maxLines: 1,
-            //           overflow: TextOverflow.ellipsis,
             //         ),
-            //       ),
-            //     ],
+            //         const SizedBox(width: 5),
+            //         Expanded(
+            //           child: Text(
+            //             '"$riderNote"',
+            //             style: const TextStyle(
+            //               color: Color(0xFF78350F),
+            //               fontSize: 12,
+            //               fontWeight: FontWeight.w600,
+            //             ),
+            //             maxLines: 1,
+            //             overflow: TextOverflow.ellipsis,
+            //           ),
+            //         ),
+            //       ],
+            //     ),
             //   ),
-            // ),
-            // const SizedBox(height: 12),
+            //   const SizedBox(height: 12),
+            // ],
 
             // 4. Pickup Address Timeline Row
             Row(
@@ -572,35 +573,92 @@ class ActiveTripPanel extends StatelessWidget {
           },
         );
       } else {
-        // Driver is still more than 100m away -> Show locked proximity indicator
+        // Driver is still outside 150m -> Show proximity indicator with manual arrival override
         return Container(
           width: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
           decoration: BoxDecoration(
-            color: const Color(0xFFF1F5F9),
+            color: const Color(0xFFF8FAFC),
             borderRadius: BorderRadius.circular(18),
             border: Border.all(color: const Color(0xFFE2E8F0)),
           ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(
-                Icons.near_me_rounded,
-                size: 18,
-                color: Color(0xFF2563EB),
-              ),
-              const SizedBox(width: 8),
-              Flexible(
-                child: Text(
-                  'Approaching pickup: $distanceText • Slide unlocks within 100m',
-                  style: const TextStyle(
-                    color: Color(0xFF334155),
-                    fontSize: 12.5,
-                    fontWeight: FontWeight.w800,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.near_me_rounded,
+                    size: 16,
+                    color: Color(0xFF2563EB),
                   ),
-                  textAlign: TextAlign.center,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                  const SizedBox(width: 8),
+                  Flexible(
+                    child: Text(
+                      'Approaching pickup: $distanceText • Slide unlocks within 150m',
+                      style: const TextStyle(
+                        color: Color(0xFF334155),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                      ),
+                      textAlign: TextAlign.center,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 6),
+              GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () {
+                  showDialog(
+                    context: context,
+                    builder: (dialogCtx) => AlertDialog(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      title: const Text('Confirm Arrival at Pickup'),
+                      content: const Text(
+                        'Are you at the pickup location? You can confirm arrival if GPS has drifted or is inaccurate.',
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(dialogCtx),
+                          child: const Text('Cancel'),
+                        ),
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFFEA580C),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          onPressed: () {
+                            Navigator.pop(dialogCtx);
+                            context.read<RideDispatchCubit>().updateStatus('ARRIVED');
+                          },
+                          child: const Text(
+                            'Yes, I Have Arrived',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  child: Text(
+                    'Arrived but GPS stuck? Tap to confirm',
+                    style: TextStyle(
+                      color: const Color(0xFF2563EB).withValues(alpha: 0.9),
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.w600,
+                      decoration: TextDecoration.underline,
+                    ),
+                  ),
                 ),
               ),
             ],

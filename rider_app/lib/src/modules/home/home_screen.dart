@@ -50,6 +50,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       duration: const Duration(milliseconds: 2400),
     )..repeat();
     _fetchCurrentLocation();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        context.read<ActiveRideCubit>().checkActiveRide();
+      }
+    });
   }
 
   @override
@@ -568,6 +573,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     _routeAnimationController?.stop();
     _fullRoutePoints.clear();
     context.read<RideSearchCubit>().clearDestination();
+    context.read<ActiveRideCubit>().resetTrip();
     setState(() {
       _markers.clear();
       _polylines.clear();

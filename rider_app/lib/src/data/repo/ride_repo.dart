@@ -25,6 +25,10 @@ class RideRepo {
     return _api.cancelRide(rideId);
   }
 
+  Future<Map<String, dynamic>?> getActiveRide() {
+    return _api.getActiveRide();
+  }
+
   Future<List<RiderRideHistoryDto>> getAllRidesForRider() async {
     final list = await _api.getAllRidesForRider();
     return list.map((json) => RiderRideHistoryDto.fromJson(json)).toList();

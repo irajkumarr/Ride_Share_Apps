@@ -672,75 +672,75 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
 
             // Floating Route Summary Chip on Map (Visible when TripCompletedSummaryState is active)
-            BlocBuilder<RideDispatchCubit, RideDispatchState>(
-              builder: (context, dispatchState) {
-                if (dispatchState is! TripCompletedSummaryState) {
-                  return const SizedBox.shrink();
-                }
+            // BlocBuilder<RideDispatchCubit, RideDispatchState>(
+            //   builder: (context, dispatchState) {
+            //     if (dispatchState is! TripCompletedSummaryState) {
+            //       return const SizedBox.shrink();
+            //     }
 
-                final req = dispatchState.request;
-                final distKm = '4.8';
-                final durMin = req.estimatedDurationMin ?? 14;
+            //     final req = dispatchState.request;
+            //     final distKm = '4.8';
+            //     final durMin = req.estimatedDurationMin ?? 14;
 
-                return Positioned(
-                  left: 20,
-                  top: MediaQuery.of(context).size.height * 0.35,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 8,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(20),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.1),
-                          blurRadius: 10,
-                          offset: const Offset(0, 3),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(
-                          Icons.check_circle_outline_rounded,
-                          size: 16,
-                          color: Color(0xFF059669),
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          '$distKm km Route',
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w800,
-                            color: Color(0xFF0F172A),
-                          ),
-                        ),
-                        const SizedBox(width: 5),
-                        const Text(
-                          '•',
-                          style: TextStyle(
-                            color: Color(0xFF94A3B8),
-                            fontWeight: FontWeight.w900,
-                          ),
-                        ),
-                        const SizedBox(width: 5),
-                        Text(
-                          '$durMin mins',
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w800,
-                            color: Color(0xFF059669),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            ),
+            //     return Positioned(
+            //       left: 20,
+            //       top: MediaQuery.of(context).size.height * 0.35,
+            //       child: Container(
+            //         padding: const EdgeInsets.symmetric(
+            //           horizontal: 14,
+            //           vertical: 8,
+            //         ),
+            //         decoration: BoxDecoration(
+            //           color: Colors.white,
+            //           borderRadius: BorderRadius.circular(20),
+            //           boxShadow: [
+            //             BoxShadow(
+            //               color: Colors.black.withValues(alpha: 0.1),
+            //               blurRadius: 10,
+            //               offset: const Offset(0, 3),
+            //             ),
+            //           ],
+            //         ),
+            //         child: Row(
+            //           mainAxisSize: MainAxisSize.min,
+            //           children: [
+            //             const Icon(
+            //               Icons.check_circle_outline_rounded,
+            //               size: 16,
+            //               color: Color(0xFF059669),
+            //             ),
+            //             const SizedBox(width: 6),
+            //             Text(
+            //               '$distKm km Route',
+            //               style: const TextStyle(
+            //                 fontSize: 12,
+            //                 fontWeight: FontWeight.w800,
+            //                 color: Color(0xFF0F172A),
+            //               ),
+            //             ),
+            //             const SizedBox(width: 5),
+            //             const Text(
+            //               '•',
+            //               style: TextStyle(
+            //                 color: Color(0xFF94A3B8),
+            //                 fontWeight: FontWeight.w900,
+            //               ),
+            //             ),
+            //             const SizedBox(width: 5),
+            //             Text(
+            //               '$durMin mins',
+            //               style: const TextStyle(
+            //                 fontSize: 12,
+            //                 fontWeight: FontWeight.w800,
+            //                 color: Color(0xFF059669),
+            //               ),
+            //             ),
+            //           ],
+            //         ),
+            //       ),
+            //     );
+            //   },
+            // ),
 
             // 4. Bottom Main Driver Dashboard Sheet (When no active ride)
             BlocBuilder<RideDispatchCubit, RideDispatchState>(

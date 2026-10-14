@@ -211,6 +211,18 @@ class RideApiService {
     return 'Ride Cancelled';
   }
 
+  Future<Map<String, dynamic>?> getActiveRide() async {
+    try {
+      final response = await _apiClient.get<Map<String, dynamic>>(ApiUrls.riderActiveRide);
+      if (response['data'] != null && response['data'] is Map<String, dynamic>) {
+        return response['data'] as Map<String, dynamic>;
+      }
+      return null;
+    } catch (_) {
+      return null;
+    }
+  }
+
   /// Fetches all trips for the authenticated rider.
   Future<List<Map<String, dynamic>>> getAllRidesForRider() async {
     final response = await _apiClient.get<Map<String, dynamic>>(ApiUrls.riderAllRides);

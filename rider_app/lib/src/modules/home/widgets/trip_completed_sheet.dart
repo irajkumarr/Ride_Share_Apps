@@ -708,24 +708,24 @@ class _TripCompletedSheetState extends State<TripCompletedSheet> {
                                   letterSpacing: 0.5,
                                 ),
                               ),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 3,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFFF1F5F9),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: const Text(
-                                  '2.4 km • 6 min transit',
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w700,
-                                    color: Color(0xFF64748B),
-                                  ),
-                                ),
-                              ),
+                              // Container(
+                              //   padding: const EdgeInsets.symmetric(
+                              //     horizontal: 8,
+                              //     vertical: 3,
+                              //   ),
+                              //   decoration: BoxDecoration(
+                              //     color: const Color(0xFFF1F5F9),
+                              //     borderRadius: BorderRadius.circular(8),
+                              //   ),
+                              //   child: const Text(
+                              //     '2.4 km • 6 min transit',
+                              //     style: TextStyle(
+                              //       fontSize: 11,
+                              //       fontWeight: FontWeight.w700,
+                              //       color: Color(0xFF64748B),
+                              //     ),
+                              //   ),
+                              // ),
                             ],
                           ),
                           const SizedBox(height: 14),

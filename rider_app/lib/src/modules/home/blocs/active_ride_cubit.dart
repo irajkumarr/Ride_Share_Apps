@@ -78,6 +78,96 @@ class ActiveRideCubit extends BaseCubit<ActiveRideState> {
        _authLocalDataSource = authLocalDataSource,
        super(ActiveRideInitial());
 
+  Future<void> checkActiveRide() async {
+    try {
+      final rideData = await _rideRepo.getActiveRide();
+      if (rideData != null && rideData['id'] != null) {
+        final rideId = rideData['id'] as String;
+        final status = rideData['status'] as String? ?? 'REQUESTED';
+        _currentRideId = rideId;
+
+        final pickup = AddressModel(
+          id: 'pickup',
+          title: rideData['pickupAddress']?.toString() ?? 'Pickup',
+          formattedAddress: rideData['pickupAddress']?.toString() ?? 'Pickup',
+          coordinates: LatLngModel(
+            latitude: (rideData['pickupLat'] as num?)?.toDouble() ?? 0.0,
+            longitude: (rideData['pickupLng'] as num?)?.toDouble() ?? 0.0,
+          ),
+          country: 'Nepal',
+        );
+
+        final destination = AddressModel(
+          id: 'destination',
+          title: rideData['dropoffAddress']?.toString() ?? 'Destination',
+          formattedAddress: rideData['dropoffAddress']?.toString() ?? 'Destination',
+          coordinates: LatLngModel(
+            latitude: (rideData['dropoffLat'] as num?)?.toDouble() ?? 0.0,
+            longitude: (rideData['dropoffLng'] as num?)?.toDouble() ?? 0.0,
+          ),
+          country: 'Nepal',
+        );
+
+        final booking = RideBookingModel(
+          id: rideId,
+          pickup: pickup,
+          destination: destination,
+          vehicleTier: 'Economy',
+          fareNpr: (rideData['estimatedFare'] as num?)?.toDouble() ?? 0.0,
+          paymentMethod: 'Cash',
+          route: const RouteModel(points: [], distanceInMeters: 0, durationInSeconds: 0),
+          status: RideStatus.searchingDriver,
+        );
+
+        // Connect WebSocket and resume tracking
+        final wsUrl = dotenv.env['WS_URL'] ?? 
+            (dotenv.env['BASE_URL'] != null 
+                ? dotenv.env['BASE_URL']!.replaceFirst('http', 'ws') + '/ws'
+                : 'ws://localhost:8080/ws');
+        final token = await _authLocalDataSource.getAccessToken();
+
+        _webSocketService.connect(
+          url: wsUrl,
+          authToken: token,
+          onConnected: () => _subscribeToWebSocketTopics(booking),
+        );
+
+        if (status == 'ACCEPTED' || status == 'ARRIVED' || status == 'IN_PROGRESS') {
+          final driver = DriverModel(
+            id: rideData['driverId']?.toString() ?? 'driver',
+            name: rideData['driverName']?.toString() ?? 'Driver',
+            photoUrl: '',
+            rating: 4.9,
+            totalRides: 100,
+            vehicleModel: rideData['vehicleMakeModel']?.toString() ?? 'Vehicle',
+            vehicleColor: '',
+            licensePlate: rideData['licensePlate']?.toString() ?? '',
+            phoneNumber: rideData['driverPhone']?.toString() ?? '',
+            location: pickup.coordinates,
+          );
+
+          emit(
+            DriverAssignedState(
+              booking: booking.copyWith(
+                status: status == 'IN_PROGRESS' 
+                    ? RideStatus.tripInProgress 
+                    : (status == 'ARRIVED' ? RideStatus.driverArriving : RideStatus.driverAssigned),
+                driver: driver,
+              ),
+              driver: driver,
+              driverPosition: pickup.coordinates,
+              statusText: 'Trip in progress ($status)',
+            ),
+          );
+        } else {
+          emit(DriverSearching(booking));
+        }
+      }
+    } catch (e) {
+      AppLogger.error('Failed to restore active ride for rider: $e');
+    }
+  }
+
   Future<void> prepareRoutePreview({
     required AddressModel pickup,
     required AddressModel destination,
@@ -147,7 +237,10 @@ class ActiveRideCubit extends BaseCubit<ActiveRideState> {
     }
 
     // 2. Connect to real STOMP WebSocket using environment URL & JWT Auth Token
-    final wsUrl = dotenv.env['WS_URL'] ?? 'ws://192.168.1.115:8080/ws';
+    final wsUrl = dotenv.env['WS_URL'] ?? 
+        (dotenv.env['BASE_URL'] != null 
+            ? dotenv.env['BASE_URL']!.replaceFirst('http', 'ws') + '/ws'
+            : 'ws://localhost:8080/ws');
     final token = await _authLocalDataSource.getAccessToken();
 
     _webSocketService.connect(

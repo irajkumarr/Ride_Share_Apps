@@ -201,13 +201,7 @@ class RideDispatchCubit extends Cubit<RideDispatchState> {
     emit(RideAcceptingState(request));
 
     try {
-      if (_webSocketService.isConnected) {
-        _webSocketService.send(
-          destination: '/app/ride.respond',
-          body: {'rideId': request.rideId, 'accepted': true},
-        );
-      }
-
+      // Use authoritative REST API for transactional ride acceptance
       await _driverRideApi.acceptRide(request.rideId);
       _driverStatusCubit.setOnRide();
 
@@ -230,16 +224,6 @@ class RideDispatchCubit extends Cubit<RideDispatchState> {
   Future<void> declineRide(String rideId, {bool isTimeout = false}) async {
     _countdownTimer?.cancel();
     try {
-      if (_webSocketService.isConnected) {
-        _webSocketService.send(
-          destination: '/app/ride.respond',
-          body: {
-            'rideId': rideId,
-            'status': 'DECLINED',
-            'message': isTimeout ? 'TIMEOUT' : 'DECLINED_BY_DRIVER',
-          },
-        );
-      }
       await _driverRideApi.declineRide(rideId);
     } catch (e) {
       AppLogger.error('Error declining ride: $e');

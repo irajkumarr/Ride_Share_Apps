@@ -442,16 +442,8 @@ class _MyVehiclesScreenState extends State<MyVehiclesScreen> {
                 else
                   TextButton(
                     onPressed: () {
-                      // Switch to this vehicle
-                      context.read<VehicleCubit>().emit(
-                        VehicleLoaded(
-                          vehicles:
-                              (context.read<VehicleCubit>().state
-                                      as VehicleLoaded)
-                                  .vehicles,
-                          activeVehicle: vehicle,
-                        ),
-                      );
+                      // Switch to this vehicle via public Cubit method
+                      context.read<VehicleCubit>().selectActiveVehicle(vehicle);
                       AppAlerts.success(
                         context,
                         '${vehicle.make} ${vehicle.model} is now your active ride vehicle.',

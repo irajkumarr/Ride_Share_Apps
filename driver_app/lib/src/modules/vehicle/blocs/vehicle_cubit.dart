@@ -52,4 +52,11 @@ class VehicleCubit extends BaseCubit<VehicleState> {
       failure: (error) => VehicleFailure(error),
     );
   }
+
+  void selectActiveVehicle(VehicleDto vehicle) {
+    final current = state;
+    if (current is VehicleLoaded) {
+      emit(VehicleLoaded(vehicles: current.vehicles, activeVehicle: vehicle));
+    }
+  }
 }
