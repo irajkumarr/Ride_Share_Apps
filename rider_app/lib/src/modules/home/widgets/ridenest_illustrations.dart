@@ -7,10 +7,7 @@ class BikeIllustration extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CustomPaint(
-      size: Size(size, size * 0.62),
-      painter: _BikePainter(),
-    );
+    return CustomPaint(size: Size(size, size * 0.62), painter: _BikePainter());
   }
 }
 
@@ -94,7 +91,11 @@ class _BikePainter extends CustomPainter {
 
     canvas.drawLine(frontCenter, Offset(w * 0.68, h * 0.26), forkPaint);
     // Handlebar grip
-    canvas.drawLine(Offset(w * 0.65, h * 0.25), Offset(w * 0.72, h * 0.27), forkPaint);
+    canvas.drawLine(
+      Offset(w * 0.65, h * 0.25),
+      Offset(w * 0.72, h * 0.27),
+      forkPaint,
+    );
 
     // Swingarm to rear wheel
     final swingPaint = Paint()
@@ -115,10 +116,7 @@ class CarIllustration extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CustomPaint(
-      size: Size(size, size * 0.55),
-      painter: _CarPainter(),
-    );
+    return CustomPaint(size: Size(size, size * 0.55), painter: _CarPainter());
   }
 }
 
@@ -132,7 +130,10 @@ class _CarPainter extends CustomPainter {
     final shadowPaint = Paint()
       ..color = Colors.black.withValues(alpha: 0.06)
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6);
-    canvas.drawOval(Rect.fromLTWH(w * 0.05, h * 0.78, w * 0.90, h * 0.16), shadowPaint);
+    canvas.drawOval(
+      Rect.fromLTWH(w * 0.05, h * 0.78, w * 0.90, h * 0.16),
+      shadowPaint,
+    );
 
     // Wheel positions
     final wheelRadius = h * 0.32;
@@ -274,8 +275,16 @@ class CargoIllustration extends StatelessWidget {
               child: const Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.arrow_upward_rounded, color: Colors.white, size: 12),
-                  Icon(Icons.arrow_upward_rounded, color: Colors.white, size: 12),
+                  Icon(
+                    Icons.arrow_upward_rounded,
+                    color: Colors.white,
+                    size: 12,
+                  ),
+                  Icon(
+                    Icons.arrow_upward_rounded,
+                    color: Colors.white,
+                    size: 12,
+                  ),
                 ],
               ),
             ),
@@ -334,7 +343,9 @@ class DeliveryIllustration extends StatelessWidget {
                   height: 5,
                   decoration: const BoxDecoration(
                     color: Color(0xFFB45309),
-                    borderRadius: BorderRadius.vertical(top: Radius.circular(5)),
+                    borderRadius: BorderRadius.vertical(
+                      top: Radius.circular(5),
+                    ),
                   ),
                 ),
               ],
@@ -366,8 +377,16 @@ class DeliveryIllustration extends StatelessWidget {
                 child: const Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.arrow_upward_rounded, color: Colors.white, size: 10),
-                    Icon(Icons.arrow_upward_rounded, color: Colors.white, size: 10),
+                    Icon(
+                      Icons.arrow_upward_rounded,
+                      color: Colors.white,
+                      size: 10,
+                    ),
+                    Icon(
+                      Icons.arrow_upward_rounded,
+                      color: Colors.white,
+                      size: 10,
+                    ),
                   ],
                 ),
               ),
@@ -423,10 +442,26 @@ class _RadarPainter extends CustomPainter {
       ..style = PaintingStyle.stroke;
 
     // Draw 3 subtle angular rays like in the reference map
-    canvas.drawLine(center, Offset(size.width * 0.1, size.height * 0.1), rayPaint);
-    canvas.drawLine(center, Offset(size.width * 0.9, size.height * 0.15), rayPaint);
-    canvas.drawLine(center, Offset(size.width * 0.3, size.height * 0.65), rayPaint);
-    canvas.drawLine(center, Offset(size.width * 0.8, size.height * 0.7), rayPaint);
+    canvas.drawLine(
+      center,
+      Offset(size.width * 0.1, size.height * 0.1),
+      rayPaint,
+    );
+    canvas.drawLine(
+      center,
+      Offset(size.width * 0.9, size.height * 0.15),
+      rayPaint,
+    );
+    canvas.drawLine(
+      center,
+      Offset(size.width * 0.3, size.height * 0.65),
+      rayPaint,
+    );
+    canvas.drawLine(
+      center,
+      Offset(size.width * 0.8, size.height * 0.7),
+      rayPaint,
+    );
 
     // Draw 3 expanding concentric radar rings
     for (int i = 0; i < 3; i++) {
@@ -448,3 +483,217 @@ class _RadarPainter extends CustomPainter {
       oldDelegate.progress != progress;
 }
 
+/// Modern illustration loader that displays the PNG asset icon (with ground shadow and tier badges)
+/// with graceful fallback to custom-painted vector representations.
+class VehicleTierIllustration extends StatelessWidget {
+  final String tierId;
+  final double size;
+  final bool isSelected;
+
+  const VehicleTierIllustration({
+    super.key,
+    required this.tierId,
+    this.size = 76,
+    this.isSelected = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    String? assetName;
+    Widget fallback;
+    Widget? badgeOverlay;
+
+    switch (tierId.toLowerCase()) {
+      case 'bike':
+        assetName = 'bike.png';
+        fallback = BikeIllustration(size: size);
+        break;
+
+      case 'fastest':
+        // Fastest ride option: energetic lightning indicator
+        assetName = 'car.png';
+        fallback = CarIllustration(size: size);
+        badgeOverlay = Positioned(
+          right: 2,
+          top: 0,
+          child: Container(
+            padding: const EdgeInsets.all(3.5),
+            decoration: const BoxDecoration(
+              color: Color(0xFFF59E0B),
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: Color(0x66F59E0B),
+                  blurRadius: 6,
+                  offset: Offset(0, 2),
+                ),
+              ],
+            ),
+            child: const Icon(
+              Icons.bolt_rounded,
+              size: 12,
+              color: Colors.white,
+            ),
+          ),
+        );
+        break;
+
+      case 'comfort':
+        // Premium executive sedan with gold luxury badge
+        assetName = 'car.png';
+        fallback = CarIllustration(size: size);
+        badgeOverlay = Positioned(
+          right: 2,
+          top: 0,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xFF0F172A), Color(0xFF334155)],
+              ),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: const Color(0xFFF59E0B), width: 0.8),
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0x33000000),
+                  blurRadius: 4,
+                  offset: Offset(0, 2),
+                ),
+              ],
+            ),
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.star_rounded, size: 10, color: Color(0xFFF59E0B)),
+                SizedBox(width: 2),
+                Text(
+                  'VIP',
+                  style: TextStyle(
+                    fontSize: 8,
+                    fontWeight: FontWeight.w900,
+                    color: Color(0xFFF8FAFC),
+                    letterSpacing: 0.4,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+        break;
+
+      case 'xl':
+        assetName = 'car.png';
+        fallback = CarIllustration(size: size);
+        badgeOverlay = Positioned(
+          right: 2,
+          top: 0,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+            decoration: BoxDecoration(
+              color: const Color(0xFF2563EB),
+              borderRadius: BorderRadius.circular(8),
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0x442563EB),
+                  blurRadius: 4,
+                  offset: Offset(0, 2),
+                ),
+              ],
+            ),
+            child: const Text(
+              '6 SEATS',
+              style: TextStyle(
+                fontSize: 8,
+                fontWeight: FontWeight.w900,
+                color: Colors.white,
+                letterSpacing: 0.3,
+              ),
+            ),
+          ),
+        );
+        break;
+
+      case 'delivery':
+      case 'parcel':
+        assetName = null;
+        fallback = DeliveryIllustration(size: size);
+        break;
+
+      case 'cargo':
+      case 'van':
+        assetName = null;
+        fallback = CargoIllustration(size: size);
+        break;
+
+      case 'economy':
+      default:
+        assetName = 'car.png';
+        fallback = CarIllustration(size: size);
+        break;
+    }
+
+    final double width = size;
+    final double height = size * 0.60;
+
+    return SizedBox(
+      width: width,
+      height: height,
+      child: Stack(
+        alignment: Alignment.center,
+        clipBehavior: Clip.none,
+        children: [
+          // Soft Ground Contact Shadow
+          Positioned(
+            bottom: 2,
+            child: Container(
+              width: width * 0.74,
+              height: 6,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                boxShadow: [
+                  BoxShadow(
+                    color: isSelected
+                        ? const Color(0xFF0F172A).withValues(alpha: 0.22)
+                        : Colors.black.withValues(alpha: 0.08),
+                    blurRadius: isSelected ? 8 : 4,
+                    spreadRadius: isSelected ? 1 : 0,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // Main vehicle image / vector
+          AnimatedScale(
+            scale: isSelected ? 1.05 : 1.0,
+            duration: const Duration(milliseconds: 200),
+            curve: Curves.easeOutCubic,
+            child: assetName != null
+                ? Image.asset(
+                    'assets/icons/$assetName',
+                    width: width,
+                    height: height,
+                    fit: BoxFit.contain,
+                    errorBuilder: (context, error, stackTrace) {
+                      // Secondary check: load from shared_core package
+                      return Image.asset(
+                        'assets/icons/$assetName',
+                        package: 'shared_core',
+                        width: width,
+                        height: height,
+                        fit: BoxFit.contain,
+                        errorBuilder: (ctx, err, stack) => fallback,
+                      );
+                    },
+                  )
+                : fallback,
+          ),
+
+          // Optional Badge Overlay
+          ?badgeOverlay,
+        ],
+      ),
+    );
+  }
+}

@@ -82,7 +82,7 @@ class _RegisterScreenState extends State<RegisterScreen> with FormMixin {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        InkWell(
+                        CustomInkWellContainer(
                           borderRadius: BorderRadius.circular(12),
                           onTap: () {
                             if (context.canPop()) {
@@ -92,7 +92,10 @@ class _RegisterScreenState extends State<RegisterScreen> with FormMixin {
                             }
                           },
                           child: const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                            padding: EdgeInsets.symmetric(
+                              vertical: 8,
+                              horizontal: 4,
+                            ),
                             child: Icon(
                               Icons.chevron_left_rounded,
                               size: 32,
@@ -103,7 +106,10 @@ class _RegisterScreenState extends State<RegisterScreen> with FormMixin {
 
                         // Pill Badge: [Logo] RideNest
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 8,
+                          ),
                           decoration: BoxDecoration(
                             color: const Color(0xFFFFF7F5),
                             borderRadius: BorderRadius.circular(20),
@@ -120,13 +126,13 @@ class _RegisterScreenState extends State<RegisterScreen> with FormMixin {
                                 width: 18,
                                 height: 18,
                                 fit: BoxFit.contain,
-                                errorBuilder: (_, __, ___) => Image.asset(
+                                errorBuilder: (_, _, _) => Image.asset(
                                   'assets/icons/ridenest_logo.png',
                                   package: 'shared_core',
                                   width: 18,
                                   height: 18,
                                   fit: BoxFit.contain,
-                                  errorBuilder: (_, __, ___) => const Icon(
+                                  errorBuilder: (_, _, _) => const Icon(
                                     Icons.location_on_rounded,
                                     size: 16,
                                     color: Color(0xFFFF3B30),
@@ -182,7 +188,9 @@ class _RegisterScreenState extends State<RegisterScreen> with FormMixin {
                       prefixIcon: Icons.badge_outlined,
                       keyboardType: TextInputType.name,
                       textInputAction: TextInputAction.next,
-                      validator: Validators.required(message: 'Enter your full name'),
+                      validator: Validators.required(
+                        message: 'Enter your full name',
+                      ),
                     ),
 
                     const SizedBox(height: 18),
@@ -197,7 +205,9 @@ class _RegisterScreenState extends State<RegisterScreen> with FormMixin {
                       textInputAction: TextInputAction.next,
                       validator: Validators.compose([
                         Validators.required(message: 'Enter your email'),
-                        Validators.email(message: 'Enter a valid email address'),
+                        Validators.email(
+                          message: 'Enter a valid email address',
+                        ),
                       ]),
                     ),
 
@@ -265,10 +275,14 @@ class _RegisterScreenState extends State<RegisterScreen> with FormMixin {
                               width: 20,
                               height: 20,
                               decoration: BoxDecoration(
-                                color: _agreeToTerms ? const Color(0xFF0F172A) : Colors.white,
+                                color: _agreeToTerms
+                                    ? AppColor.secondary
+                                    : Colors.white,
                                 borderRadius: BorderRadius.circular(6),
                                 border: Border.all(
-                                  color: _agreeToTerms ? const Color(0xFF0F172A) : const Color(0xFFCBD5E1),
+                                  color: _agreeToTerms
+                                      ? AppColor.secondary
+                                      : const Color(0xFFCBD5E1),
                                   width: 1.5,
                                 ),
                               ),
@@ -394,10 +408,7 @@ class _RegisterScreenState extends State<RegisterScreen> with FormMixin {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(
-              color: const Color(0xFFCBD5E1),
-              width: 1.2,
-            ),
+            border: Border.all(color: const Color(0xFFCBD5E1), width: 1.2),
           ),
           child: TextFormField(
             controller: controller,
@@ -422,7 +433,10 @@ class _RegisterScreenState extends State<RegisterScreen> with FormMixin {
                 color: const Color(0xFF94A3B8),
               ),
               suffixIcon: suffixIcon,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 15),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 14,
+                vertical: 15,
+              ),
               border: InputBorder.none,
               enabledBorder: InputBorder.none,
               focusedBorder: InputBorder.none,
@@ -459,7 +473,7 @@ class _RegisterScreenState extends State<RegisterScreen> with FormMixin {
           child: ElevatedButton(
             onPressed: () => _onRegister(context),
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF0F172A),
+              backgroundColor: AppColor.secondary,
               foregroundColor: Colors.white,
               elevation: 0,
               shape: RoundedRectangleBorder(
@@ -481,4 +495,3 @@ class _RegisterScreenState extends State<RegisterScreen> with FormMixin {
     );
   }
 }
-

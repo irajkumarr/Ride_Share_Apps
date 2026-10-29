@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:geolocator/geolocator.dart';
 import '../../models/location/lat_lng_model.dart';
 
@@ -26,6 +28,9 @@ abstract class LocationService {
     LocationAccuracy accuracy = LocationAccuracy.high,
     int distanceFilter = 5,
     int intervalDurationInSeconds = 5,
+    bool enableBackgroundNotification = false,
+    String notificationTitle = 'Active Driver Online',
+    String notificationText = 'Tracking location in background for active ride dispatch.',
   });
 
   /// Calculates distance in meters between two coordinates.
@@ -113,11 +118,30 @@ class LocationServiceImpl implements LocationService {
     LocationAccuracy accuracy = LocationAccuracy.high,
     int distanceFilter = 5,
     int intervalDurationInSeconds = 5,
+    bool enableBackgroundNotification = false,
+    String notificationTitle = 'Active Driver Online',
+    String notificationText = 'Tracking location in background for active ride dispatch.',
   }) {
-    final locationSettings = LocationSettings(
-      accuracy: accuracy,
-      distanceFilter: distanceFilter,
-    );
+    LocationSettings locationSettings;
+
+    if (!kIsWeb && Platform.isAndroid && enableBackgroundNotification) {
+      locationSettings = AndroidSettings(
+        accuracy: accuracy,
+        distanceFilter: distanceFilter,
+        forceLocationManager: true,
+        intervalDuration: Duration(seconds: intervalDurationInSeconds),
+        foregroundNotificationConfig: ForegroundNotificationConfig(
+          notificationTitle: notificationTitle,
+          notificationText: notificationText,
+          enableWakeLock: true,
+        ),
+      );
+    } else {
+      locationSettings = LocationSettings(
+        accuracy: accuracy,
+        distanceFilter: distanceFilter,
+      );
+    }
 
     return Geolocator.getPositionStream(locationSettings: locationSettings).map(
       (pos) => LatLngModel(

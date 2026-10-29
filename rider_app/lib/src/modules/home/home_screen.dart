@@ -41,7 +41,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   AnimationController? _routeAnimationController;
   List<LatLng> _fullRoutePoints = [];
 
-
   @override
   void initState() {
     super.initState();
@@ -817,8 +816,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       // ── UI #1: ON TRIP (Trip in Progress) ──
                       // Top Center Pill Badge: 🟢 ON TRIP | BA 2 PA 4092
                       Positioned(
-                        top: MediaQuery.of(context).padding.top + 10,
-                        left: 76,
+                        top: MediaQuery.of(context).padding.top + 20,
+                        left: 80,
                         right: 76,
                         child: Container(
                           padding: const EdgeInsets.symmetric(
@@ -1197,8 +1196,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       // ── UI #2: DRIVER ARRIVED AT PICKUP ──
                       // Top Center Pill Badge: 🟢 DRIVER ARRIVED | BA 2 PA 4092
                       Positioned(
-                        top: MediaQuery.of(context).padding.top + 10,
-                        left: 60,
+                        top: MediaQuery.of(context).padding.top + 20,
+                        left: 80,
                         right: 60,
                         child: Container(
                           padding: const EdgeInsets.symmetric(
@@ -1269,132 +1268,132 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       // ── UI #3: DRIVER ACCEPTED / ON THE WAY (Screenshot 2) ──
 
                       // Top Right Driver ETA Pill Badge: 🟢 3 min • BA 2 PA 4092
-                      Positioned(
-                        top: MediaQuery.of(context).padding.top + 70,
-                        right: 18,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 6,
-                          ),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF0A0F1D), // Dark navy capsule
-                            borderRadius: BorderRadius.circular(20),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.2),
-                                blurRadius: 10,
-                                offset: const Offset(0, 3),
-                              ),
-                            ],
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Container(
-                                width: 7,
-                                height: 7,
-                                decoration: const BoxDecoration(
-                                  color: Color(0xFF10B981),
-                                  shape: BoxShape.circle,
-                                ),
-                              ),
-                              const SizedBox(width: 6),
-                              const Text(
-                                '3 min',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w800,
-                                ),
-                              ),
-                              const SizedBox(width: 6),
-                              Text(
-                                '•  ${activeState.driver.licensePlate.isNotEmpty ? activeState.driver.licensePlate : 'BA 2 PA 4092'}',
-                                style: const TextStyle(
-                                  color: Color(0xFF94A3B8),
-                                  fontSize: 11.5,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
+                      // Positioned(
+                      //   top: MediaQuery.of(context).padding.top + 70,
+                      //   right: 18,
+                      //   child: Container(
+                      //     padding: const EdgeInsets.symmetric(
+                      //       horizontal: 12,
+                      //       vertical: 6,
+                      //     ),
+                      //     decoration: BoxDecoration(
+                      //       color: const Color(0xFF0A0F1D), // Dark navy capsule
+                      //       borderRadius: BorderRadius.circular(20),
+                      //       boxShadow: [
+                      //         BoxShadow(
+                      //           color: Colors.black.withValues(alpha: 0.2),
+                      //           blurRadius: 10,
+                      //           offset: const Offset(0, 3),
+                      //         ),
+                      //       ],
+                      //     ),
+                      //     child: Row(
+                      //       mainAxisSize: MainAxisSize.min,
+                      //       children: [
+                      //         Container(
+                      //           width: 7,
+                      //           height: 7,
+                      //           decoration: const BoxDecoration(
+                      //             color: Color(0xFF10B981),
+                      //             shape: BoxShape.circle,
+                      //           ),
+                      //         ),
+                      //         const SizedBox(width: 6),
+                      //         const Text(
+                      //           '3 min',
+                      //           style: TextStyle(
+                      //             color: Colors.white,
+                      //             fontSize: 13,
+                      //             fontWeight: FontWeight.w800,
+                      //           ),
+                      //         ),
+                      //         const SizedBox(width: 6),
+                      //         Text(
+                      //           '•  ${activeState.driver.licensePlate.isNotEmpty ? activeState.driver.licensePlate : 'BA 2 PA 4092'}',
+                      //           style: const TextStyle(
+                      //             color: Color(0xFF94A3B8),
+                      //             fontSize: 11.5,
+                      //             fontWeight: FontWeight.w700,
+                      //           ),
+                      //         ),
+                      //       ],
+                      //     ),
+                      //   ),
+                      // ),
 
                       // Pickup Point Location Pin dynamically anchored at pickup coordinate
-                      Builder(
-                        builder: (context) {
-                          final screenSize = MediaQuery.of(context).size;
-                          final topPadding = MediaQuery.of(context).padding.top;
-                          const pinWidth = 56.0;
-                          const pinHeight = 74.0;
+                      // Builder(
+                      //   builder: (context) {
+                      //     final screenSize = MediaQuery.of(context).size;
+                      //     final topPadding = MediaQuery.of(context).padding.top;
+                      //     const pinWidth = 56.0;
+                      //     const pinHeight = 74.0;
 
-                          final double posX;
-                          final double posY;
+                      //     final double posX;
+                      //     final double posY;
 
-                          if (_pickupScreenOffset != null) {
-                            posX = (_pickupScreenOffset!.dx - (pinWidth / 2))
-                                .clamp(
-                                  16.0,
-                                  screenSize.width - pinWidth - 16.0,
-                                );
-                            posY = (_pickupScreenOffset!.dy - pinHeight).clamp(
-                              topPadding + 65.0,
-                              screenSize.height - 300.0,
-                            );
-                          } else {
-                            posX = (screenSize.width - pinWidth) / 2;
-                            posY = screenSize.height * 0.35;
-                          }
+                      //     if (_pickupScreenOffset != null) {
+                      //       posX = (_pickupScreenOffset!.dx - (pinWidth / 2))
+                      //           .clamp(
+                      //             16.0,
+                      //             screenSize.width - pinWidth - 16.0,
+                      //           );
+                      //       posY = (_pickupScreenOffset!.dy - pinHeight).clamp(
+                      //         topPadding + 65.0,
+                      //         screenSize.height - 300.0,
+                      //       );
+                      //     } else {
+                      //       posX = (screenSize.width - pinWidth) / 2;
+                      //       posY = screenSize.height * 0.35;
+                      //     }
 
-                          return Positioned(
-                            left: posX,
-                            top: posY,
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Container(
-                                  width: 48,
-                                  height: 48,
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFFFF4824),
-                                    borderRadius: BorderRadius.circular(16),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: const Color(0xFFFF4824)
-                                            .withValues(alpha: 0.4),
-                                        blurRadius: 16,
-                                        offset: const Offset(0, 4),
-                                      ),
-                                    ],
-                                  ),
-                                  child: const Center(
-                                    child: Icon(
-                                      Icons.person_rounded,
-                                      color: Colors.white,
-                                      size: 28,
-                                    ),
-                                  ),
-                                ),
-                                Container(
-                                  width: 14,
-                                  height: 14,
-                                  margin: const EdgeInsets.only(top: 6),
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: Colors.white,
-                                    border: Border.all(
-                                      color: Colors.black,
-                                      width: 3.5,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                      ),
+                      //     return Positioned(
+                      //       left: posX,
+                      //       top: posY,
+                      //       child: Column(
+                      //         mainAxisSize: MainAxisSize.min,
+                      //         children: [
+                      //           Container(
+                      //             width: 48,
+                      //             height: 48,
+                      //             decoration: BoxDecoration(
+                      //               color: const Color(0xFFFF4824),
+                      //               borderRadius: BorderRadius.circular(16),
+                      //               boxShadow: [
+                      //                 BoxShadow(
+                      //                   color: const Color(0xFFFF4824)
+                      //                       .withValues(alpha: 0.4),
+                      //                   blurRadius: 16,
+                      //                   offset: const Offset(0, 4),
+                      //                 ),
+                      //               ],
+                      //             ),
+                      //             child: const Center(
+                      //               child: Icon(
+                      //                 Icons.person_rounded,
+                      //                 color: Colors.white,
+                      //                 size: 28,
+                      //               ),
+                      //             ),
+                      //           ),
+                      //           Container(
+                      //             width: 14,
+                      //             height: 14,
+                      //             margin: const EdgeInsets.only(top: 6),
+                      //             decoration: BoxDecoration(
+                      //               shape: BoxShape.circle,
+                      //               color: Colors.white,
+                      //               border: Border.all(
+                      //                 color: Colors.black,
+                      //                 width: 3.5,
+                      //               ),
+                      //             ),
+                      //           ),
+                      //         ],
+                      //       ),
+                      //     );
+                      //   },
+                      // ),
 
                       // Approaching Red Motorcycle Marker dynamically anchored at driver position
                       Builder(
@@ -1443,11 +1442,32 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                   ),
                                 ],
                               ),
-                              child: const Center(
-                                child: Icon(
-                                  Icons.two_wheeler_rounded,
-                                  color: Color(0xFFFF4824),
-                                  size: 22,
+                              child: Center(
+                                // child: Icon(
+                                //   Icons.two_wheeler_rounded,
+                                //   color: Color(0xFFFF4824),
+                                //   size: 22,
+                                // ),
+                                child: Image.asset(
+                                  'assets/icons/bike.png',
+                                  width: 30,
+                                  height: 30,
+                                  fit: BoxFit.contain,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    // Secondary check: load from shared_core package
+                                    return Image.asset(
+                                      'assets/icons/bike.png',
+                                      package: 'shared_core',
+                                      width: 30,
+                                      height: 30,
+                                      fit: BoxFit.contain,
+                                      errorBuilder: (ctx, err, stack) => Icon(
+                                        Icons.two_wheeler_rounded,
+                                        color: const Color(0xFFFF4824),
+                                        size: 22,
+                                      ),
+                                    );
+                                  },
                                 ),
                               ),
                             ),
@@ -2224,7 +2244,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               onTap: () => _openSearchSheet(focusDestination: true),
               borderRadius: BorderRadius.circular(16),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 14,
+                ),
                 decoration: BoxDecoration(
                   color: const Color(0xFFF8FAFC),
                   borderRadius: BorderRadius.circular(16),
