@@ -75,7 +75,7 @@ class _RideSelectionDrawerState extends State<RideSelectionDrawer> {
     );
     final distance = distKm > 0 ? distKm : 1.0;
     const baseFare = 30.0;
-    const perKmRate = 18.0;
+    const perKmRate = 16.0;
     final raw = (baseFare + (distance * perKmRate)) * multiplier;
     return raw.clamp(45.0, 99999.0).roundToDouble();
   }

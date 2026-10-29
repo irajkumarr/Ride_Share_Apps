@@ -11,6 +11,7 @@ class VehicleTier {
   final String description;
   final double baseFareNpr;
   final double perKmRate;
+  final double minFareNpr;
   final Widget illustration;
   final int etaMins;
   final int capacity;
@@ -24,13 +25,14 @@ class VehicleTier {
     required this.description,
     required this.baseFareNpr,
     required this.perKmRate,
+    double? minFareNpr,
     required this.illustration,
     required this.etaMins,
     required this.capacity,
     this.hasLightning = false,
     this.badgeText,
     this.highlightText,
-  });
+  }) : minFareNpr = minFareNpr ?? baseFareNpr;
 }
 
 class RideBookingSheet extends StatefulWidget {
@@ -74,7 +76,8 @@ class _RideBookingSheetState extends State<RideBookingSheet> {
       id: 'bike',
       name: 'Bike',
       description: 'Fastest through traffic',
-      baseFareNpr: 45.0,
+      baseFareNpr: 30.0,
+      minFareNpr: 45.0,
       perKmRate: 16.0,
       illustration: const VehicleTierIllustration(tierId: 'bike', size: 72),
       etaMins: 3,
@@ -88,8 +91,9 @@ class _RideBookingSheetState extends State<RideBookingSheet> {
       id: 'fastest',
       name: 'Fastest',
       description: 'Quickest pickup nearby',
-      baseFareNpr: 46.0,
-      perKmRate: 18.0,
+      baseFareNpr: 30.0,
+      minFareNpr: 45.0,
+      perKmRate: 16.0,
       illustration: const VehicleTierIllustration(tierId: 'fastest', size: 72),
       etaMins: 2,
       capacity: 3,
@@ -114,8 +118,9 @@ class _RideBookingSheetState extends State<RideBookingSheet> {
       id: 'comfort',
       name: 'Comfort',
       description: 'Spacious & Air-conditioned',
-      baseFareNpr: 180.0,
-      perKmRate: 48.0,
+      baseFareNpr: 150.0,
+      minFareNpr: 150.0,
+      perKmRate: 45.0,
       illustration: const VehicleTierIllustration(tierId: 'comfort', size: 72),
       etaMins: 6,
       capacity: 4,
@@ -127,8 +132,9 @@ class _RideBookingSheetState extends State<RideBookingSheet> {
       id: 'xl',
       name: 'XL SUV',
       description: 'Room for 6 & extra bags',
-      baseFareNpr: 240.0,
-      perKmRate: 60.0,
+      baseFareNpr: 200.0,
+      minFareNpr: 200.0,
+      perKmRate: 55.0,
       illustration: const VehicleTierIllustration(tierId: 'xl', size: 72),
       etaMins: 8,
       capacity: 6,
@@ -148,9 +154,7 @@ class _RideBookingSheetState extends State<RideBookingSheet> {
   double _calculateFare(VehicleTier tier) {
     final distance = widget.distanceKm > 0 ? widget.distanceKm : 1.0;
     final rawFare = tier.baseFareNpr + (distance * tier.perKmRate);
-    final minFare = tier.id == 'bike' || tier.id == 'fastest'
-        ? 45.0
-        : tier.baseFareNpr;
+    final minFare = tier.minFareNpr;
     return rawFare.clamp(minFare, 99999.0).roundToDouble();
   }
 
