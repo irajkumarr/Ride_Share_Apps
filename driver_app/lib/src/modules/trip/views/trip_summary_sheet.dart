@@ -3,14 +3,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:driver_app/src/modules/ride/blocs/ride_dispatch_cubit.dart';
 import 'package:driver_app/src/modules/trip/utils/trip_location_utils.dart';
 
-/// Modal bottom sheet presenting the completed trip summary matching the screenshot:
-/// - Header: Green checkmark circle, "Trip Completed!" with [FINISHED] green badge, "Dropped off Aarav Shrestha at Sundhara"
-/// - Collect Cash Box: Dark green gradient container with "• COLLECT CASH FROM RIDER", [Cash Mode] badge with faded watermark,
-///   Large "Rs. 185", "Exact fare due", and informative note: "ⓘ Hand exact change if passenger pays with Rs. 500/1000 note."
-/// - Trip Receipt & Split: Detailed breakdown with ID (#RN-8942), Base Fare, Distance Rate, Time Fare,
-///   Peak Surge Bonus (+Rs. 35.00), RideNest Platform Fee 10% (-Rs. 18.00), and NET DRIVER PAYOUT ("Rs. 167.00").
-/// - Rate Rider Card: Rider initials/avatar ("AS"), "Rate Aarav Shrestha", star rating selector (1-5 stars with 4.9 initial).
-/// - Bottom primary button: "COLLECTED CASH & RETURN ONLINE"
+/// Modal bottom sheet presenting the completed trip summary:
+/// - Authoritative fare and real payment method
+/// - Real pickup to dropoff route metrics (no fabricated addresses or distances)
+/// - Interactive rider rating selector
+/// - Single-tap return to online shift status
 class TripSummarySheet extends StatefulWidget {
   const TripSummarySheet({super.key, required this.summary});
 
@@ -28,39 +25,51 @@ class _TripSummarySheetState extends State<TripSummarySheet> {
     final req = widget.summary.request;
     final fare = widget.summary.fare;
 
-    final riderName =
-        (req.riderName != null && req.riderName!.trim().isNotEmpty)
-        ? req.riderName!.trim()
-        : 'Aarav Shrestha';
+    final hasRiderName =
+        req.riderName != null && req.riderName!.trim().isNotEmpty;
+    final riderName = hasRiderName ? req.riderName!.trim() : 'Passenger';
 
     // Dropoff display name
-    final dropoffLocation = req.dropoffAddress.isNotEmpty
-        ? (req.dropoffAddress.split(',').first.trim())
-        : 'Sundhara';
+    final dropoffLocation = req.dropoffAddress.trim().isNotEmpty
+        ? req.dropoffAddress.split(',').first.trim()
+        : 'Destination';
 
-    // Pickup display name
-    final pickupLocation = req.pickupAddress.isNotEmpty
-        ? (req.pickupAddress.split(',').first.trim())
-        : 'Gatthaghar';
+    // Real distance & time calculations
+    final distanceMeters =
+        (req.pickupLat != null &&
+            req.pickupLng != null &&
+            req.dropoffLat != null &&
+            req.dropoffLng != null)
+        ? TripLocationUtils.distanceInMeters(
+            req.pickupLat!,
+            req.pickupLng!,
+            req.dropoffLat!,
+            req.dropoffLng!,
+          )
+        : (req.distanceToPickupKm != null && req.distanceToPickupKm! > 0
+              ? req.distanceToPickupKm! * 1000.0
+              : null);
 
-    // Distance & time
-    final distanceKm = '4.8';
-    final durationMin = req.estimatedDurationMin ?? 14;
+    final distanceKmText = distanceMeters != null
+        ? '${(distanceMeters / 1000.0).toStringAsFixed(1)} km'
+        : null;
 
-    // Financial breakdown calculations
-    final surge = req.surgeBonus ?? 35.0;
-    final baseFare = 60.0;
-    final distanceRate = ((fare - surge - baseFare) * 0.75).clamp(20.0, 999.0);
-    final timeFare = (fare - surge - baseFare - distanceRate).clamp(
-      10.0,
-      999.0,
-    );
-    final platformFee = (fare * 0.10); // 10%
-    final netDriverPayout = fare - platformFee;
+    final durationMin =
+        req.estimatedDurationMin ??
+        (distanceMeters != null
+            ? TripLocationUtils.estimatedDurationMinutes(distanceMeters)
+            : null);
+
+    final paymentType = req.paymentType?.trim().isNotEmpty == true
+        ? req.paymentType!.trim()
+        : 'Cash';
+
+    final surge = req.surgeBonus;
+    final hasSurge = surge != null && surge > 0;
 
     final tripId = req.rideId.isNotEmpty
-        ? '#RN-${req.rideId.length >= 4 ? req.rideId.substring(req.rideId.length - 4) : req.rideId}'
-        : '#RN-8942';
+        ? '#RN-${req.rideId.length >= 6 ? req.rideId.substring(req.rideId.length - 6).toUpperCase() : req.rideId.toUpperCase()}'
+        : null;
 
     final initials = _getInitials(riderName);
 
@@ -107,8 +116,8 @@ class _TripSummarySheetState extends State<TripSummarySheet> {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Container(
-                        width: 46,
-                        height: 46,
+                        width: 44,
+                        height: 44,
                         decoration: BoxDecoration(
                           color: const Color(0xFFDCFCE7),
                           shape: BoxShape.circle,
@@ -121,11 +130,11 @@ class _TripSummarySheetState extends State<TripSummarySheet> {
                           child: Icon(
                             Icons.check_circle_rounded,
                             color: Color(0xFF10B981),
-                            size: 28,
+                            size: 26,
                           ),
                         ),
                       ),
-                      const SizedBox(width: 14),
+                      const SizedBox(width: 12),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -133,9 +142,9 @@ class _TripSummarySheetState extends State<TripSummarySheet> {
                             Row(
                               children: [
                                 const Text(
-                                  'Trip Completed!',
+                                  'Trip Completed',
                                   style: TextStyle(
-                                    fontSize: 19,
+                                    fontSize: 18,
                                     fontWeight: FontWeight.w900,
                                     color: Color(0xFF0F172A),
                                     letterSpacing: -0.4,
@@ -163,11 +172,11 @@ class _TripSummarySheetState extends State<TripSummarySheet> {
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 3),
+                            const SizedBox(height: 2),
                             Text(
                               'Dropped off $riderName at $dropoffLocation',
                               style: const TextStyle(
-                                fontSize: 12.5,
+                                fontSize: 12,
                                 fontWeight: FontWeight.w600,
                                 color: Color(0xFF64748B),
                               ),
@@ -179,9 +188,9 @@ class _TripSummarySheetState extends State<TripSummarySheet> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 14),
 
-                  // 2. Collect Cash Container (Dark Slate/Green Card)
+                  // 2. Collect Cash Container
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(18),
@@ -191,7 +200,7 @@ class _TripSummarySheetState extends State<TripSummarySheet> {
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
-                      borderRadius: BorderRadius.circular(22),
+                      borderRadius: BorderRadius.circular(20),
                       boxShadow: [
                         BoxShadow(
                           color: const Color(0xFF092926)
@@ -204,7 +213,7 @@ class _TripSummarySheetState extends State<TripSummarySheet> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Card Header Row: [• COLLECT CASH FROM RIDER] & [Cash Mode]
+                        // Card Header Row: [• COLLECT FARE] & [Payment Type]
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -220,10 +229,10 @@ class _TripSummarySheetState extends State<TripSummarySheet> {
                                 ),
                                 const SizedBox(width: 8),
                                 const Text(
-                                  'COLLECT CASH FROM RIDER',
+                                  'COLLECT FROM PASSENGER',
                                   style: TextStyle(
                                     color: Color(0xFF34D399),
-                                    fontSize: 11,
+                                    fontSize: 10.5,
                                     fontWeight: FontWeight.w900,
                                     letterSpacing: 0.7,
                                   ),
@@ -242,9 +251,9 @@ class _TripSummarySheetState extends State<TripSummarySheet> {
                                   color: Colors.white.withValues(alpha: 0.2),
                                 ),
                               ),
-                              child: const Text(
-                                'Cash Mode',
-                                style: TextStyle(
+                              child: Text(
+                                paymentType,
+                                style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 11,
                                   fontWeight: FontWeight.w800,
@@ -253,9 +262,9 @@ class _TripSummarySheetState extends State<TripSummarySheet> {
                             ),
                           ],
                         ),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 10),
 
-                        // Large Fare Number & "Exact fare due"
+                        // Large Fare Number
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           crossAxisAlignment: CrossAxisAlignment.end,
@@ -264,200 +273,221 @@ class _TripSummarySheetState extends State<TripSummarySheet> {
                               'Rs. ${fare.toStringAsFixed(0)}',
                               style: const TextStyle(
                                 color: Colors.white,
-                                fontSize: 36,
+                                fontSize: 34,
                                 fontWeight: FontWeight.w900,
                                 letterSpacing: -0.8,
                               ),
                             ),
                             const Text(
-                              'Exact fare due',
+                              'Total fare due',
                               style: TextStyle(
                                 color: Color(0xFF6EE7B7),
-                                fontSize: 12.5,
+                                fontSize: 12,
                                 fontWeight: FontWeight.w800,
                               ),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 14),
-
-                        // Hand exact change tip box
-                        Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 10,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.black.withValues(alpha: 0.25),
-                            borderRadius: BorderRadius.circular(14),
-                            border: Border.all(
-                              color: Colors.white.withValues(alpha: 0.1),
-                            ),
-                          ),
-                          child: const Row(
-                            children: [
-                              Icon(
-                                Icons.info_outline_rounded,
-                                size: 16,
-                                color: Color(0xFFFBBF24),
-                              ),
-                              SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  'Hand exact change if passenger pays with Rs. 500/1000 note.',
-                                  style: TextStyle(
-                                    color: Color(0xFFE2E8F0),
-                                    fontSize: 11.5,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 14),
 
-                  // 3. Trip Receipt & Split Breakdown Box
-                  // Container(
-                  //   width: double.infinity,
-                  //   padding: const EdgeInsets.all(16),
-                  //   decoration: BoxDecoration(
-                  //     color: const Color(0xFFF8FAFC),
-                  //     borderRadius: BorderRadius.circular(20),
-                  //     border: Border.all(color: const Color(0xFFE2E8F0)),
-                  //   ),
-                  //   child: Column(
-                  //     crossAxisAlignment: CrossAxisAlignment.start,
-                  //     children: [
-                  //       // Receipt Header: [📄 TRIP RECEIPT & SPLIT] and [ID: #RN-8942]
-                  //       // Row(
-                  //       //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  //       //   children: [
-                  //       //     const Row(
-                  //       //       children: [
-                  //       //         Icon(
-                  //       //           Icons.receipt_long_rounded,
-                  //       //           size: 18,
-                  //       //           color: Color(0xFF1E293B),
-                  //       //         ),
-                  //       //         SizedBox(width: 8),
-                  //       //         Text(
-                  //       //           'TRIP RECEIPT & SPLIT',
-                  //       //           style: TextStyle(
-                  //       //             color: Color(0xFF0F172A),
-                  //       //             fontSize: 12.5,
-                  //       //             fontWeight: FontWeight.w900,
-                  //       //             letterSpacing: 0.5,
-                  //       //           ),
-                  //       //         ),
-                  //       //       ],
-                  //       //     ),
-                  //       //     Text(
-                  //       //       'ID: $tripId',
-                  //       //       style: const TextStyle(
-                  //       //         color: Color(0xFF64748B),
-                  //       //         fontSize: 11.5,
-                  //       //         fontWeight: FontWeight.w800,
-                  //       //       ),
-                  //       //     ),
-                  //       //   ],
-                  //       // ),
-                  //       // const SizedBox(height: 12),
-                  //       // const Divider(height: 1, color: Color(0xFFE2E8F0)),
-                  //       // const SizedBox(height: 12),
+                  // 3. Trip Route & Metrics Recap Card
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF8FAFC),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: const Color(0xFFE2E8F0)),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text(
+                              'ROUTE RECAP',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w800,
+                                color: Color(0xFF64748B),
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                            if (tripId != null)
+                              Text(
+                                tripId,
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w700,
+                                  color: Color(0xFF94A3B8),
+                                ),
+                              ),
+                          ],
+                        ),
+                        const SizedBox(height: 10),
 
-                  //       // Line items
-                  //       // _buildReceiptRow('Base Fare', 'Rs. ${baseFare.toStringAsFixed(2)}'),
-                  //       // const SizedBox(height: 8),
-                  //       // _buildReceiptRow('Distance Rate ($distanceKm km)', 'Rs. ${distanceRate.toStringAsFixed(2)}'),
-                  //       // const SizedBox(height: 8),
-                  //       // _buildReceiptRow('Time Fare ($durationMin min)', 'Rs. ${timeFare.toStringAsFixed(2)}'),
-                  //       // const SizedBox(height: 8),
+                        // Addresses
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Column(
+                              children: [
+                                const SizedBox(height: 3),
+                                Container(
+                                  width: 10,
+                                  height: 10,
+                                  decoration: const BoxDecoration(
+                                    color: Color(0xFF10B981),
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                                Container(
+                                  width: 2,
+                                  height: 24,
+                                  margin: const EdgeInsets.symmetric(
+                                    vertical: 2,
+                                  ),
+                                  color: const Color(0xFFCBD5E1),
+                                ),
+                                const Icon(
+                                  Icons.location_on_rounded,
+                                  size: 14,
+                                  color: Color(0xFFEF4444),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    req.pickupAddress,
+                                    style: const TextStyle(
+                                      fontSize: 12.5,
+                                      fontWeight: FontWeight.w700,
+                                      color: Color(0xFF1E293B),
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  const SizedBox(height: 12),
+                                  Text(
+                                    req.dropoffAddress,
+                                    style: const TextStyle(
+                                      fontSize: 12.5,
+                                      fontWeight: FontWeight.w700,
+                                      color: Color(0xFF1E293B),
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
 
-                  //       // Peak Surge Bonus (Green)
-                  //       // _buildReceiptRow(
-                  //       //   '⚡ Peak Surge Bonus (1.2x)',
-                  //       //   '+ Rs. ${surge.toStringAsFixed(2)}',
-                  //       //   valueColor: const Color(0xFF059669),
-                  //       //   labelColor: const Color(0xFF059669),
-                  //       // ),
-                  //       // const SizedBox(height: 8),
-
-                  //       // Platform Fee (Red)
-                  //       // _buildReceiptRow(
-                  //       //   'RideNest Platform Fee (10%)',
-                  //       //   '- Rs. ${platformFee.toStringAsFixed(2)}',
-                  //       //   valueColor: const Color(0xFFDC2626),
-                  //       //   labelColor: const Color(0xFFDC2626),
-                  //       // ),
-                  //       // const SizedBox(height: 12),
-                  //       // const Divider(height: 1, color: Color(0xFFE2E8F0)),
-                  //       // const SizedBox(height: 12),
-
-                  //       // NET DRIVER PAYOUT
-                  //       // Row(
-                  //       //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  //       //   crossAxisAlignment: CrossAxisAlignment.baseline,
-                  //       //   textBaseline: TextBaseline.alphabetic,
-                  //       //   children: [
-                  //       //     const Column(
-                  //       //       crossAxisAlignment: CrossAxisAlignment.start,
-                  //       //       children: [
-                  //       //         Text(
-                  //       //           'NET DRIVER PAYOUT',
-                  //       //           style: TextStyle(
-                  //       //             color: Color(0xFF475569),
-                  //       //             fontSize: 11,
-                  //       //             fontWeight: FontWeight.w900,
-                  //       //             letterSpacing: 0.6,
-                  //       //           ),
-                  //       //         ),
-                  //       //         SizedBox(height: 2),
-                  //       //         Text(
-                  //       //           'Credited to wallet',
-                  //       //           style: TextStyle(
-                  //       //             color: Color(0xFF94A3B8),
-                  //       //             fontSize: 11,
-                  //       //             fontWeight: FontWeight.w600,
-                  //       //           ),
-                  //       //         ),
-                  //       //       ],
-                  //       //     ),
-                  //       //     Text(
-                  //       //       'Rs. ${netDriverPayout.toStringAsFixed(2)}',
-                  //       //       style: const TextStyle(
-                  //       //         color: Color(0xFF059669),
-                  //       //         fontSize: 20,
-                  //       //         fontWeight: FontWeight.w900,
-                  //       //         letterSpacing: -0.5,
-                  //       //       ),
-                  //       //     ),
-                  //       //   ],
-                  //       // ),
-                  //     ],
-                  //   ),
-                  // ),
-                  // const SizedBox(height: 16),
+                        if (distanceKmText != null ||
+                            durationMin != null ||
+                            hasSurge) ...[
+                          const SizedBox(height: 12),
+                          const Divider(height: 1, color: Color(0xFFE2E8F0)),
+                          const SizedBox(height: 10),
+                          Row(
+                            children: [
+                              if (distanceKmText != null) ...[
+                                const Icon(
+                                  Icons.route_rounded,
+                                  size: 15,
+                                  color: Color(0xFF64748B),
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  distanceKmText,
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                    color: Color(0xFF334155),
+                                  ),
+                                ),
+                              ],
+                              if (distanceKmText != null &&
+                                  durationMin != null) ...[
+                                const SizedBox(width: 8),
+                                const Text(
+                                  '•',
+                                  style: TextStyle(
+                                    color: Color(0xFF94A3B8),
+                                    fontWeight: FontWeight.w900,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                              ],
+                              if (durationMin != null) ...[
+                                const Icon(
+                                  Icons.schedule_rounded,
+                                  size: 14,
+                                  color: Color(0xFF64748B),
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  '$durationMin mins',
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                    color: Color(0xFF334155),
+                                  ),
+                                ),
+                              ],
+                              if (hasSurge) ...[
+                                const Spacer(),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 6,
+                                    vertical: 2,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFFEF2F2),
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  child: Text(
+                                    '⚡ Surge +Rs. ${surge.toStringAsFixed(0)}',
+                                    style: const TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w800,
+                                      color: Color(0xFFDC2626),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 14),
 
                   // 4. Rate Rider Section
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
+                      horizontal: 14,
                       vertical: 12,
                     ),
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: BorderRadius.circular(18),
                       border: Border.all(color: const Color(0xFFE2E8F0)),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.04),
-                          blurRadius: 8,
+                          color: Colors.black.withValues(alpha: 0.03),
+                          blurRadius: 6,
                           offset: const Offset(0, 2),
                         ),
                       ],
@@ -466,8 +496,8 @@ class _TripSummarySheetState extends State<TripSummarySheet> {
                       children: [
                         // Rider avatar circle with initials
                         Container(
-                          width: 42,
-                          height: 42,
+                          width: 40,
+                          height: 40,
                           decoration: BoxDecoration(
                             color: const Color(0xFF132226),
                             borderRadius: BorderRadius.circular(12),
@@ -483,7 +513,7 @@ class _TripSummarySheetState extends State<TripSummarySheet> {
                             ),
                           ),
                         ),
-                        const SizedBox(width: 12),
+                        const SizedBox(width: 10),
 
                         // Rider info & question
                         Expanded(
@@ -493,18 +523,18 @@ class _TripSummarySheetState extends State<TripSummarySheet> {
                               Text(
                                 'Rate $riderName',
                                 style: const TextStyle(
-                                  fontSize: 13.5,
+                                  fontSize: 13,
                                   fontWeight: FontWeight.w900,
                                   color: Color(0xFF0F172A),
                                 ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
-                              const SizedBox(height: 2),
+                              const SizedBox(height: 1),
                               const Text(
-                                'How was your rider experience?',
+                                'Passenger experience',
                                 style: TextStyle(
-                                  fontSize: 11.5,
+                                  fontSize: 11,
                                   fontWeight: FontWeight.w600,
                                   color: Color(0xFF64748B),
                                 ),
@@ -527,11 +557,11 @@ class _TripSummarySheetState extends State<TripSummarySheet> {
                               },
                               child: Padding(
                                 padding: const EdgeInsets.symmetric(
-                                  horizontal: 1.5,
+                                  horizontal: 1,
                                 ),
                                 child: Icon(
                                   Icons.star_rounded,
-                                  size: 20,
+                                  size: 22,
                                   color: isSelected
                                       ? const Color(0xFFF59E0B)
                                       : const Color(0xFFCBD5E1),
@@ -543,7 +573,7 @@ class _TripSummarySheetState extends State<TripSummarySheet> {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 18),
 
                   // 5. Primary Return Online Button
                   ElevatedButton(
@@ -554,10 +584,11 @@ class _TripSummarySheetState extends State<TripSummarySheet> {
                       backgroundColor: const Color(0xFF132A2F),
                       foregroundColor: Colors.white,
                       elevation: 0,
-                      minimumSize: const Size.fromHeight(56),
+                      minimumSize: const Size.fromHeight(54),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(18),
+                        borderRadius: BorderRadius.circular(16),
                       ),
+                      side: BorderSide.none,
                     ),
                     child: const Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -565,11 +596,11 @@ class _TripSummarySheetState extends State<TripSummarySheet> {
                         Icon(Icons.check_circle_outline_rounded, size: 20),
                         SizedBox(width: 8),
                         Text(
-                          'COLLECTED CASH & RETURN ONLINE',
+                          'COLLECTED FARE',
                           style: TextStyle(
-                            fontSize: 14,
+                            fontSize: 13.5,
                             fontWeight: FontWeight.w900,
-                            letterSpacing: 0.6,
+                            letterSpacing: 0.5,
                           ),
                         ),
                       ],
@@ -581,35 +612,6 @@ class _TripSummarySheetState extends State<TripSummarySheet> {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildReceiptRow(
-    String label,
-    String value, {
-    Color? labelColor,
-    Color? valueColor,
-  }) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 12.5,
-            fontWeight: FontWeight.w700,
-            color: labelColor ?? const Color(0xFF475569),
-          ),
-        ),
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w800,
-            color: valueColor ?? const Color(0xFF0F172A),
-          ),
-        ),
-      ],
     );
   }
 

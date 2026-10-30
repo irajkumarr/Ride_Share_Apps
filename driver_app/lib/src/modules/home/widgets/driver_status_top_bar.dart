@@ -131,16 +131,17 @@ class DriverStatusTopBar extends StatelessWidget {
                         color: isOnline
                             ? const Color(0xFF22C55E)
                             : (isOnRide
-                                ? const Color(0xFF38BDF8)
-                                : const Color(0xFFEF4444)),
+                                  ? const Color(0xFF38BDF8)
+                                  : const Color(0xFFEF4444)),
                         boxShadow: [
                           BoxShadow(
-                            color: (isOnline
-                                    ? const Color(0xFF22C55E)
-                                    : (isOnRide
-                                        ? const Color(0xFF38BDF8)
-                                        : const Color(0xFFEF4444)))
-                                .withValues(alpha: 0.6),
+                            color:
+                                (isOnline
+                                        ? const Color(0xFF22C55E)
+                                        : (isOnRide
+                                              ? const Color(0xFF38BDF8)
+                                              : const Color(0xFFEF4444)))
+                                    .withValues(alpha: 0.6),
                             blurRadius: 6,
                             spreadRadius: 1,
                           ),
@@ -155,8 +156,8 @@ class DriverStatusTopBar extends StatelessWidget {
                         isIncomingRequest
                             ? 'ONLINE • RADAR ACTIVE'
                             : (isOnRide
-                                ? 'ON TRIP'
-                                : (isOnline ? 'ONLINE' : 'OFFLINE')),
+                                  ? 'ON TRIP'
+                                  : (isOnline ? 'ONLINE' : 'OFFLINE')),
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 13,
@@ -184,14 +185,17 @@ class DriverStatusTopBar extends StatelessWidget {
                           height: 14,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.white,
+                            ),
                           ),
                         )
                       else
                         Text(
                           isOnline ? 'TAP TO STOP' : 'TAP TO\nGO',
                           style: TextStyle(
-                            color: const Color(0xFF00B4A0).withValues(alpha: 0.9),
+                            color: const Color(0xFF00B4A0)
+                                .withValues(alpha: 0.9),
                             fontSize: 9.5,
                             fontWeight: FontWeight.w900,
                             height: 1.1,
@@ -227,7 +231,9 @@ class DriverStatusTopBar extends StatelessWidget {
                 ),
                 child: Center(
                   child: Icon(
-                    isMuted ? Icons.volume_off_rounded : Icons.volume_up_rounded,
+                    isMuted
+                        ? Icons.volume_off_rounded
+                        : Icons.volume_up_rounded,
                     color: const Color(0xFF1E293B),
                     size: 22,
                   ),

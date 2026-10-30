@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:driver_app/src/data/remote/driver_ride_api_service.dart';
 import 'package:driver_app/src/data/local/auth_local_data_source.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -68,10 +69,12 @@ class DriverStatusCubit extends Cubit<DriverStatusState> {
     try {
       final hasPerm = await _locationService.ensurePermission();
       if (!hasPerm) {
-        emit(state.copyWith(
-          isUpdating: false,
-          errorMessage: "Location permission is required to go online.",
-        ));
+        emit(
+          state.copyWith(
+            isUpdating: false,
+            errorMessage: "Location permission is required to go online.",
+          ),
+        );
         return;
       }
 
@@ -90,15 +93,16 @@ class DriverStatusCubit extends Cubit<DriverStatusState> {
       await _connectWebSocketAndTopics();
       _startLocationPings();
 
-      emit(state.copyWith(
-        status: DriverShiftStatus.available,
-        isUpdating: false,
-      ));
+      emit(
+        state.copyWith(status: DriverShiftStatus.available, isUpdating: false),
+      );
     } catch (e) {
-      emit(state.copyWith(
-        isUpdating: false,
-        errorMessage: "Failed to go online: " + e.toString(),
-      ));
+      emit(
+        state.copyWith(
+          isUpdating: false,
+          errorMessage: "Failed to go online: " + e.toString(),
+        ),
+      );
     }
   }
 
@@ -107,15 +111,16 @@ class DriverStatusCubit extends Cubit<DriverStatusState> {
     try {
       _stopLocationPings();
       await _driverRideApi.updateDriverStatus("OFFLINE");
-      emit(state.copyWith(
-        status: DriverShiftStatus.offline,
-        isUpdating: false,
-      ));
+      emit(
+        state.copyWith(status: DriverShiftStatus.offline, isUpdating: false),
+      );
     } catch (e) {
-      emit(state.copyWith(
-        isUpdating: false,
-        errorMessage: "Failed to go offline: " + e.toString(),
-      ));
+      emit(
+        state.copyWith(
+          isUpdating: false,
+          errorMessage: "Failed to go offline: " + e.toString(),
+        ),
+      );
     }
   }
 
@@ -123,15 +128,9 @@ class DriverStatusCubit extends Cubit<DriverStatusState> {
     try {
       await _connectWebSocketAndTopics();
       _startLocationPings();
-      emit(state.copyWith(
-        status: DriverShiftStatus.onRide,
-        isUpdating: false,
-      ));
+      emit(state.copyWith(status: DriverShiftStatus.onRide, isUpdating: false));
     } catch (e) {
-      emit(state.copyWith(
-        status: DriverShiftStatus.onRide,
-        isUpdating: false,
-      ));
+      emit(state.copyWith(status: DriverShiftStatus.onRide, isUpdating: false));
     }
   }
 
@@ -161,15 +160,18 @@ class DriverStatusCubit extends Cubit<DriverStatusState> {
   void _startLocationPings() {
     _stopLocationPings();
 
-    _positionStreamSub = _locationService.getLocationStream(
-      enableBackgroundNotification: true,
-      notificationTitle: "RideNest Pro Online",
-      notificationText: "Continuous background GPS is tracking your location for rides.",
-      intervalDurationInSeconds: 5,
-    ).listen((pos) {
-      emit(state.copyWith(lastPosition: pos));
-      _sendLocationUpdate(pos);
-    });
+    _positionStreamSub = _locationService
+        .getLocationStream(
+          enableBackgroundNotification: true,
+          notificationTitle: "RideNest Pro Online",
+          notificationText:
+              "Continuous background GPS is tracking your location for rides.",
+          intervalDurationInSeconds: 5,
+        )
+        .listen((pos) {
+          emit(state.copyWith(lastPosition: pos));
+          _sendLocationUpdate(pos);
+        });
 
     _locationPingTimer = Timer.periodic(const Duration(seconds: 10), (_) async {
       final pos = await _locationService.getCurrentLocation();
@@ -193,11 +195,13 @@ class DriverStatusCubit extends Cubit<DriverStatusState> {
       );
     }
 
-    _driverRideApi.pingLocation(
-      latitude: pos.latitude,
-      longitude: pos.longitude,
-      heading: pos.heading,
-    ).catchError((_) {});
+    _driverRideApi
+        .pingLocation(
+          latitude: pos.latitude,
+          longitude: pos.longitude,
+          heading: pos.heading,
+        )
+        .catchError((_) {});
   }
 
   void _stopLocationPings() {

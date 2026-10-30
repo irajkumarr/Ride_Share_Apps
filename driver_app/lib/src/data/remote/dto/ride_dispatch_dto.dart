@@ -1,4 +1,3 @@
-
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part '../../../../gen/src/data/remote/dto/ride_dispatch_dto.freezed.dart';

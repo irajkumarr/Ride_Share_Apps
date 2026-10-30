@@ -29,7 +29,8 @@ class CurrentUserCubit extends BaseCubit<CurrentUserState> {
       label: 'CurrentUser',
       call: () => _repo.getCurrentUser(),
       loading: () => CurrentUserLoading(),
-      success: (data) => CurrentUserSuccess(data, 'CurrentUser fetched successful.'),
+      success: (data) =>
+          CurrentUserSuccess(data, 'CurrentUser fetched successful.'),
       failure: (error) => CurrentUserFailure(error),
     );
   }

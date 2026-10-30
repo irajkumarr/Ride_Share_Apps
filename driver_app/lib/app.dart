@@ -55,7 +55,10 @@ class App extends StatelessWidget {
 
   List<BlocProvider> get _globalProviders => [
     BlocProvider<NetworkCubit>(create: (_) => sl<NetworkCubit>(), lazy: false),
-    BlocProvider<CurrentUserCubit>(create: (_) => sl<CurrentUserCubit>(), lazy: false),
+    BlocProvider<CurrentUserCubit>(
+      create: (_) => sl<CurrentUserCubit>(),
+      lazy: false,
+    ),
     BlocProvider<LoginCubit>(create: (_) => sl<LoginCubit>(), lazy: false),
     BlocProvider<RegisterCubit>(
       create: (_) => sl<RegisterCubit>(),
@@ -75,7 +78,6 @@ class App extends StatelessWidget {
       lazy: false,
     ),
   ];
-
 
   String get _appTitle => switch (flavor) {
     AppFlavor.dev => 'RideNest Driver (Dev)',

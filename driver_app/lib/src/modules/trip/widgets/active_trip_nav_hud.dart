@@ -165,12 +165,16 @@ class ActiveTripNavHud extends StatelessWidget {
                       ),
                       const SizedBox(height: 3),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
                         decoration: BoxDecoration(
                           color: const Color(0xFF064E3B),
                           borderRadius: BorderRadius.circular(6),
                           border: Border.all(
-                            color: const Color(0xFF059669).withValues(alpha: 0.6),
+                            color: const Color(0xFF059669)
+                                .withValues(alpha: 0.6),
                           ),
                         ),
                         child: Text(
@@ -195,7 +199,10 @@ class ActiveTripNavHud extends StatelessWidget {
               children: [
                 // Left ETA chip: [4 MIN • 1.2 km away]
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(16),
@@ -221,7 +228,10 @@ class ActiveTripNavHud extends StatelessWidget {
                       const SizedBox(width: 4),
                       const Text(
                         '•',
-                        style: TextStyle(color: Color(0xFF94A3B8), fontWeight: FontWeight.w900),
+                        style: TextStyle(
+                          color: Color(0xFF94A3B8),
+                          fontWeight: FontWeight.w900,
+                        ),
                       ),
                       const SizedBox(width: 4),
                       Text(
@@ -240,7 +250,10 @@ class ActiveTripNavHud extends StatelessWidget {
                 // Right Traffic chip: [• Fastest Route • Normal Traffic]
                 Expanded(
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
                       color: const Color(0xFFF0FDF4),
                       borderRadius: BorderRadius.circular(16),

@@ -1,4 +1,5 @@
 import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
@@ -13,7 +14,9 @@ class RideRequestMapMarkers {
   static BitmapDescriptor? _cachedPickupIcon;
 
   /// Marker for pickup location: Green circle with walking person icon and black ETA badge above
-  static Future<BitmapDescriptor> getPickupMarkerIcon({String etaText = 'PICKUP • 2 min'}) async {
+  static Future<BitmapDescriptor> getPickupMarkerIcon({
+    String etaText = 'PICKUP • 2 min',
+  }) async {
     final pictureRecorder = ui.PictureRecorder();
     final canvas = Canvas(pictureRecorder);
     const width = 240.0;
@@ -98,7 +101,10 @@ class RideRequestMapMarkers {
     iconPainter.layout();
     iconPainter.paint(
       canvas,
-      Offset(circleCenter.dx - (iconPainter.width / 2), circleCenter.dy - (iconPainter.height / 2)),
+      Offset(
+        circleCenter.dx - (iconPainter.width / 2),
+        circleCenter.dy - (iconPainter.height / 2),
+      ),
     );
 
     final picture = pictureRecorder.endRecording();
@@ -110,7 +116,9 @@ class RideRequestMapMarkers {
   }
 
   /// Label marker under driver: "You (400m away)"
-  static Future<BitmapDescriptor> getDriverDistanceLabelIcon({String text = 'You (400m away)'}) async {
+  static Future<BitmapDescriptor> getDriverDistanceLabelIcon({
+    String text = 'You (400m away)',
+  }) async {
     final pictureRecorder = ui.PictureRecorder();
     final canvas = Canvas(pictureRecorder);
     const width = 200.0;
@@ -146,7 +154,10 @@ class RideRequestMapMarkers {
     textPainter.layout(maxWidth: 180);
     textPainter.paint(
       canvas,
-      Offset(width / 2 - (textPainter.width / 2), height / 2 - (textPainter.height / 2)),
+      Offset(
+        width / 2 - (textPainter.width / 2),
+        height / 2 - (textPainter.height / 2),
+      ),
     );
 
     final picture = pictureRecorder.endRecording();
@@ -242,7 +253,10 @@ class RideRequestMapMarkers {
     iconPainter.layout();
     iconPainter.paint(
       canvas,
-      Offset(circleCenter.dx - (iconPainter.width / 2), circleCenter.dy - (iconPainter.height / 2)),
+      Offset(
+        circleCenter.dx - (iconPainter.width / 2),
+        circleCenter.dy - (iconPainter.height / 2),
+      ),
     );
 
     final picture = pictureRecorder.endRecording();
@@ -303,10 +317,7 @@ class RideRequestMapMarkers {
       textDirection: TextDirection.ltr,
     );
     textPainter.layout(maxWidth: 105);
-    textPainter.paint(
-      canvas,
-      Offset(44, 24 - (textPainter.height / 2)),
-    );
+    textPainter.paint(canvas, Offset(44, 24 - (textPainter.height / 2)));
 
     final picture = pictureRecorder.endRecording();
     final image = await picture.toImage(width.toInt(), height.toInt());
@@ -359,7 +370,10 @@ class RideRequestMapMarkers {
     iconPainter.layout();
     iconPainter.paint(
       canvas,
-      Offset(flagCenter.dx - (iconPainter.width / 2), flagCenter.dy - (iconPainter.height / 2)),
+      Offset(
+        flagCenter.dx - (iconPainter.width / 2),
+        flagCenter.dy - (iconPainter.height / 2),
+      ),
     );
 
     // Dark destination pill label below flag: [Sundhara]
