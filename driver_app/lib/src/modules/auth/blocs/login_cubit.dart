@@ -24,10 +24,15 @@ class LoginCubit extends BaseCubit<LoginState> {
 
   final AuthRepo _repo;
 
-  Future<void> login({required String phone, required String password, required String fcmToken}) async {
+  Future<void> login({
+    required String phone,
+    required String password,
+    required String fcmToken,
+  }) async {
     await safeCall(
       label: 'Login',
-      call: () => _repo.login(phone: phone, password: password, fcmToken: fcmToken),
+      call: () =>
+          _repo.login(phone: phone, password: password, fcmToken: fcmToken),
       loading: () => LoginLoading(),
       success: (data) => LoginSuccess(data, 'Login successful.'),
       failure: (error) => LoginFailure(error),

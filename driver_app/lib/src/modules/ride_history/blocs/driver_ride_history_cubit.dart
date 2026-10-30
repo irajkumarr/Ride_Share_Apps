@@ -19,7 +19,8 @@ class DriverRideHistoryFailure extends DriverRideHistoryState {
 }
 
 class DriverRideHistoryCubit extends BaseCubit<DriverRideHistoryState> {
-  DriverRideHistoryCubit(this._driverRideRepo) : super(DriverRideHistoryInitial());
+  DriverRideHistoryCubit(this._driverRideRepo)
+    : super(DriverRideHistoryInitial());
 
   final DriverRideRepo _driverRideRepo;
 

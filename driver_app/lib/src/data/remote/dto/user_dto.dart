@@ -5,13 +5,11 @@ part '../../../../gen/src/data/remote/dto/user_dto.g.dart';
 
 @freezed
 abstract class UserDto with _$UserDto {
-  const factory UserDto({
-    bool? success,
-    String? message,
-    UserDataDto? data,
-  }) = _UserDto;
+  const factory UserDto({bool? success, String? message, UserDataDto? data}) =
+      _UserDto;
 
-  factory UserDto.fromJson(Map<String, dynamic> json) => _$UserDtoFromJson(json);
+  factory UserDto.fromJson(Map<String, dynamic> json) =>
+      _$UserDtoFromJson(json);
 }
 
 @freezed

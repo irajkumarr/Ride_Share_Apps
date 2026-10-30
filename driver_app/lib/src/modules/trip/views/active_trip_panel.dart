@@ -4,23 +4,18 @@ import 'package:driver_app/src/modules/ride/blocs/ride_dispatch_cubit.dart';
 import 'package:driver_app/src/modules/trip/utils/trip_location_utils.dart';
 import 'package:shared_core/shared_core.dart';
 
-/// Redesigned Active Trip Control Card matching the screenshot:
-/// - Top status & guaranteed fare:
-///   [ • EN ROUTE TO PICKUP • BIKE RIDE ] and [GUARANTEED FARE  Rs. 185]
-/// - Rider details row:
-///   Photo thumbnail with [VIP] badge, "Aarav Shrestha", "★ 4.9 • 124 rides", Call button, Chat button (with unread badge)
-/// - Rider note banner:
-///   ✨ Rider Note: "Waiting near the main entrance gate"
-/// - Route pickup timeline address:
-///   Green circle + "Gatthaghar, Madhyapur Thimi-03 (Near Ci...  ETA 12:20"
-/// - **100m Proximity Trigger**:
-///   The slide button [SLIDE: ARRIVED AT PICKUP > >] is visible only when the driver is within 100 meters of pickup.
-///   If outside 100m, an informative proximity lock pill is displayed indicating the remaining distance to unlock.
+/// Active Trip Control Panel for driver:
+/// - Distinct statuses: EN ROUTE TO PICKUP, AT PICKUP, and TRIP IN PROGRESS
+/// - Guaranteed real fare
+/// - Authoritative passenger details (real initials, verified rating only if present)
+/// - Authoritative pickup and dropoff addresses with real dynamic distance and clock ETA
+/// - 150m Proximity geofence with manual arrival fallback
+/// - Direct Call action & Google Maps navigation launch
 class ActiveTripPanel extends StatelessWidget {
   const ActiveTripPanel({
     super.key,
     required this.tripState,
-    this.distanceToPickupMeters = 1200.0,
+    this.distanceToPickupMeters = 0.0,
     this.onCallTap,
     this.onChatTap,
     this.onOpenGoogleMaps,
@@ -41,22 +36,19 @@ class ActiveTripPanel extends StatelessWidget {
     final req = tripState.request;
     final status = tripState.currentStatus;
 
-    final riderName =
-        (req.riderName != null && req.riderName!.trim().isNotEmpty)
-        ? req.riderName!.trim()
-        : 'Aarav Shrestha';
-    final riderRating = (req.riderRating != null && req.riderRating! > 0)
-        ? req.riderRating!.toStringAsFixed(1)
-        : '4.9';
-    final riderRidesCount = req.riderTripsCount ?? 124;
-    final riderNote =
-        (req.riderNote != null && req.riderNote!.trim().isNotEmpty)
-        ? req.riderNote!
-        : 'Waiting near the main entrance gate';
+    final hasRiderName =
+        req.riderName != null && req.riderName!.trim().isNotEmpty;
+    final riderName = hasRiderName ? req.riderName!.trim() : 'Passenger';
+    final hasRating = req.riderRating != null && req.riderRating! > 0;
+    final riderRating = hasRating ? req.riderRating!.toStringAsFixed(1) : null;
+    final hasTrips = req.riderTripsCount != null && req.riderTripsCount! > 0;
+    final riderRidesCount = hasTrips ? '${req.riderTripsCount} rides' : null;
+    final riderNote = req.riderNote?.trim();
+
     final vehicleCategory =
         (req.vehicleCategory != null && req.vehicleCategory!.isNotEmpty)
         ? req.vehicleCategory!.toUpperCase()
-        : 'BIKE RIDE';
+        : 'RIDE';
 
     final etaText = TripLocationUtils.formatEtaClockTime(
       distanceToPickupMeters,
@@ -65,8 +57,28 @@ class ActiveTripPanel extends StatelessWidget {
       distanceToPickupMeters,
     );
 
-    // Geofence check: Recommended 150 meters to avoid getting trapped by urban GPS drift
+    // 150 meters geofence threshold to accommodate urban GPS drift
     final isWithinPickupGeofence = distanceToPickupMeters <= 150.0;
+
+    final isArrived = status == 'ARRIVED';
+    final isInProgress = status == 'IN_PROGRESS';
+
+    final headerText = isArrived
+        ? 'AT PICKUP • WAITING FOR RIDER'
+        : (isInProgress
+              ? 'TRIP IN PROGRESS • $vehicleCategory'
+              : 'ROUTE TO PICKUP • $vehicleCategory');
+
+    final headerColor = isArrived
+        ? const Color(0xFFD97706)
+        : (isInProgress ? const Color(0xFF059669) : const Color(0xFF1D4ED8));
+
+    final headerBgColor = isArrived
+        ? const Color(0xFFFFFBEB)
+        : (isInProgress ? const Color(0xFFECFDF5) : const Color(0xFFEFF6FF));
+
+    final targetAddress = isInProgress ? req.dropoffAddress : req.pickupAddress;
+    final initials = _getInitials(riderName);
 
     return Container(
       decoration: BoxDecoration(
@@ -105,15 +117,14 @@ class ActiveTripPanel extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Blue Pill: [• EN ROUTE TO PICKUP • BIKE RIDE]
                 Flexible(
                   child: Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 12,
-                      vertical: 7,
+                      vertical: 6,
                     ),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFEFF6FF),
+                      color: headerBgColor,
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Row(
@@ -122,21 +133,17 @@ class ActiveTripPanel extends StatelessWidget {
                         Container(
                           width: 8,
                           height: 8,
-                          decoration: const BoxDecoration(
-                            color: Color(0xFF2563EB),
+                          decoration: BoxDecoration(
+                            color: headerColor,
                             shape: BoxShape.circle,
                           ),
                         ),
                         const SizedBox(width: 8),
                         Flexible(
                           child: Text(
-                            status == 'ARRIVED'
-                                ? 'AT PICKUP LOCATION • $vehicleCategory'
-                                : (status == 'IN_PROGRESS'
-                                      ? 'TRIP IN PROGRESS • $vehicleCategory'
-                                      : 'EN ROUTE TO PICKUP • $vehicleCategory'),
-                            style: const TextStyle(
-                              color: Color(0xFF1D4ED8),
+                            headerText,
+                            style: TextStyle(
+                              color: headerColor,
                               fontSize: 10.5,
                               fontWeight: FontWeight.w900,
                               letterSpacing: 0.4,
@@ -151,13 +158,13 @@ class ActiveTripPanel extends StatelessWidget {
                 ),
                 const SizedBox(width: 12),
 
-                // Fare Display: [GUARANTEED FARE  Rs. 185]
+                // Guaranteed Fare
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     const Text(
-                      'GUARANTEED FARE',
+                      'ESTIMATED FARE',
                       style: TextStyle(
                         color: Color(0xFF94A3B8),
                         fontSize: 9.5,
@@ -179,63 +186,34 @@ class ActiveTripPanel extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 14),
 
-            // 2. Rider Details Card: Portrait, Name, Rating, Call, Chat
+            // 2. Rider Details Card: Initials Avatar, Name, Rating/Verification, Call
             Row(
               children: [
-                // Rider Portrait with VIP Tag
-                Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    Container(
-                      width: 60,
-                      height: 60,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(16),
-                        color: const Color(0xFFE2E8F0),
-                        image: const DecorationImage(
-                          image: AssetImage('assets/images/rider_portrait.jpg'),
-                          fit: BoxFit.cover,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.08),
-                            blurRadius: 8,
-                            offset: const Offset(0, 3),
-                          ),
-                        ],
+                // Rider Initials Avatar
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(14),
+                    color: const Color(0xFF132226),
+                  ),
+                  child: Center(
+                    child: Text(
+                      initials,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 0.5,
                       ),
                     ),
-                    Positioned(
-                      bottom: -4,
-                      right: -4,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 5,
-                          vertical: 1.5,
-                        ),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF1D4ED8),
-                          borderRadius: BorderRadius.circular(6),
-                          border: Border.all(color: Colors.white, width: 1.5),
-                        ),
-                        child: const Text(
-                          'VIP',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 8.5,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: 0.4,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
-                const SizedBox(width: 14),
+                const SizedBox(width: 12),
 
-                // Name & Rating
+                // Name & Rating/Trips
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -244,48 +222,55 @@ class ActiveTripPanel extends StatelessWidget {
                         riderName,
                         style: const TextStyle(
                           color: Color(0xFF0F172A),
-                          fontSize: 16,
+                          fontSize: 15.5,
                           fontWeight: FontWeight.w900,
                           letterSpacing: -0.2,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 3),
                       Row(
                         children: [
-                          const Icon(
-                            Icons.star_rounded,
-                            size: 16,
-                            color: Color(0xFFF59E0B),
-                          ),
-                          const SizedBox(width: 3),
-                          Text(
-                            riderRating,
-                            style: const TextStyle(
-                              color: Color(0xFF0F172A),
-                              fontSize: 13,
-                              fontWeight: FontWeight.w800,
+                          if (riderRating != null) ...[
+                            const Icon(
+                              Icons.star_rounded,
+                              size: 15,
+                              color: Color(0xFFF59E0B),
                             ),
-                          ),
-                          const SizedBox(width: 6),
-                          Container(
-                            width: 3.5,
-                            height: 3.5,
-                            decoration: const BoxDecoration(
-                              color: Color(0xFF94A3B8),
-                              shape: BoxShape.circle,
+                            const SizedBox(width: 3),
+                            Text(
+                              riderRating,
+                              style: const TextStyle(
+                                color: Color(0xFF0F172A),
+                                fontSize: 12.5,
+                                fontWeight: FontWeight.w800,
+                              ),
                             ),
-                          ),
-                          const SizedBox(width: 6),
-                          Text(
-                            '$riderRidesCount rides',
-                            style: const TextStyle(
-                              color: Color(0xFF64748B),
-                              fontSize: 12.5,
-                              fontWeight: FontWeight.w600,
+                          ],
+                          if (riderRating != null &&
+                              riderRidesCount != null) ...[
+                            const SizedBox(width: 6),
+                            Container(
+                              width: 3.5,
+                              height: 3.5,
+                              decoration: const BoxDecoration(
+                                color: Color(0xFF94A3B8),
+                                shape: BoxShape.circle,
+                              ),
                             ),
-                          ),
+                            const SizedBox(width: 6),
+                          ],
+                          if (riderRidesCount != null) ...[
+                            Text(
+                              riderRidesCount,
+                              style: const TextStyle(
+                                color: Color(0xFF64748B),
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
                         ],
                       ),
                     ],
@@ -302,140 +287,81 @@ class ActiveTripPanel extends StatelessWidget {
                         );
                       },
                   child: Container(
-                    width: 46,
-                    height: 46,
+                    width: 44,
+                    height: 44,
                     decoration: BoxDecoration(
                       color: const Color(0xFFF1F5F9),
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(14),
                       border: Border.all(color: const Color(0xFFE2E8F0)),
                     ),
                     child: const Center(
                       child: Icon(
-                        Icons.phone_outlined,
+                        Icons.phone_rounded,
                         color: Color(0xFF1E293B),
                         size: 20,
                       ),
                     ),
                   ),
                 ),
-                const SizedBox(width: 10),
-
-                // Chat Action Button with unread notification badge
-                // GestureDetector(
-                //   onTap:
-                //       onChatTap ??
-                //       () {
-                //         ScaffoldMessenger.of(context).showSnackBar(
-                //           SnackBar(
-                //             content: Text('Opening chat with $riderName...'),
-                //           ),
-                //         );
-                //       },
-                //   child: Stack(
-                //     clipBehavior: Clip.none,
-                //     children: [
-                //       Container(
-                //         width: 46,
-                //         height: 46,
-                //         decoration: BoxDecoration(
-                //           color: const Color(0xFFEFF6FF),
-                //           borderRadius: BorderRadius.circular(16),
-                //           border: Border.all(color: const Color(0xFFBFDBFE)),
-                //         ),
-                //         child: const Center(
-                //           child: Icon(
-                //             Icons.chat_bubble_outline_rounded,
-                //             color: Color(0xFF2563EB),
-                //             size: 20,
-                //           ),
-                //         ),
-                //       ),
-                //       Positioned(
-                //         top: -3,
-                //         right: -3,
-                //         child: Container(
-                //           width: 17,
-                //           height: 17,
-                //           decoration: BoxDecoration(
-                //             color: const Color(0xFFEA580C),
-                //             shape: BoxShape.circle,
-                //             border: Border.all(color: Colors.white, width: 2),
-                //           ),
-                //           child: const Center(
-                //             child: Text(
-                //               '1',
-                //               style: TextStyle(
-                //                 color: Colors.white,
-                //                 fontSize: 9,
-                //                 fontWeight: FontWeight.w900,
-                //               ),
-                //             ),
-                //           ),
-                //         ),
-                //       ),
-                //     ],
-                //   ),
-                // ),
               ],
             ),
-            const SizedBox(height: 14),
 
-            // 3. Rider Note Banner
-            // if (riderNote.isNotEmpty) ...[
-            //   Container(
-            //     width: double.infinity,
-            //     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            //     decoration: BoxDecoration(
-            //       color: const Color(0xFFFFFBEB),
-            //       borderRadius: BorderRadius.circular(14),
-            //       border: Border.all(color: const Color(0xFFFEF3C7)),
-            //     ),
-            //     child: Row(
-            //       children: [
-            //         const Icon(
-            //           Icons.auto_awesome_rounded,
-            //           size: 16,
-            //           color: Color(0xFFD97706),
-            //         ),
-            //         const SizedBox(width: 8),
-            //         const Text(
-            //           'Rider Note:',
-            //           style: TextStyle(
-            //             color: Color(0xFFB45309),
-            //             fontSize: 12,
-            //             fontWeight: FontWeight.w900,
-            //           ),
-            //         ),
-            //         const SizedBox(width: 5),
-            //         Expanded(
-            //           child: Text(
-            //             '"$riderNote"',
-            //             style: const TextStyle(
-            //               color: Color(0xFF78350F),
-            //               fontSize: 12,
-            //               fontWeight: FontWeight.w600,
-            //             ),
-            //             maxLines: 1,
-            //             overflow: TextOverflow.ellipsis,
-            //           ),
-            //         ),
-            //       ],
-            //     ),
-            //   ),
-            //   const SizedBox(height: 12),
-            // ],
+            // Optional Real Rider Note
+            if (riderNote != null && riderNote.isNotEmpty) ...[
+              const SizedBox(height: 10),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFFBEB),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: const Color(0xFFFEF3C7)),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.sticky_note_2_outlined,
+                      size: 15,
+                      color: Color(0xFFD97706),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Note: "$riderNote"',
+                        style: const TextStyle(
+                          color: Color(0xFF78350F),
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
 
-            // 4. Pickup Address Timeline Row
+            const SizedBox(height: 12),
+
+            // 3. Destination / Pickup Address Row with Real Distance & Clock ETA
             Row(
               children: [
                 Container(
-                  width: 18,
-                  height: 18,
+                  width: 16,
+                  height: 16,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFDCFCE7),
+                    color: isInProgress
+                        ? const Color(0xFFFEE2E2)
+                        : const Color(0xFFDCFCE7),
                     shape: BoxShape.circle,
                     border: Border.all(
-                      color: const Color(0xFF10B981),
+                      color: isInProgress
+                          ? const Color(0xFFEF4444)
+                          : const Color(0xFF10B981),
                       width: 3,
                     ),
                   ),
@@ -443,9 +369,7 @@ class ActiveTripPanel extends StatelessWidget {
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
-                    status == 'IN_PROGRESS'
-                        ? req.dropoffAddress
-                        : req.pickupAddress,
+                    targetAddress,
                     style: const TextStyle(
                       color: Color(0xFF1E293B),
                       fontSize: 13,
@@ -466,10 +390,10 @@ class ActiveTripPanel extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 14),
 
             // Navigation Options Bar (Visible when trip is IN_PROGRESS)
-            if (status == 'IN_PROGRESS') ...[
+            if (isInProgress) ...[
               Row(
                 children: [
                   // 1. Open in Google Maps Button
@@ -530,15 +454,16 @@ class ActiveTripPanel extends StatelessWidget {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(14),
                         ),
+                        side: BorderSide.none,
                       ),
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 14),
+              const SizedBox(height: 12),
             ],
 
-            // 5. Action Area with 100m Proximity Geofencing
+            // 4. Action Area with 150m Proximity Geofencing
             _buildActionArea(
               context,
               status,
@@ -558,28 +483,27 @@ class ActiveTripPanel extends StatelessWidget {
     String distanceText,
   ) {
     if (status == 'ACCEPTED') {
-      // REQUIREMENT: That slide button should only be visible after the driver is near 100m from pickup point.
       if (isWithinGeofence) {
         return SlideToActButton(
           text: 'SLIDE: ARRIVED AT PICKUP > >',
-          height: 58,
-          borderRadius: 20,
+          height: 56,
+          borderRadius: 18,
           backgroundColor: const Color(0xFFEA580C),
           thumbColor: Colors.white,
-          thumbIconColor: Color(0xFFEA580C),
+          thumbIconColor: const Color(0xFFEA580C),
           thumbIcon: Icons.keyboard_double_arrow_right_rounded,
           onSlideComplete: () async {
             context.read<RideDispatchCubit>().updateStatus('ARRIVED');
           },
         );
       } else {
-        // Driver is still outside 150m -> Show proximity indicator with manual arrival override
+        // Driver outside 150m: show proximity indicator with manual override
         return Container(
           width: double.infinity,
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
           decoration: BoxDecoration(
             color: const Color(0xFFF8FAFC),
-            borderRadius: BorderRadius.circular(18),
+            borderRadius: BorderRadius.circular(16),
             border: Border.all(color: const Color(0xFFE2E8F0)),
           ),
           child: Column(
@@ -637,7 +561,9 @@ class ActiveTripPanel extends StatelessWidget {
                           ),
                           onPressed: () {
                             Navigator.pop(dialogCtx);
-                            context.read<RideDispatchCubit>().updateStatus('ARRIVED');
+                            context.read<RideDispatchCubit>().updateStatus(
+                              'ARRIVED',
+                            );
                           },
                           child: const Text(
                             'Yes, I Have Arrived',
@@ -649,7 +575,7 @@ class ActiveTripPanel extends StatelessWidget {
                   );
                 },
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  padding: const EdgeInsets.symmetric(vertical: 2),
                   child: Text(
                     'Arrived but GPS stuck? Tap to confirm',
                     style: TextStyle(
@@ -666,11 +592,10 @@ class ActiveTripPanel extends StatelessWidget {
         );
       }
     } else if (status == 'ARRIVED') {
-      // Driver at pickup -> Slide to start trip
       return SlideToActButton(
         text: 'SLIDE: START TRIP > >',
-        height: 58,
-        borderRadius: 20,
+        height: 56,
+        borderRadius: 18,
         backgroundColor: const Color(0xFF059669),
         thumbColor: Colors.white,
         thumbIconColor: const Color(0xFF059669),
@@ -680,19 +605,26 @@ class ActiveTripPanel extends StatelessWidget {
         },
       );
     } else {
-      // Trip in progress -> Slide to complete trip
       return SlideToActButton(
         text: 'SLIDE: COMPLETE TRIP > >',
-        height: 58,
-        borderRadius: 20,
+        height: 56,
+        borderRadius: 18,
         backgroundColor: const Color(0xFF0F172A),
         thumbColor: Colors.white,
-        thumbIconColor: Color(0xFF0F172A),
+        thumbIconColor: const Color(0xFF0F172A),
         thumbIcon: Icons.keyboard_double_arrow_right_rounded,
         onSlideComplete: () async {
           context.read<RideDispatchCubit>().updateStatus('COMPLETED');
         },
       );
     }
+  }
+
+  static String _getInitials(String name) {
+    final parts = name.trim().split(' ');
+    if (parts.length >= 2 && parts[0].isNotEmpty && parts[1].isNotEmpty) {
+      return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
+    }
+    return name.substring(0, name.length >= 2 ? 2 : 1).toUpperCase();
   }
 }

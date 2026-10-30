@@ -48,7 +48,8 @@ class VehicleCubit extends BaseCubit<VehicleState> {
       label: 'Register Vehicle',
       call: () => _vehicleRepo.registerVehicle(vehicle),
       loading: () => VehicleLoading(),
-      success: (data) => VehicleActionSuccess('Vehicle registered successfully!', data),
+      success: (data) =>
+          VehicleActionSuccess('Vehicle registered successfully!', data),
       failure: (error) => VehicleFailure(error),
     );
   }

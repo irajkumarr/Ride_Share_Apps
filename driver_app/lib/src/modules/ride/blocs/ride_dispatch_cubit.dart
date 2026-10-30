@@ -250,7 +250,6 @@ class RideDispatchCubit extends Cubit<RideDispatchState> {
         );
       }
 
-
       if (status == 'COMPLETED') {
         _driverStatusCubit.setAvailable();
         emit(

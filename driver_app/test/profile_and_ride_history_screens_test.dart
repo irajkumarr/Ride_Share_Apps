@@ -159,7 +159,10 @@ void main() {
       // Verify no fake placeholder data is displayed
       expect(find.text('+977 9804040404'), findsNothing);
       expect(find.text('RN-8842'), findsNothing);
-      expect(find.text('Toyota Corolla • BA 2 KHA 1234 (Active)'), findsNothing);
+      expect(
+        find.text('Toyota Corolla • BA 2 KHA 1234 (Active)'),
+        findsNothing,
+      );
       expect(find.text('486'), findsNothing);
       expect(find.text('4.92'), findsNothing);
     });
@@ -214,7 +217,9 @@ void main() {
   });
 
   group('Driver RideHistoryScreen Tests', () {
-    testWidgets('renders shimmer skeleton during loading state', (tester) async {
+    testWidgets('renders shimmer skeleton during loading state', (
+      tester,
+    ) async {
       final fakeHistoryCubit = FakeDriverRideHistoryCubit(
         DriverRideHistoryLoading(),
       );
@@ -323,8 +328,14 @@ void main() {
 
         // Check filter chips and counts
         expect(find.text('ALL'), findsOneWidget);
-        expect(find.text('COMPLETED'), findsNWidgets(2)); // filter tab + card badge
-        expect(find.text('CANCELLED'), findsNWidgets(2)); // filter tab + card badge
+        expect(
+          find.text('COMPLETED'),
+          findsNWidgets(2),
+        ); // filter tab + card badge
+        expect(
+          find.text('CANCELLED'),
+          findsNWidgets(2),
+        ); // filter tab + card badge
 
         // Check total earnings section
         expect(find.text('TOTAL EARNED'), findsOneWidget);

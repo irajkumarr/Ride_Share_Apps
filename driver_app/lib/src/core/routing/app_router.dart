@@ -64,7 +64,8 @@ class AppRouter {
       path: '/vehicle-setup',
       name: 'vehicle-setup',
       builder: (context, state) {
-        final fromReg = state.uri.queryParameters['fromRegistration'] == 'true' ||
+        final fromReg =
+            state.uri.queryParameters['fromRegistration'] == 'true' ||
             state.extra == 'fromRegistration';
         return VehicleRegisterScreen(showBackButton: !fromReg);
       },
@@ -99,11 +100,17 @@ class ErrorPage extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.error_outline_rounded, size: 64, color: Colors.grey),
+              const Icon(
+                Icons.error_outline_rounded,
+                size: 64,
+                color: Colors.grey,
+              ),
               const SizedBox(height: 16),
               Text(
                 'Page Not Found',
-                style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 24),
               CustomButton(

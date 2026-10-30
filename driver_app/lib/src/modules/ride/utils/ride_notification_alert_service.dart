@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:flutter/services.dart';
 import 'package:vibration/vibration.dart';
 
@@ -6,7 +7,8 @@ import 'package:vibration/vibration.dart';
 /// when a new ride dispatch request arrives for the driver.
 class RideNotificationAlertService {
   RideNotificationAlertService._();
-  static final RideNotificationAlertService instance = RideNotificationAlertService._();
+  static final RideNotificationAlertService instance =
+      RideNotificationAlertService._();
 
   Timer? _alertTimer;
   bool _isPlaying = false;

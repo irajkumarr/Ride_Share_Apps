@@ -15,7 +15,8 @@ class VehicleApiService {
       ApiUrls.vehicles,
       data: vehicle,
     );
-    final Map<String, dynamic> responseMap = response['data'] as Map<String, dynamic>;
+    final Map<String, dynamic> responseMap =
+        response['data'] as Map<String, dynamic>;
     return VehicleDto.fromJson(responseMap);
   }
 

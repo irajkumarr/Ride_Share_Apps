@@ -57,8 +57,6 @@ Future<void> configureDriverDependencies() async {
     () => DriverRideHistoryCubit(sl<DriverRideRepo>()),
   );
 
-
-
   sl.registerLazySingleton<DriverStatusCubit>(
     () => DriverStatusCubit(
       driverRideApi: sl<DriverRideApiService>(),

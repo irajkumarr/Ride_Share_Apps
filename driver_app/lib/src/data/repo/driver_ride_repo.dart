@@ -42,4 +42,3 @@ class DriverRideRepo {
     return await _api.getAllRidesForDriver();
   }
 }
-

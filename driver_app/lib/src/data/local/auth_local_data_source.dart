@@ -14,7 +14,10 @@ class AuthLocalDataSource {
   static const String _driverKey = 'cached_driver';
 
   Future<void> cacheDriver(UserDataDto driver) async {
-    await _localStorage.setString(_driverKey, value: jsonEncode(driver.toJson()));
+    await _localStorage.setString(
+      _driverKey,
+      value: jsonEncode(driver.toJson()),
+    );
   }
 
   Future<void> setLoggedIn(bool value) async {

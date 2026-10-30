@@ -17,7 +17,7 @@ class AuthApiService {
   }) async {
     final data = await _apiClient.post<Map<String, dynamic>>(
       ApiUrls.login,
-      data: {'phone': phone, 'password': password,'fcmToken': fcmToken},
+      data: {'phone': phone, 'password': password, 'fcmToken': fcmToken},
       options: skipAuthOptions,
     );
     return UserDto.fromJson(data);

@@ -237,6 +237,7 @@ class _MyVehiclesScreenState extends State<MyVehiclesScreen> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(14),
                 ),
+                side: BorderSide.none,
                 elevation: 0,
               ),
             ),
