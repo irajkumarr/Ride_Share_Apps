@@ -100,7 +100,8 @@ class ActiveRideCubit extends BaseCubit<ActiveRideState> {
         final destination = AddressModel(
           id: 'destination',
           title: rideData['dropoffAddress']?.toString() ?? 'Destination',
-          formattedAddress: rideData['dropoffAddress']?.toString() ?? 'Destination',
+          formattedAddress:
+              rideData['dropoffAddress']?.toString() ?? 'Destination',
           coordinates: LatLngModel(
             latitude: (rideData['dropoffLat'] as num?)?.toDouble() ?? 0.0,
             longitude: (rideData['dropoffLng'] as num?)?.toDouble() ?? 0.0,
@@ -115,13 +116,18 @@ class ActiveRideCubit extends BaseCubit<ActiveRideState> {
           vehicleTier: 'Economy',
           fareNpr: (rideData['estimatedFare'] as num?)?.toDouble() ?? 0.0,
           paymentMethod: 'Cash',
-          route: const RouteModel(points: [], distanceInMeters: 0, durationInSeconds: 0),
+          route: const RouteModel(
+            points: [],
+            distanceInMeters: 0,
+            durationInSeconds: 0,
+          ),
           status: RideStatus.searchingDriver,
         );
 
         // Connect WebSocket and resume tracking
-        final wsUrl = dotenv.env['WS_URL'] ?? 
-            (dotenv.env['BASE_URL'] != null 
+        final wsUrl =
+            dotenv.env['WS_URL'] ??
+            (dotenv.env['BASE_URL'] != null
                 ? dotenv.env['BASE_URL']!.replaceFirst('http', 'ws') + '/ws'
                 : 'ws://localhost:8080/ws');
         final token = await _authLocalDataSource.getAccessToken();
@@ -132,7 +138,9 @@ class ActiveRideCubit extends BaseCubit<ActiveRideState> {
           onConnected: () => _subscribeToWebSocketTopics(booking),
         );
 
-        if (status == 'ACCEPTED' || status == 'ARRIVED' || status == 'IN_PROGRESS') {
+        if (status == 'ACCEPTED' ||
+            status == 'ARRIVED' ||
+            status == 'IN_PROGRESS') {
           final driver = DriverModel(
             id: rideData['driverId']?.toString() ?? 'driver',
             name: rideData['driverName']?.toString() ?? 'Driver',
@@ -149,9 +157,11 @@ class ActiveRideCubit extends BaseCubit<ActiveRideState> {
           emit(
             DriverAssignedState(
               booking: booking.copyWith(
-                status: status == 'IN_PROGRESS' 
-                    ? RideStatus.tripInProgress 
-                    : (status == 'ARRIVED' ? RideStatus.driverArriving : RideStatus.driverAssigned),
+                status: status == 'IN_PROGRESS'
+                    ? RideStatus.tripInProgress
+                    : (status == 'ARRIVED'
+                          ? RideStatus.driverArriving
+                          : RideStatus.driverAssigned),
                 driver: driver,
               ),
               driver: driver,
@@ -237,8 +247,9 @@ class ActiveRideCubit extends BaseCubit<ActiveRideState> {
     }
 
     // 2. Connect to real STOMP WebSocket using environment URL & JWT Auth Token
-    final wsUrl = dotenv.env['WS_URL'] ?? 
-        (dotenv.env['BASE_URL'] != null 
+    final wsUrl =
+        dotenv.env['WS_URL'] ??
+        (dotenv.env['BASE_URL'] != null
             ? dotenv.env['BASE_URL']!.replaceFirst('http', 'ws') + '/ws'
             : 'ws://localhost:8080/ws');
     final token = await _authLocalDataSource.getAccessToken();
@@ -297,8 +308,12 @@ class ActiveRideCubit extends BaseCubit<ActiveRideState> {
       if (state is DriverAssignedState) {
         final current = state as DriverAssignedState;
         // If the new payload has empty/null driverData, ignore it to prevent overwriting with placeholder
-        if (data['driverData'] == null && current.driver.id.isNotEmpty && current.driver.id != 'driver_assigned') {
-          AppLogger.info('Ignoring duplicate ACCEPTED status payload without driver details');
+        if (data['driverData'] == null &&
+            current.driver.id.isNotEmpty &&
+            current.driver.id != 'driver_assigned') {
+          AppLogger.info(
+            'Ignoring duplicate ACCEPTED status payload without driver details',
+          );
           return;
         }
       }
@@ -313,8 +328,7 @@ class ActiveRideCubit extends BaseCubit<ActiveRideState> {
         photoUrl: driverData?['photoUrl']?.toString() ?? '',
         rating: (driverData?['rating'] as num?)?.toDouble() ?? 4.9,
         totalRides: (driverData?['totalRides'] as num?)?.toInt() ?? 100,
-        vehicleModel:
-            vehicleData?['model']?.toString() ?? booking.vehicleTier,
+        vehicleModel: vehicleData?['model']?.toString() ?? booking.vehicleTier,
         vehicleColor: vehicleData?['color']?.toString() ?? '',
         licensePlate: vehicleData?['licensePlate']?.toString() ?? '',
         phoneNumber: driverData?['phone']?.toString() ?? '',
@@ -365,7 +379,11 @@ class ActiveRideCubit extends BaseCubit<ActiveRideState> {
         currentDriver = (state as DriverAssignedState).driver;
       }
       emit(
-        TripCompletedState(booking, driver: currentDriver, message: message),
+        TripCompletedState(
+          booking,
+          driver: currentDriver,
+          message: "Ride Completed",
+        ),
       );
     } else if (status == 'CANCELLED') {
       final msg = message ?? 'Ride has been cancelled';

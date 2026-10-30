@@ -12,6 +12,7 @@ abstract final class LocalStorageKeys {
   static const String fcmToken = 'fcm_token';
   static const String lastSyncAt = 'last_sync_at';
   static const String appVersion = 'app_version';
+  static const String savedPickupAddress = 'saved_pickup_address';
 }
 
 /// Contract for non-sensitive local key-value storage (SharedPreferences).
@@ -21,7 +22,7 @@ abstract class LocalStorageService {
   Future<void> setString(String key, {required String value});
   Future<void> setInt(String key, {required int value});
   Future<void> setDouble(String key, {required double value});
-  Future<void> setBool(String key,  {required bool value});
+  Future<void> setBool(String key, {required bool value});
   Future<void> setStringList(String key, {required List<String> value});
 
   String? getString(String key);
@@ -44,16 +45,20 @@ class LocalStorageServiceImpl implements LocalStorageService {
   // ── Write ─────────────────────────────────────────────────────────────────
 
   @override
-  Future<void> setString(String key, {required String value}) => _prefs.setString(key, value);
+  Future<void> setString(String key, {required String value}) =>
+      _prefs.setString(key, value);
 
   @override
-  Future<void> setInt(String key, {required int value}) => _prefs.setInt(key, value);
+  Future<void> setInt(String key, {required int value}) =>
+      _prefs.setInt(key, value);
 
   @override
-  Future<void> setDouble(String key, {required double value}) => _prefs.setDouble(key, value);
+  Future<void> setDouble(String key, {required double value}) =>
+      _prefs.setDouble(key, value);
 
   @override
-  Future<void> setBool(String key, {required bool value}) => _prefs.setBool(key, value);
+  Future<void> setBool(String key, {required bool value}) =>
+      _prefs.setBool(key, value);
 
   @override
   Future<void> setStringList(String key, {required List<String> value}) =>

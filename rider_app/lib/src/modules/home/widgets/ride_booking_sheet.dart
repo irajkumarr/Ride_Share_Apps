@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:shared_core/shared_core.dart';
 
+import 'destination_search_sheet.dart';
 import 'ridenest_illustrations.dart';
 
 class VehicleTier {
@@ -9,10 +11,13 @@ class VehicleTier {
   final String description;
   final double baseFareNpr;
   final double perKmRate;
+  final double minFareNpr;
   final Widget illustration;
   final int etaMins;
   final int capacity;
   final bool hasLightning;
+  final String? badgeText;
+  final String? highlightText;
 
   const VehicleTier({
     required this.id,
@@ -20,11 +25,14 @@ class VehicleTier {
     required this.description,
     required this.baseFareNpr,
     required this.perKmRate,
+    double? minFareNpr,
     required this.illustration,
     required this.etaMins,
     required this.capacity,
     this.hasLightning = false,
-  });
+    this.badgeText,
+    this.highlightText,
+  }) : minFareNpr = minFareNpr ?? baseFareNpr;
 }
 
 class RideBookingSheet extends StatefulWidget {
@@ -34,6 +42,7 @@ class RideBookingSheet extends StatefulWidget {
   final double distanceKm;
   final int durationMins;
   final VoidCallback onCancel;
+  final void Function({bool focusDestination})? onOpenSearch;
   final void Function({
     required VehicleTier selectedTier,
     required double fareNpr,
@@ -50,6 +59,7 @@ class RideBookingSheet extends StatefulWidget {
     required this.distanceKm,
     required this.durationMins,
     required this.onCancel,
+    this.onOpenSearch,
     required this.onConfirmBooking,
   });
 
@@ -58,35 +68,38 @@ class RideBookingSheet extends StatefulWidget {
 }
 
 class _RideBookingSheetState extends State<RideBookingSheet> {
-  int _selectedTierIndex = 1; // Default to 'Bike' as selected in screenshot
-  int _selectedTab = 0; // 0: Rides, 1: Delivery and Cargo
-  String _selectedPaymentMethod = 'Cash';
+  int _selectedTierIndex = 0; // Default to 'Bike'
+  bool _isRequesting = false;
 
-  late final List<VehicleTier> _tiers = [
-    VehicleTier(
-      id: 'fastest',
-      name: 'Fastest',
-      description: 'Quickest pickup nearby',
-      baseFareNpr: 46.0,
-      perKmRate: 18.0,
-      illustration: const Icon(
-        Icons.directions_car_filled_rounded,
-        size: 46,
-        color: Color(0xFF94A3B8),
-      ),
-      etaMins: 5,
-      capacity: 3,
-    ),
+  late final List<VehicleTier> _rideTiers = [
     VehicleTier(
       id: 'bike',
       name: 'Bike',
       description: 'Fastest through traffic',
-      baseFareNpr: 46.0,
+      baseFareNpr: 30.0,
+      minFareNpr: 45.0,
       perKmRate: 16.0,
-      illustration: const BikeIllustration(size: 68),
-      etaMins: 5,
+      illustration: const VehicleTierIllustration(tierId: 'bike', size: 72),
+      etaMins: 3,
       capacity: 1,
       hasLightning: true,
+      badgeText: '⚡ QUICKEST',
+      highlightText:
+          '🛵 Fast single-rider trip • Helmet verified • Beat the jam',
+    ),
+    VehicleTier(
+      id: 'fastest',
+      name: 'Fastest',
+      description: 'Quickest pickup nearby',
+      baseFareNpr: 30.0,
+      minFareNpr: 45.0,
+      perKmRate: 16.0,
+      illustration: const VehicleTierIllustration(tierId: 'fastest', size: 72),
+      etaMins: 2,
+      capacity: 3,
+      hasLightning: true,
+      badgeText: '🔥 NEAREST',
+      highlightText: '⚡ Auto-matches closest available bike or cab to you',
     ),
     VehicleTier(
       id: 'economy',
@@ -94,128 +107,97 @@ class _RideBookingSheetState extends State<RideBookingSheet> {
       description: 'Budget-friendly ride',
       baseFareNpr: 120.0,
       perKmRate: 35.0,
-      illustration: const Icon(
-        Icons.directions_car_filled_rounded,
-        size: 46,
-        color: Color(0xFF94A3B8),
-      ),
-      etaMins: 6,
+      illustration: const VehicleTierIllustration(tierId: 'economy', size: 72),
+      etaMins: 5,
       capacity: 4,
+      badgeText: '⭐ BEST VALUE',
+      highlightText:
+          '🚗 Reliable everyday compact car • Air-conditioned • 4 seats',
     ),
     VehicleTier(
       id: 'comfort',
       name: 'Comfort',
       description: 'Spacious & Air-conditioned',
-      baseFareNpr: 180.0,
-      perKmRate: 48.0,
-      illustration: const Icon(
-        Icons.local_taxi_rounded,
-        size: 46,
-        color: Color(0xFF94A3B8),
-      ),
-      etaMins: 8,
+      baseFareNpr: 150.0,
+      minFareNpr: 150.0,
+      perKmRate: 45.0,
+      illustration: const VehicleTierIllustration(tierId: 'comfort', size: 72),
+      etaMins: 6,
       capacity: 4,
+      badgeText: '✨ PREMIUM',
+      highlightText:
+          '💎 Top-rated executive sedans • Extra legroom • Quiet cabin',
+    ),
+    VehicleTier(
+      id: 'xl',
+      name: 'XL SUV',
+      description: 'Room for 6 & extra bags',
+      baseFareNpr: 200.0,
+      minFareNpr: 200.0,
+      perKmRate: 55.0,
+      illustration: const VehicleTierIllustration(tierId: 'xl', size: 72),
+      etaMins: 8,
+      capacity: 6,
+      badgeText: '👥 6 SEATS',
+      highlightText:
+          '🚐 Spacious 6-seater SUV • Ideal for groups & airport luggage',
     ),
   ];
 
+  VehicleTier get _selectedTier {
+    if (_selectedTierIndex >= _rideTiers.length) {
+      return _rideTiers.first;
+    }
+    return _rideTiers[_selectedTierIndex];
+  }
+
   double _calculateFare(VehicleTier tier) {
-    // Real distance-based fare calculation in NPR
-    // Formula: baseFare + (distanceKm * perKmRate), rounded to nearest integer with sensible minimums
     final distance = widget.distanceKm > 0 ? widget.distanceKm : 1.0;
     final rawFare = tier.baseFareNpr + (distance * tier.perKmRate);
-    final minFare = tier.id == 'bike' || tier.id == 'fastest' ? 45.0 : tier.baseFareNpr;
+    final minFare = tier.minFareNpr;
     return rawFare.clamp(minFare, 99999.0).roundToDouble();
   }
 
-  void _showPaymentSelection() {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-      ),
-      builder: (ctx) {
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Payment Method',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w800,
-                    fontSize: 18,
-                    color: Colors.black,
-                  ),
-                ),
-                const SizedBox(height: 14),
-                ListTile(
-                  leading: const Icon(Icons.money_rounded, color: Colors.green),
-                  title: const Text('Cash on Delivery / Dropoff'),
-                  trailing: _selectedPaymentMethod == 'Cash'
-                      ? const Icon(
-                          Icons.check_circle_rounded,
-                          color: Colors.black,
-                        )
-                      : null,
-                  onTap: () {
-                    setState(() => _selectedPaymentMethod = 'Cash');
-                    Navigator.pop(ctx);
-                  },
-                ),
-                ListTile(
-                  leading: const Icon(
-                    Icons.account_balance_wallet_rounded,
-                    color: Color(0xFF5C2D91),
-                  ),
-                  title: const Text('Khalti Digital Wallet'),
-                  trailing: _selectedPaymentMethod == 'Khalti'
-                      ? const Icon(
-                          Icons.check_circle_rounded,
-                          color: Colors.black,
-                        )
-                      : null,
-                  onTap: () {
-                    setState(() => _selectedPaymentMethod = 'Khalti');
-                    Navigator.pop(ctx);
-                  },
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
+  void _handleOpenSearch({bool focusDestination = true}) {
+    HapticFeedback.lightImpact();
+    if (widget.onOpenSearch != null) {
+      widget.onOpenSearch!(focusDestination: focusDestination);
+    } else {
+      DestinationSearchSheet.show(
+        context,
+        currentPosition: widget.pickup.coordinates,
+        initialFocusDestination: focusDestination,
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final selectedTier = _tiers[_selectedTierIndex];
-    final fareNpr = _calculateFare(selectedTier);
+    final selectedTier = _selectedTier;
+    final fare = _calculateFare(selectedTier);
 
     final pickupText =
         widget.pickup.title.isNotEmpty &&
             widget.pickup.title != 'Your location' &&
             widget.pickup.title != 'Current Location'
         ? widget.pickup.title
-        : 'Udaypur fresh butcher shop';
+        : 'Pickup Point';
 
     final destText = widget.destination.title.isNotEmpty
         ? widget.destination.title
-        : 'sirjana nagar busstand';
+        : 'Destination';
 
+    final distanceKm = widget.distanceKm > 0 ? widget.distanceKm : 1.2;
     final durationMin = widget.durationMins > 0 ? widget.durationMins : 6;
 
     return Container(
       decoration: const BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black12,
-            blurRadius: 24,
+            color: Color(0x18000000),
+            blurRadius: 28,
             offset: Offset(0, -6),
           ),
         ],
@@ -229,265 +211,418 @@ class _RideBookingSheetState extends State<RideBookingSheet> {
             // 1. Top Drag Handle
             Center(
               child: Padding(
-                padding: const EdgeInsets.only(top: 10, bottom: 8),
+                padding: const EdgeInsets.only(top: 10, bottom: 6),
                 child: Container(
-                  width: 46,
+                  width: 42,
                   height: 4.5,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFD1D5DB),
+                    color: const Color(0xFFCBD5E1),
                     borderRadius: BorderRadius.circular(3),
                   ),
                 ),
               ),
             ),
 
-            // 2. Pickup & Destination Summary with Stops Pill
+            // 2. Interactive Journey & Route Summary Header Card
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
-              child: Column(
-                children: [
-                  // Pickup row
-                  Row(
-                    children: [
-                      const Icon(
-                        Icons.directions_walk_rounded,
-                        color: Color(0xFF0F172A),
-                        size: 20,
-                      ),
-                      const SizedBox(width: 14),
-                      Expanded(
-                        child: Text(
-                          pickupText,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w800,
-                            color: Color(0xFF0F172A),
-                            letterSpacing: -0.2,
-                          ),
-                        ),
-                      ),
-                    ],
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 4),
+              child: Container(
+                padding: const EdgeInsets.fromLTRB(12, 10, 10, 10),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF8FAFC),
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(
+                    color: const Color(0xFFF1F5F9),
+                    width: 1.2,
                   ),
-                  const SizedBox(height: 12),
-
-                  // Destination row + Stops Button
-                  Row(
-                    children: [
-                      const Icon(
-                        Icons.flag_outlined,
-                        color: Color(0xFF0F172A),
-                        size: 20,
-                      ),
-                      const SizedBox(width: 14),
-                      Expanded(
-                        child: RichText(
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          text: TextSpan(
-                            text: destText,
-                            style: const TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w800,
-                              color: Color(0xFF0F172A),
-                              letterSpacing: -0.2,
-                            ),
-                            children: [
-                              const TextSpan(
-                                text: '  •  ',
-                                style: TextStyle(
-                                  color: Color(0xFF94A3B8),
-                                  fontSize: 12,
-                                ),
-                              ),
-                              TextSpan(
-                                text: '$durationMin min',
-                                style: const TextStyle(
-                                  color: Color(0xFF64748B),
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 13.5,
-                                ),
+                ),
+                child: Row(
+                  children: [
+                    // Vertical visual route indicator
+                    Column(
+                      children: [
+                        Container(
+                          width: 10,
+                          height: 10,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF10B981),
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.white, width: 2),
+                            boxShadow: const [
+                              BoxShadow(
+                                color: Color(0x3310B981),
+                                blurRadius: 4,
                               ),
                             ],
                           ),
                         ),
-                      ),
-                      const SizedBox(width: 8),
-                      // "Stops" rounded button
-                      // Container(
-                      //   padding: const EdgeInsets.symmetric(
-                      //     horizontal: 14,
-                      //     vertical: 6,
-                      //   ),
-                      //   decoration: BoxDecoration(
-                      //     color: const Color(0xFFF1F5F9),
-                      //     borderRadius: BorderRadius.circular(16),
-                      //   ),
-                      //   child: const Text(
-                      //     'Stops',
-                      //     style: TextStyle(
-                      //       fontSize: 12.5,
-                      //       fontWeight: FontWeight.w800,
-                      //       color: Color(0xFF334155),
-                      //     ),
-                      //   ),
-                      // ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 6),
-            const Divider(height: 1, color: Color(0xFFF1F5F9)),
-            const SizedBox(height: 12),
-
-            // 3. Tab Switcher: [Rides] [Delivery and Cargo]
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Row(
-                children: [
-                  GestureDetector(
-                    onTap: () => setState(() => _selectedTab = 0),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 7,
-                      ),
-                      decoration: BoxDecoration(
-                        color: _selectedTab == 0
-                            ? const Color(0xFFF1F5F9)
-                            : Colors.transparent,
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Text(
-                        'Rides',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w800,
-                          color: _selectedTab == 0
-                              ? const Color(0xFF0F172A)
-                              : const Color(0xFF94A3B8),
+                        Container(
+                          width: 1.5,
+                          height: 20,
+                          margin: const EdgeInsets.symmetric(vertical: 2),
+                          color: const Color(0xFFCBD5E1),
                         ),
-                      ),
+                        const Icon(
+                          Icons.location_on_rounded,
+                          color: Color(0xFFEF4444),
+                          size: 14,
+                        ),
+                      ],
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  // GestureDetector(
-                  //   onTap: () => setState(() => _selectedTab = 1),
-                  //   child: Container(
-                  //     padding: const EdgeInsets.symmetric(
-                  //       horizontal: 12,
-                  //       vertical: 7,
-                  //     ),
-                  //     decoration: BoxDecoration(
-                  //       color: _selectedTab == 1
-                  //           ? const Color(0xFFF1F5F9)
-                  //           : Colors.transparent,
-                  //       borderRadius: BorderRadius.circular(16),
-                  //     ),
-                  //     child: Text(
-                  //       'Delivery and Cargo',
-                  //       style: TextStyle(
-                  //         fontSize: 14,
-                  //         fontWeight: FontWeight.w800,
-                  //         color: _selectedTab == 1
-                  //             ? const Color(0xFF0F172A)
-                  //             : const Color(0xFF94A3B8),
-                  //       ),
-                  //     ),
-                  //   ),
-                  // ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 14),
+                    const SizedBox(width: 10),
 
-            // 4. Horizontal Scrollable Vehicle Category Cards
-            SizedBox(
-              height: 136,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                physics: const BouncingScrollPhysics(),
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                itemCount: _tiers.length,
-                separatorBuilder: (_, __) => const SizedBox(width: 12),
-                itemBuilder: (context, index) {
-                  final tier = _tiers[index];
-                  final isSelected = index == _selectedTierIndex;
-                  final fare = _calculateFare(tier);
-
-                  return GestureDetector(
-                    onTap: () => setState(() => _selectedTierIndex = index),
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 180),
-                      width: 114,
-                      padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? const Color(0xFFF1F5F9)
-                            : Colors.transparent,
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                          color: isSelected
-                              ? const Color(0xFFCBD5E1)
-                              : Colors.transparent,
-                          width: 1.2,
-                        ),
-                      ),
+                    // Tap-to-edit Pickup and Destination Addresses
+                    Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Graphic / Illustration
-                          Center(
-                            child: SizedBox(
-                              height: 48,
-                              child: Center(child: tier.illustration),
+                          // Pickup Row (Tap to edit pickup)
+                          InkWell(
+                            onTap: () =>
+                                _handleOpenSearch(focusDestination: false),
+                            borderRadius: BorderRadius.circular(8),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 2,
+                                horizontal: 4,
+                              ),
+                              child: Row(
+                                children: [
+                                  const Text(
+                                    'PICKUP  ',
+                                    style: TextStyle(
+                                      fontSize: 9.5,
+                                      fontWeight: FontWeight.w800,
+                                      color: Color(0xFF64748B),
+                                      letterSpacing: 0.5,
+                                    ),
+                                  ),
+                                  Expanded(
+                                    child: Text(
+                                      pickupText,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                        fontSize: 13.5,
+                                        fontWeight: FontWeight.w800,
+                                        color: Color(0xFF0F172A),
+                                        letterSpacing: -0.2,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  const Icon(
+                                    Icons.edit_outlined,
+                                    size: 13,
+                                    color: Color(0xFF94A3B8),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
-                          const Spacer(),
 
-                          // ETA tag (e.g. 5 min)
+                          const SizedBox(height: 4),
+
+                          // Dropoff Row (Tap to edit destination)
+                          InkWell(
+                            onTap: () =>
+                                _handleOpenSearch(focusDestination: true),
+                            borderRadius: BorderRadius.circular(8),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 2,
+                                horizontal: 4,
+                              ),
+                              child: Row(
+                                children: [
+                                  const Text(
+                                    'DROPOFF  ',
+                                    style: TextStyle(
+                                      fontSize: 9.5,
+                                      fontWeight: FontWeight.w800,
+                                      color: Color(0xFF64748B),
+                                      letterSpacing: 0.5,
+                                    ),
+                                  ),
+                                  Expanded(
+                                    child: Text(
+                                      destText,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                        fontSize: 13.5,
+                                        fontWeight: FontWeight.w800,
+                                        color: Color(0xFF0F172A),
+                                        letterSpacing: -0.2,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  const Icon(
+                                    Icons.edit_outlined,
+                                    size: 13,
+                                    color: Color(0xFF94A3B8),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(width: 8),
+
+                    // Trip stats chip (Distance • Time)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 5,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: const Color(0xFFE2E8F0)),
+                        boxShadow: const [
+                          BoxShadow(
+                            color: Color(0x06000000),
+                            blurRadius: 4,
+                            offset: Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
                           Text(
-                            '${tier.etaMins} min',
+                            '${distanceKm.toStringAsFixed(1)} km',
                             style: const TextStyle(
                               fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                              color: Color(0xFF94A3B8),
-                            ),
-                          ),
-                          const SizedBox(height: 1),
-
-                          // Tier Name (e.g. Bike / Fastest)
-                          Text(
-                            tier.name,
-                            style: const TextStyle(
-                              fontSize: 13.5,
                               fontWeight: FontWeight.w800,
                               color: Color(0xFF0F172A),
                             ),
                           ),
+                          Text(
+                            '$durationMin min',
+                            style: const TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF64748B),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(width: 6),
+
+                    // Cancel / dismiss button
+                    InkWell(
+                      onTap: widget.onCancel,
+                      borderRadius: BorderRadius.circular(12),
+                      child: Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFE2E8F0).withValues(alpha: 0.6),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.close_rounded,
+                          size: 16,
+                          color: Color(0xFF475569),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 10),
+
+            // 3. Horizontal Scrollable Vehicle Category Cards
+            SizedBox(
+              height: 154,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                physics: const BouncingScrollPhysics(),
+                padding: const EdgeInsets.symmetric(horizontal: 18),
+                itemCount: _rideTiers.length,
+                separatorBuilder: (context, index) => const SizedBox(width: 12),
+                itemBuilder: (context, index) {
+                  final tier = _rideTiers[index];
+                  final isSelected = index == _selectedTierIndex;
+                  final tierFare = _calculateFare(tier);
+
+                  return GestureDetector(
+                    onTap: () {
+                      HapticFeedback.selectionClick();
+                      setState(() => _selectedTierIndex = index);
+                    },
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      curve: Curves.easeOutCubic,
+                      width: 124,
+                      padding: const EdgeInsets.fromLTRB(10, 8, 10, 10),
+                      decoration: BoxDecoration(
+                        gradient: isSelected
+                            ? const LinearGradient(
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                                colors: [Color(0xFFFFFFFF), Color(0xFFF8FAFC)],
+                              )
+                            : null,
+                        color: isSelected ? null : Colors.white,
+                        borderRadius: BorderRadius.circular(18),
+                        border: Border.all(
+                          color: isSelected
+                              ? const Color(0xFF0F172A)
+                              : const Color(0xFFE2E8F0),
+                          width: isSelected ? 1.8 : 1.0,
+                        ),
+                        boxShadow: isSelected
+                            ? const [
+                                BoxShadow(
+                                  color: Color(0x180F172A),
+                                  blurRadius: 14,
+                                  offset: Offset(0, 4),
+                                ),
+                              ]
+                            : const [
+                                BoxShadow(
+                                  color: Color(0x06000000),
+                                  blurRadius: 6,
+                                  offset: Offset(0, 2),
+                                ),
+                              ],
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Top Mini-Badge & Selection indicator
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              // Badge (e.g. Quickest / Best Value)
+                              if (tier.badgeText != null)
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 5,
+                                    vertical: 2,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: isSelected
+                                        ? const Color(0xFF0F172A)
+                                        : const Color(0xFFF1F5F9),
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  child: Text(
+                                    tier.badgeText!,
+                                    style: TextStyle(
+                                      fontSize: 7.5,
+                                      fontWeight: FontWeight.w900,
+                                      color: isSelected
+                                          ? Colors.white
+                                          : const Color(0xFF475569),
+                                      letterSpacing: 0.3,
+                                    ),
+                                  ),
+                                )
+                              else
+                                const SizedBox(height: 14),
+
+                              // Capacity Indicator or Checkmark
+                              if (isSelected)
+                                Container(
+                                  width: 16,
+                                  height: 16,
+                                  decoration: const BoxDecoration(
+                                    color: Color(0xFF0F172A),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(
+                                    Icons.check_rounded,
+                                    size: 11,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              else
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(
+                                      Icons.person_rounded,
+                                      size: 11,
+                                      color: Color(0xFF94A3B8),
+                                    ),
+                                    Text(
+                                      '${tier.capacity}',
+                                      style: const TextStyle(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w700,
+                                        color: Color(0xFF94A3B8),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                            ],
+                          ),
+
+                          const Spacer(),
+
+                          // Graphic / Illustration
+                          Center(
+                            child: SizedBox(
+                              height: 52,
+                              child: Center(child: tier.illustration),
+                            ),
+                          ),
+
+                          // const Spacer(),
+
+                          // ETA tag (e.g. 3 min away)
+                          // Text(
+                          //   '${tier.etaMins} min away',
+                          //   style: const TextStyle(
+                          //     fontSize: 10.5,
+                          //     fontWeight: FontWeight.w600,
+                          //     color: Color(0xFF64748B),
+                          //   ),
+                          // ),
+                          // const SizedBox(height: 1),
+
+                          // Tier Name (e.g. Bike / Economy)
+                          Text(
+                            tier.name,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w900,
+                              color: Color(0xFF0F172A),
+                              letterSpacing: -0.2,
+                            ),
+                          ),
                           const SizedBox(height: 2),
 
-                          // Price row with lightning icon if active
+                          // Price display
                           Row(
                             children: [
                               if (tier.hasLightning) ...[
                                 const Icon(
                                   Icons.bolt_rounded,
-                                  color: Color(0xFFFFB300),
-                                  size: 14,
+                                  color: Color(0xFFF59E0B),
+                                  size: 13,
                                 ),
                                 const SizedBox(width: 1),
                               ],
                               Text(
                                 tier.id == 'fastest'
-                                    ? 'from Rs. ${fare.toStringAsFixed(0)}'
-                                    : 'Rs. ${fare.toStringAsFixed(0)}',
+                                    ? 'from Rs. ${tierFare.toStringAsFixed(0)}'
+                                    : 'Rs. ${tierFare.toStringAsFixed(0)}',
                                 style: const TextStyle(
                                   fontSize: 12.5,
-                                  fontWeight: FontWeight.w800,
+                                  fontWeight: FontWeight.w900,
                                   color: Color(0xFF0F172A),
                                 ),
                               ),
@@ -500,83 +635,170 @@ class _RideBookingSheetState extends State<RideBookingSheet> {
                 },
               ),
             ),
-            const SizedBox(height: 18),
 
-            // 5. Bottom Action Bar (Payment Icon, Request Button, Settings/Filters Icon)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Row(
-                children: [
-                  // Teal Payment Card / Cash Stack Icon Button
-                  InkWell(
-                    onTap: _showPaymentSelection,
-                    borderRadius: BorderRadius.circular(14),
-                    child: Container(
-                      width: 48,
-                      height: 48,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF1F5F9),
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      child: Center(
-                        child: Container(
-                          width: 28,
-                          height: 20,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF0D9488), // Vibrant teal
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: const Center(
-                            child: Icon(
-                              Icons.circle,
-                              color: Colors.white,
-                              size: 7,
-                            ),
-                          ),
-                        ),
-                      ),
+            const SizedBox(height: 10),
+
+            // 4. Selected Tier Feature Highlight Banner
+            if (selectedTier.highlightText != null)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 18),
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 7,
+                  ),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF8FAFC),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: const Color(0xFFE2E8F0),
+                      width: 0.8,
                     ),
                   ),
-                  const SizedBox(width: 14),
-
-                  // Vibrant Orange "Request" Button
-                  Expanded(
-                    child: SizedBox(
-                      height: 52,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(
-                            0xFFFF4824,
-                          ), // Vibrant Orange Red
-                          foregroundColor: Colors.white,
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.shield_outlined,
+                        size: 14,
+                        color: Color(0xFF10B981),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          selectedTier.highlightText!,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 11.5,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFF334155),
                           ),
                         ),
-                        onPressed: () {
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+            const SizedBox(height: 14),
+
+            // 5. Request Action Button
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 18),
+              child: SizedBox(
+                width: double.infinity,
+                height: 52,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    // backgroundColor: const Color(
+                    //   0xFFFF4824,
+                    // ), // Vibrant RideNest Orange
+                    backgroundColor: AppColor.secondary,
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(18),
+                      side: BorderSide.none,
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 18),
+                  ),
+
+                  onPressed: _isRequesting
+                      ? null
+                      : () {
+                          HapticFeedback.mediumImpact();
+                          setState(() => _isRequesting = true);
                           widget.onConfirmBooking(
                             selectedTier: selectedTier,
-                            fareNpr: fareNpr,
-                            paymentMethod: _selectedPaymentMethod,
+                            fareNpr: fare,
+                            paymentMethod: 'Cash',
                           );
                         },
-                        child: const Text(
-                          'Request',
-                          style: TextStyle(
-                            fontSize: 17,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: -0.2,
+                  child: _isRequesting
+                      ? const SizedBox(
+                          width: 22,
+                          height: 22,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2.5,
                           ),
+                        )
+                      : Row(
+                          children: [
+                            Text(
+                              'Request ${selectedTier.name}',
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: -0.2,
+                              ),
+                            ),
+                            const Spacer(),
+
+                            // Fare Pill inside Button
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 4.5,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.black.withValues(alpha: 0.16),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    'Rs. ${fare.toStringAsFixed(0)}',
+                                    style: const TextStyle(
+                                      fontSize: 14.5,
+                                      fontWeight: FontWeight.w900,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  const Icon(
+                                    Icons.arrow_forward_rounded,
+                                    size: 15,
+                                    color: Colors.white,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 14),
-                ],
+                ),
               ),
             ),
-            const SizedBox(height: 18),
+
+            const SizedBox(height: 10),
+
+            // 6. Trust & Safety Guarantee Line
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 6),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: const [
+                    Icon(
+                      Icons.verified_user_rounded,
+                      size: 12,
+                      color: Color(0xFF64748B),
+                    ),
+                    SizedBox(width: 4),
+                    Text(
+                      'RideNest Safety Shield: Insured trips • Verified partners • 24/7 SOS',
+                      style: TextStyle(
+                        fontSize: 10.5,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF64748B),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ],
         ),
       ),

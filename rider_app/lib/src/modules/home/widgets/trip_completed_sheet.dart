@@ -52,7 +52,7 @@ class _TripCompletedSheetState extends State<TripCompletedSheet> {
         ? widget.driver!.licensePlate
         : 'BA 2 PA 4092';
 
-    final rating = (widget.driver != null && widget.driver!.rating > 0)
+    final rating = (widget.driver != null && widget.driver!.rating >= 0)
         ? widget.driver!.rating
         : 4.9;
 
@@ -238,49 +238,6 @@ class _TripCompletedSheetState extends State<TripCompletedSheet> {
                                   ),
                                 ),
                               ),
-                              const Spacer(),
-                              InkWell(
-                                onTap: () {
-                                  ToastOverlay.show(
-                                    'Receipt downloaded to device',
-                                    type: ToastType.success,
-                                  );
-                                },
-                                borderRadius: BorderRadius.circular(12),
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                    vertical: 6,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFFF8FAFC),
-                                    borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(
-                                      color: const Color(0xFFE2E8F0),
-                                      width: 1,
-                                    ),
-                                  ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: const [
-                                      Text(
-                                        'Receipt',
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w800,
-                                          color: Color(0xFF0F172A),
-                                        ),
-                                      ),
-                                      SizedBox(width: 6),
-                                      Icon(
-                                        Icons.receipt_long_rounded,
-                                        size: 15,
-                                        color: Color(0xFF64748B),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
                             ],
                           ),
                           const SizedBox(height: 6),
@@ -295,15 +252,6 @@ class _TripCompletedSheetState extends State<TripCompletedSheet> {
                                   fontWeight: FontWeight.w900,
                                   color: Color(0xFF0F172A),
                                   letterSpacing: -0.5,
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              const Text(
-                                '(Standard Nest Tier)',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: Color(0xFF94A3B8),
                                 ),
                               ),
                             ],
@@ -449,36 +397,6 @@ class _TripCompletedSheetState extends State<TripCompletedSheet> {
                                         color: Color(0xFF64748B),
                                       ),
                                     ),
-                                    const SizedBox(height: 4),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 6,
-                                        vertical: 2,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: const Color(0xFFF1F5F9),
-                                        borderRadius: BorderRadius.circular(6),
-                                      ),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: const [
-                                          Icon(
-                                            Icons.two_wheeler_rounded,
-                                            size: 12,
-                                            color: Color(0xFF0D9488),
-                                          ),
-                                          SizedBox(width: 4),
-                                          Text(
-                                            'Certified Nest Pilot',
-                                            style: TextStyle(
-                                              fontSize: 10.5,
-                                              fontWeight: FontWeight.w700,
-                                              color: Color(0xFF0D9488),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
                                   ],
                                 ),
                               ),
@@ -564,111 +482,6 @@ class _TripCompletedSheetState extends State<TripCompletedSheet> {
                               );
                             }),
                           ),
-                          const SizedBox(height: 16),
-
-                          // "WHAT WENT REMARKABLY WELL?" Tag Chips
-                          Align(
-                            alignment: Alignment.centerLeft,
-                            child: const Text(
-                              'WHAT WENT REMARKABLY WELL?',
-                              style: TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w800,
-                                color: Color(0xFF64748B),
-                                letterSpacing: 0.5,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 10),
-
-                          Wrap(
-                            spacing: 8,
-                            runSpacing: 8,
-                            children: _compliments.map((compliment) {
-                              final isSelected = _selectedCompliments.contains(
-                                compliment,
-                              );
-                              return GestureDetector(
-                                onTap: () {
-                                  setState(() {
-                                    if (isSelected) {
-                                      _selectedCompliments.remove(compliment);
-                                    } else {
-                                      _selectedCompliments.add(compliment);
-                                    }
-                                  });
-                                },
-                                child: AnimatedContainer(
-                                  duration: const Duration(milliseconds: 150),
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                    vertical: 7,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: isSelected
-                                        ? const Color(
-                                            0xFF0F172A,
-                                          ) // Dark slate selected
-                                        : const Color(0xFFF1F5F9), // Light grey
-                                    borderRadius: BorderRadius.circular(16),
-                                  ),
-                                  child: Text(
-                                    compliment,
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w700,
-                                      color: isSelected
-                                          ? Colors.white
-                                          : const Color(0xFF334155),
-                                    ),
-                                  ),
-                                ),
-                              );
-                            }).toList(),
-                          ),
-                          const SizedBox(height: 18),
-
-                          // "ADD A TIP FOR BIKASH (100% TO PILOT)"
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                'ADD A TIP FOR $driverFirstName (100% TO PILOT)',
-                                style: const TextStyle(
-                                  fontSize: 10.5,
-                                  fontWeight: FontWeight.w800,
-                                  color: Color(0xFF64748B),
-                                  letterSpacing: 0.4,
-                                ),
-                              ),
-                              Text(
-                                _selectedTipAmount == 0
-                                    ? 'No tip'
-                                    : 'Rs. $_selectedTipAmount',
-                                style: const TextStyle(
-                                  fontSize: 11.5,
-                                  fontWeight: FontWeight.w800,
-                                  color: Color(0xFFF97316),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 10),
-
-                          // Tip Selection Row: [No tip] [+ Rs. 10] [+ Rs. 20] [+ Rs. 50] [Custom]
-                          Row(
-                            children: [
-                              _buildTipChip(label: 'No tip', amount: 0),
-                              const SizedBox(width: 6),
-                              _buildTipChip(label: '+ Rs. 10', amount: 10),
-                              const SizedBox(width: 6),
-                              _buildTipChip(label: '+ Rs. 20', amount: 20),
-                              const SizedBox(width: 6),
-                              _buildTipChip(label: '+ Rs. 50', amount: 50),
-                              const SizedBox(width: 6),
-                              _buildTipChip(label: 'Custom', amount: -1),
-                            ],
-                          ),
                         ],
                       ),
                     ),
@@ -748,15 +561,6 @@ class _TripCompletedSheetState extends State<TripCompletedSheet> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    const Text(
-                                      '6:26 PM • PICKUP',
-                                      style: TextStyle(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w800,
-                                        color: Color(0xFF94A3B8),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 2),
                                     Text(
                                       pickupTitle,
                                       style: const TextStyle(
@@ -799,15 +603,6 @@ class _TripCompletedSheetState extends State<TripCompletedSheet> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    const Text(
-                                      '6:32 PM • DESTINATION',
-                                      style: TextStyle(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w800,
-                                        color: Color(0xFFD97706),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 2),
                                     Text(
                                       destTitle,
                                       style: const TextStyle(
@@ -826,91 +621,13 @@ class _TripCompletedSheetState extends State<TripCompletedSheet> {
                     ),
                     const SizedBox(height: 14),
 
-                    // 5. Secondary Options Row: [Report an issue] and [Find lost item]
-                    Row(
-                      children: [
-                        Expanded(
-                          child: SizedBox(
-                            height: 44,
-                            child: OutlinedButton.icon(
-                              style: OutlinedButton.styleFrom(
-                                side: const BorderSide(
-                                  color: Color(0xFFE2E8F0),
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(14),
-                                ),
-                              ),
-                              onPressed: () {
-                                ToastOverlay.show(
-                                  'Support ticket opened',
-                                  type: ToastType.normal,
-                                );
-                              },
-                              icon: const Icon(
-                                Icons.support_agent_rounded,
-                                size: 17,
-                                color: Color(0xFF0F172A),
-                              ),
-                              label: const Text(
-                                'Report an issue',
-                                style: TextStyle(
-                                  fontSize: 12.5,
-                                  fontWeight: FontWeight.w800,
-                                  color: Color(0xFF0F172A),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: SizedBox(
-                            height: 44,
-                            child: OutlinedButton.icon(
-                              style: OutlinedButton.styleFrom(
-                                side: const BorderSide(
-                                  color: Color(0xFFE2E8F0),
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(14),
-                                ),
-                              ),
-                              onPressed: () {
-                                ToastOverlay.show(
-                                  'Driver alerted about lost item request',
-                                  type: ToastType.normal,
-                                );
-                              },
-                              icon: const Icon(
-                                Icons.inventory_2_outlined,
-                                size: 17,
-                                color: Color(0xFF0F172A),
-                              ),
-                              label: const Text(
-                                'Find lost item',
-                                style: TextStyle(
-                                  fontSize: 12.5,
-                                  fontWeight: FontWeight.w800,
-                                  color: Color(0xFF0F172A),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 14),
-
                     // 6. Main Action: "Submit & Return to Home →"
                     SizedBox(
                       width: double.infinity,
                       height: 52,
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(
-                            0xFF062828,
-                          ), // Dark spruce navy
+                          backgroundColor: AppColor.secondary,
                           foregroundColor: Colors.white,
                           elevation: 0,
                           shape: RoundedRectangleBorder(

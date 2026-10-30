@@ -24,16 +24,10 @@ Future<void> configureRiderDependencies() async {
     () => AuthApiService(sl<ApiClient>()),
   );
   sl.registerLazySingleton<PlacesApiService>(
-    () => PlacesApiService(
-      apiClient: sl<ApiClient>(),
-      dio: sl<Dio>(),
-    ),
+    () => PlacesApiService(apiClient: sl<ApiClient>(), dio: sl<Dio>()),
   );
   sl.registerLazySingleton<RideApiService>(
-    () => RideApiService(
-      apiClient: sl<ApiClient>(),
-      dio: sl<Dio>(),
-    ),
+    () => RideApiService(apiClient: sl<ApiClient>(), dio: sl<Dio>()),
   );
 
   // ── Local Data Sources ─────────────────────────────────────────────────────
@@ -55,16 +49,17 @@ Future<void> configureRiderDependencies() async {
     () => PlacesRepo(
       api: sl<PlacesApiService>(),
       local: sl<RecentPlacesLocalDataSource>(),
+      storage: sl<LocalStorageService>(),
     ),
   );
-  sl.registerLazySingleton<RideRepo>(
-    () => RideRepo(api: sl<RideApiService>()),
-  );
+  sl.registerLazySingleton<RideRepo>(() => RideRepo(api: sl<RideApiService>()));
 
   sl.registerFactory<LoginCubit>(() => LoginCubit(sl<AuthRepo>()));
   sl.registerFactory<RegisterCubit>(() => RegisterCubit(sl<AuthRepo>()));
   sl.registerFactory<CurrentUserCubit>(() => CurrentUserCubit(sl<AuthRepo>()));
-  sl.registerFactory<RiderRideHistoryCubit>(() => RiderRideHistoryCubit(sl<RideRepo>()));
+  sl.registerFactory<RiderRideHistoryCubit>(
+    () => RiderRideHistoryCubit(sl<RideRepo>()),
+  );
   sl.registerFactory<RideSearchCubit>(() => RideSearchCubit(sl<PlacesRepo>()));
   sl.registerFactory<ActiveRideCubit>(
     () => ActiveRideCubit(
@@ -73,7 +68,6 @@ Future<void> configureRiderDependencies() async {
       authLocalDataSource: sl<AuthLocalDataSource>(),
     ),
   );
-
 
   // ── Router ─────────────────────────────────────────────────────────────────
   sl.registerLazySingleton<AppRouter>(

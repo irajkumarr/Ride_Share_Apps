@@ -44,11 +44,17 @@ class $AssetsCountryCodesGen {
 class $AssetsIconsGen {
   const $AssetsIconsGen();
 
+  /// File path: assets/icons/bike.png
+  AssetGenImage get bike => const AssetGenImage('assets/icons/bike.png');
+
+  /// File path: assets/icons/car.png
+  AssetGenImage get car => const AssetGenImage('assets/icons/car.png');
+
   /// File path: assets/icons/ridenest_logo.png
   AssetGenImage get ridenestLogo => const AssetGenImage('assets/icons/ridenest_logo.png');
 
   /// List of all assets
-  List<AssetGenImage> get values => [ridenestLogo];
+  List<AssetGenImage> get values => [bike, car, ridenestLogo];
 }
 
 class $AssetsImagesGen {

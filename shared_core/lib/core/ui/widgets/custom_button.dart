@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import 'custom_circular_progress_indicator.dart';
 import '../../utils/colors.dart';
 import '../../utils/font.dart';
@@ -76,9 +77,7 @@ class CustomButton extends StatelessWidget {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(borderRadius),
                   ),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
                 ),
                 child: innerChild,
               )
@@ -90,6 +89,7 @@ class CustomButton extends StatelessWidget {
                   minimumSize: Size(buttonWidth, height),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(borderRadius),
+                    side: BorderSide.none,
                   ),
                   padding: const EdgeInsets.symmetric(
                     horizontal: 16,

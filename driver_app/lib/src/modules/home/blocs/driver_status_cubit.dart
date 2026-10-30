@@ -161,7 +161,12 @@ class DriverStatusCubit extends Cubit<DriverStatusState> {
   void _startLocationPings() {
     _stopLocationPings();
 
-    _positionStreamSub = _locationService.getLocationStream().listen((pos) {
+    _positionStreamSub = _locationService.getLocationStream(
+      enableBackgroundNotification: true,
+      notificationTitle: "RideNest Pro Online",
+      notificationText: "Continuous background GPS is tracking your location for rides.",
+      intervalDurationInSeconds: 5,
+    ).listen((pos) {
       emit(state.copyWith(lastPosition: pos));
       _sendLocationUpdate(pos);
     });
