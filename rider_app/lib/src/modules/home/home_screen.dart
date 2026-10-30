@@ -12,6 +12,8 @@ import 'blocs/ride_search_cubit.dart';
 import 'widgets/active_driver_card.dart';
 import 'widgets/destination_search_sheet.dart';
 import 'widgets/driver_searching_view.dart';
+import 'widgets/map_location_picker_sheet.dart';
+import 'widgets/pickup_address_picker_sheet.dart';
 import 'widgets/ride_booking_sheet.dart';
 import 'widgets/ridenest_illustrations.dart';
 import 'widgets/trip_completed_sheet.dart';
@@ -58,12 +60,57 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   @override
   void dispose() {
+    _mapController = null;
     _radarAnimation.dispose();
     _routeAnimationController?.dispose();
     super.dispose();
   }
 
-  Future<void> _fetchCurrentLocation() async {
+  bool get _isMapMounted {
+    if (!mounted || _mapController == null) return false;
+    final state = context.read<ActiveRideCubit>().state;
+    return state is RoutePreviewReady ||
+        state is DriverSearching ||
+        state is DriverAssignedState ||
+        state is TripCompletedState;
+  }
+
+  Future<void> _safeAnimateCamera(CameraUpdate update) async {
+    if (!_isMapMounted) return;
+    try {
+      await _mapController?.animateCamera(update);
+    } catch (_) {
+      _mapController = null;
+    }
+  }
+
+  Future<void> _fetchCurrentLocation({bool forceGps = false}) async {
+    final placesRepo = sl<PlacesRepo>();
+
+    // 1. If not forcing GPS, check if user previously chose and saved a custom pickup address.
+    if (!forceGps) {
+      final savedAddress = placesRepo.getSavedPickupAddress();
+      if (savedAddress != null) {
+        if (mounted) {
+          setState(() {
+            _isLoadingLocation = false;
+            _currentAddressModel = savedAddress;
+            _currentLocation = LatLng(
+              savedAddress.coordinates.latitude,
+              savedAddress.coordinates.longitude,
+            );
+          });
+          context.read<RideSearchCubit>().setPickup(savedAddress);
+          _safeAnimateCamera(
+            CameraUpdate.newCameraPosition(
+              CameraPosition(target: _currentLocation, zoom: 16.2),
+            ),
+          );
+        }
+        return;
+      }
+    }
+
     setState(() => _isLoadingLocation = true);
     final locationService = sl<LocationService>();
     final hasPermission = await locationService.ensurePermission();
@@ -75,26 +122,27 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         _currentLocation = currentLatLng;
 
         // Reverse geocode strictly via API
-        final placesRepo = sl<PlacesRepo>();
         try {
           final resolvedAddress = await placesRepo.reverseGeocode(pos);
           if (mounted) {
+            final address =
+                resolvedAddress ??
+                AddressModel(
+                  id: 'current_gps',
+                  title: 'Current Location',
+                  formattedAddress:
+                      '${pos.latitude.toStringAsFixed(4)}, ${pos.longitude.toStringAsFixed(4)}',
+                  coordinates: pos,
+                  country: 'Nepal',
+                );
             setState(() {
               _isLoadingLocation = false;
-              _currentAddressModel =
-                  resolvedAddress ??
-                  AddressModel(
-                    id: 'current_gps',
-                    title: 'Current Location',
-                    formattedAddress:
-                        '${pos.latitude.toStringAsFixed(4)}, ${pos.longitude.toStringAsFixed(4)}',
-                    coordinates: pos,
-                    country: 'Nepal',
-                  );
+              _currentAddressModel = address;
             });
-            context.read<RideSearchCubit>().setPickup(_currentAddressModel!);
+            context.read<RideSearchCubit>().setPickup(address);
+            await placesRepo.saveSavedPickupAddress(address);
 
-            _mapController?.animateCamera(
+            _safeAnimateCamera(
               CameraUpdate.newCameraPosition(
                 CameraPosition(target: _currentLocation, zoom: 16.2),
               ),
@@ -108,6 +156,40 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     if (mounted) {
       setState(() => _isLoadingLocation = false);
     }
+  }
+
+  Future<void> _openPickupLocationPicker() async {
+    final chosenAddress = await PickupAddressPickerSheet.show(
+      context,
+      currentCoordinates: _currentLocation,
+      currentAddress: _currentAddressModel,
+    );
+
+    if (chosenAddress != null && mounted) {
+      await _onPickupAddressChosen(chosenAddress);
+    }
+  }
+
+  Future<void> _onPickupAddressChosen(AddressModel address) async {
+    setState(() {
+      _currentAddressModel = address;
+      _currentLocation = LatLng(
+        address.coordinates.latitude,
+        address.coordinates.longitude,
+      );
+    });
+
+    // Save chosen address to persistent local storage so next time app opens it shows this address
+    await sl<PlacesRepo>().saveSavedPickupAddress(address);
+
+    // Update RideSearchCubit so subsequent destination searches use this pickup
+    context.read<RideSearchCubit>().setPickup(address);
+
+    _safeAnimateCamera(
+      CameraUpdate.newCameraPosition(
+        CameraPosition(target: _currentLocation, zoom: 16.2),
+      ),
+    );
   }
 
   void _openSearchSheet({bool focusDestination = true}) {
@@ -355,15 +437,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     if (state.booking.status == RideStatus.tripInProgress) {
       // In trip: Zoom in closely on driver position with bike navigation tracking (zoom 17.5)
       // so the rider can clearly see the real-time driver bike moving along the streets
-      _mapController
-          ?.animateCamera(
-            CameraUpdate.newCameraPosition(
-              CameraPosition(target: dPos, zoom: 17.5, tilt: 30.0),
-            ),
-          )
-          .then((_) {
-            _updateMapScreenPositions();
-          });
+      _safeAnimateCamera(
+        CameraUpdate.newCameraPosition(
+          CameraPosition(target: dPos, zoom: 17.5, tilt: 30.0),
+        ),
+      ).then((_) {
+        _updateMapScreenPositions();
+      });
     } else if (state.booking.status == RideStatus.driverArriving) {
       // Driver arrived at pickup: frame tightly around pickup and driver (zoom ~17.0)
       _fitRouteBounds([dPos, pLatLng], pickup: dPos, destination: pLatLng);
@@ -435,7 +515,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     LatLng? destination,
     double bottomOffset = 0,
   }) {
-    if (_mapController == null) return;
+    if (!_isMapMounted) return;
 
     final List<LatLng> targetPoints = [
       if (pickup != null) pickup,
@@ -450,17 +530,15 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     // With map padding dynamically configured on the GoogleMap widget
     // (with bottom equal to sheet height + safe margins, and top equal to status bar + header),
     // CameraUpdate.newLatLngBounds centers all points perfectly inside the visible viewport.
-    _mapController
-        ?.animateCamera(CameraUpdate.newLatLngBounds(bounds, 48.0))
-        .then((_) {
-          _updateMapScreenPositions();
-        });
+    _safeAnimateCamera(CameraUpdate.newLatLngBounds(bounds, 48.0)).then((_) {
+      _updateMapScreenPositions();
+    });
   }
 
   /// Calculates the physical screen coordinates of key coordinates (pickup, destination, driver)
   /// so that floating pins and callouts track seamlessly with the map rather than being fixed.
   Future<void> _updateMapScreenPositions() async {
-    if (_mapController == null || !mounted || _isUpdatingOffsets) return;
+    if (!_isMapMounted || !mounted || _isUpdatingOffsets) return;
     _isUpdatingOffsets = true;
 
     try {
@@ -540,15 +618,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     _fullRoutePoints.clear();
     context.read<RideSearchCubit>().clearDestination();
     context.read<ActiveRideCubit>().cancelRide();
+    _mapController = null;
     setState(() {
       _markers.clear();
       _polylines.clear();
     });
-    _mapController?.animateCamera(
-      CameraUpdate.newCameraPosition(
-        CameraPosition(target: _currentLocation, zoom: 16.0),
-      ),
-    );
   }
 
   /// Cleanly completes and resets after a finished trip without calling cancel
@@ -557,15 +631,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     _fullRoutePoints.clear();
     context.read<RideSearchCubit>().clearDestination();
     context.read<ActiveRideCubit>().resetTrip();
+    _mapController = null;
     setState(() {
       _markers.clear();
       _polylines.clear();
     });
-    _mapController?.animateCamera(
-      CameraUpdate.newCameraPosition(
-        CameraPosition(target: _currentLocation, zoom: 16.0),
-      ),
-    );
   }
 
   void _onRideCancelled(String message) {
@@ -573,15 +643,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     _fullRoutePoints.clear();
     context.read<RideSearchCubit>().clearDestination();
     context.read<ActiveRideCubit>().resetTrip();
+    _mapController = null;
     setState(() {
       _markers.clear();
       _polylines.clear();
     });
-    _mapController?.animateCamera(
-      CameraUpdate.newCameraPosition(
-        CameraPosition(target: _currentLocation, zoom: 16.0),
-      ),
-    );
     AppAlerts.warning(context, message);
   }
 
@@ -610,7 +676,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             } else if (state is TripCompletedState) {
               // Stay on map and present TripCompletedSheet
             } else if (state is RideCancelledState) {
+              _mapController = null;
               _onRideCancelled(state.message);
+            } else if (state is ActiveRideInitial) {
+              _mapController = null;
             }
           },
         ),
@@ -1821,7 +1890,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                 } else if (activeState is DriverAssignedState) {
                                   _onDriverUpdated(activeState);
                                 } else {
-                                  _fetchCurrentLocation();
+                                  _fetchCurrentLocation(forceGps: true);
                                 }
                               },
                             ),
@@ -1992,13 +2061,26 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   Widget _buildLocationPill() {
     final title = _currentAddressModel?.title ?? 'Your location';
     return InkWell(
-      onTap: () => _openSearchSheet(focusDestination: false),
+      onTap: _openPickupLocationPicker,
       borderRadius: BorderRadius.circular(20),
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 4),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
+            Container(
+              padding: const EdgeInsets.all(4),
+              decoration: const BoxDecoration(
+                color: Color(0xFFEFF6FF),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.place_rounded,
+                size: 14,
+                color: Colors.black,
+              ),
+            ),
+            const SizedBox(width: 6),
             Flexible(
               child: Text(
                 title.length > 25 ? '${title.substring(0, 25)}...' : title,

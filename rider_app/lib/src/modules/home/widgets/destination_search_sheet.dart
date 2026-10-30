@@ -3,9 +3,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:shared_core/shared_core.dart';
 
+import '../../../data/repo/places_repo.dart';
 import '../blocs/ride_search_cubit.dart';
+import 'map_location_picker_sheet.dart';
 
 /// Modern ride-hailing address search sheet.
 /// Pickup + destination in one route card, saved places as quick chips,
@@ -66,12 +69,9 @@ class _DestinationSearchSheetState extends State<DestinationSearchSheet> {
     super.initState();
     final cubit = context.read<RideSearchCubit>();
     final currentTitle = cubit.currentPickup?.title;
-    final defaultPickup =
-        (currentTitle == null ||
-            currentTitle == 'Your location' ||
-            currentTitle == 'Current Location')
-        ? 'Udaypur fresh butcher shop'
-        : currentTitle;
+    final defaultPickup = (currentTitle != null && currentTitle.isNotEmpty)
+        ? currentTitle
+        : 'Your location';
     _pickupController = TextEditingController(text: defaultPickup);
     _destinationController = TextEditingController(
       text: cubit.currentDestination?.title ?? '',
@@ -129,6 +129,7 @@ class _DestinationSearchSheetState extends State<DestinationSearchSheet> {
     if (isPickup) {
       _pickupController.text = place.title;
       cubit.setPickup(place);
+      sl<PlacesRepo>().saveSavedPickupAddress(place);
       if (_destinationController.text.trim().isEmpty) {
         setState(() => _isSearchingPickup = false);
         _destinationFocus.requestFocus();
@@ -139,6 +140,29 @@ class _DestinationSearchSheetState extends State<DestinationSearchSheet> {
       _destinationController.text = place.title;
       cubit.setDestination(place);
       Navigator.of(context).pop();
+    }
+  }
+
+  Future<void> _pickOnMap() async {
+    HapticFeedback.lightImpact();
+    final cubit = context.read<RideSearchCubit>();
+    final targetCoords = _isSearchingPickup
+        ? (cubit.currentPickup?.coordinates ?? widget.currentPosition)
+        : (cubit.currentDestination?.coordinates ?? widget.currentPosition);
+    final targetLatLng = targetCoords != null
+        ? LatLng(targetCoords.latitude, targetCoords.longitude)
+        : const LatLng(27.7172, 85.3240);
+
+    final address = await MapLocationPickerSheet.show(
+      context,
+      initialLocation: targetLatLng,
+      title: _isSearchingPickup
+          ? 'Choose Pickup on Map'
+          : 'Choose Destination on Map',
+    );
+
+    if (address != null && mounted) {
+      _selectPlace(address, isPickup: _isSearchingPickup);
     }
   }
 
@@ -266,6 +290,73 @@ class _DestinationSearchSheetState extends State<DestinationSearchSheet> {
                 //   ),
                 // ),
                 const Divider(height: 16, color: Color(0xFFF1F5F9)),
+
+                // Map Picker Shortcut Bar
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+                  child: Material(
+                    color: const Color(0xFFF8FAFC),
+                    borderRadius: BorderRadius.circular(14),
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(14),
+                      onTap: _pickOnMap,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 10,
+                        ),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(
+                            color: const Color(0xFFE2E8F0),
+                            width: 1.2,
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 30,
+                              height: 30,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: const Color(0xFFE2E8F0),
+                                  width: 1,
+                                ),
+                              ),
+                              child: const Center(
+                                child: Icon(
+                                  Icons.map_rounded,
+                                  size: 16,
+                                  color: Color(0xFF10B981),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                _isSearchingPickup
+                                    ? 'Choose pickup on map'
+                                    : 'Choose destination on map',
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w700,
+                                  color: Color(0xFF0F172A),
+                                ),
+                              ),
+                            ),
+                            const Icon(
+                              Icons.chevron_right_rounded,
+                              size: 18,
+                              color: Color(0xFF94A3B8),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
 
                 // 4. Smooth Scrollable Results / Recents Container
                 Expanded(
