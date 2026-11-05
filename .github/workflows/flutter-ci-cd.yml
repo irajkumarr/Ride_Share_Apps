@@ -1,0 +1,148 @@
+name: Flutter Apps CI/CD
+
+on:
+  push:
+    branches: [ "main" ]
+    tags: [ "v*.*.*" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+    inputs:
+      build_apks:
+        description: "Build and upload release APKs"
+        required: false
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+jobs:
+  test-and-lint:
+    name: Test & Analyze (${{ matrix.name }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Rider App
+            path: rider_app
+          - name: Driver App
+            path: driver_app
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Resolve shared_core dependencies
+        run: |
+          cd shared_core
+          flutter pub get
+
+      - name: Resolve app dependencies
+        run: |
+          cd ${{ matrix.path }}
+          flutter pub get
+
+      - name: Analyze code
+        run: |
+          cd ${{ matrix.path }}
+          flutter analyze --no-fatal-infos --no-fatal-warnings
+
+      - name: Run unit & widget tests
+        run: |
+          cd ${{ matrix.path }}
+          flutter test --reporter expanded
+
+  build-apks:
+    name: Build APK (${{ matrix.name }})
+    needs: test-and-lint
+    if: github.event_name != 'pull_request' || (github.event_name == 'workflow_dispatch' && inputs.build_apks)
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Rider App
+            path: rider_app
+            artifact_name: rider-app-release
+          - name: Driver App
+            path: driver_app
+            artifact_name: driver-app-release
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Resolve dependencies
+        run: |
+          cd shared_core
+          flutter pub get
+          cd ../${{ matrix.path }}
+          flutter pub get
+
+      - name: Build release APK
+        run: |
+          cd ${{ matrix.path }}
+          flutter build apk --release
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}-apk
+          path: ${{ matrix.path }}/build/app/outputs/flutter-apk/app-release.apk
+          retention-days: 30
+
+  release:
+    name: Create GitHub Release
+    needs: build-apks
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download all APK artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: apk-artifacts
+
+      - name: Prepare release assets
+        run: |
+          mkdir -p release-files
+          cp apk-artifacts/rider-app-release-apk/app-release.apk release-files/rider-app-${{ github.ref_name }}.apk
+          cp apk-artifacts/driver-app-release-apk/app-release.apk release-files/driver-app-${{ github.ref_name }}.apk
+
+      - name: Create Release and attach APKs
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release-files/*.apk
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+

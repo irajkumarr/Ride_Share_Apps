@@ -8,7 +8,6 @@ import 'package:driver_app/src/data/remote/dto/vehicle_dto.dart';
 import 'package:driver_app/src/modules/auth/blocs/current_user_cubit.dart';
 import 'package:driver_app/src/modules/home/blocs/driver_status_cubit.dart';
 import 'package:driver_app/src/modules/vehicle/blocs/vehicle_cubit.dart';
-import 'package:shared_core/core/ui/widgets/common/skeleton_loader.dart';
 import 'package:shared_core/shared_core.dart';
 
 /// Minimal, modern Driver Profile & Fleet Settings screen.

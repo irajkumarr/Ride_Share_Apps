@@ -5,7 +5,7 @@ import '../remote/ride_api_service.dart';
 class RideRepo {
   final RideApiService _api;
 
-  RideRepo({required RideApiService api}) : _api = api;
+  RideRepo({required this._api});
 
   Future<RouteModel> getRouteBetweenCoordinates({
     required LatLngModel origin,

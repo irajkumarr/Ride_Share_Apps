@@ -241,7 +241,7 @@ class _RegisterScreenState extends State<RegisterScreen> with FormMixin {
                   width: 18,
                   height: 18,
                   fit: BoxFit.contain,
-                  errorBuilder: (_, __, ___) => const Icon(
+                  errorBuilder: (_, _, _) => const Icon(
                     Icons.local_taxi_rounded,
                     color: Color(0xFFFF3333),
                     size: 16,

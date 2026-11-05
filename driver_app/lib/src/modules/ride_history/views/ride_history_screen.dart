@@ -4,7 +4,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:driver_app/src/data/remote/dto/driver_ride_history_dto.dart';
 import 'package:driver_app/src/modules/ride_history/blocs/driver_ride_history_cubit.dart';
-import 'package:shared_core/core/ui/widgets/common/skeleton_loader.dart';
 import 'package:shared_core/shared_core.dart';
 
 /// Minimal, modern Ride History & Earnings screen for the authenticated driver.

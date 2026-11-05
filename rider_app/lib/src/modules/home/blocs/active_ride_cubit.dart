@@ -65,18 +65,15 @@ class ActiveRideCubit extends BaseCubit<ActiveRideState> {
 
   Timer? _simulationTimer;
   Timer? _fallbackAcceptanceTimer;
-  int _simulationStep = 0;
+  final int _simulationStep = 0;
   List<LatLngModel> _currentPolylinePoints = [];
   String? _currentRideId;
 
   ActiveRideCubit({
-    required RideRepo rideRepo,
-    required WebSocketService webSocketService,
-    required AuthLocalDataSource authLocalDataSource,
-  }) : _rideRepo = rideRepo,
-       _webSocketService = webSocketService,
-       _authLocalDataSource = authLocalDataSource,
-       super(ActiveRideInitial());
+    required this._rideRepo,
+    required this._webSocketService,
+    required this._authLocalDataSource,
+  }) : super(ActiveRideInitial());
 
   Future<void> checkActiveRide() async {
     try {
@@ -128,7 +125,7 @@ class ActiveRideCubit extends BaseCubit<ActiveRideState> {
         final wsUrl =
             dotenv.env['WS_URL'] ??
             (dotenv.env['BASE_URL'] != null
-                ? dotenv.env['BASE_URL']!.replaceFirst('http', 'ws') + '/ws'
+                ? '${dotenv.env['BASE_URL']!.replaceFirst('http', 'ws')}/ws'
                 : 'ws://localhost:8080/ws');
         final token = await _authLocalDataSource.getAccessToken();
 
@@ -250,7 +247,7 @@ class ActiveRideCubit extends BaseCubit<ActiveRideState> {
     final wsUrl =
         dotenv.env['WS_URL'] ??
         (dotenv.env['BASE_URL'] != null
-            ? dotenv.env['BASE_URL']!.replaceFirst('http', 'ws') + '/ws'
+            ? '${dotenv.env['BASE_URL']!.replaceFirst('http', 'ws')}/ws'
             : 'ws://localhost:8080/ws');
     final token = await _authLocalDataSource.getAccessToken();
 

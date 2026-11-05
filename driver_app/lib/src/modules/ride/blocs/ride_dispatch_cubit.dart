@@ -84,13 +84,10 @@ class RideDispatchError extends RideDispatchState {
 
 class RideDispatchCubit extends Cubit<RideDispatchState> {
   RideDispatchCubit({
-    required DriverRideApiService driverRideApi,
-    required WebSocketService webSocketService,
-    required DriverStatusCubit driverStatusCubit,
-  }) : _driverRideApi = driverRideApi,
-       _webSocketService = webSocketService,
-       _driverStatusCubit = driverStatusCubit,
-       super(RideDispatchIdle());
+    required this._driverRideApi,
+    required this._webSocketService,
+    required this._driverStatusCubit,
+  }) : super(RideDispatchIdle());
 
   final DriverRideApiService _driverRideApi;
   final WebSocketService _webSocketService;

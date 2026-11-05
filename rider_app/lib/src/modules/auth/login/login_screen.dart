@@ -104,11 +104,11 @@ class _LoginScreenState extends State<LoginScreen> with FormMixin {
                         child: Image.asset(
                           'assets/icons/ridenest_logo.png',
                           fit: BoxFit.contain,
-                          errorBuilder: (_, __, ___) => Image.asset(
+                          errorBuilder: (_, _, _) => Image.asset(
                             'assets/icons/ridenest_logo.png',
                             package: 'shared_core',
                             fit: BoxFit.contain,
-                            errorBuilder: (_, __, ___) => const Icon(
+                            errorBuilder: (_, _, _) => const Icon(
                               Icons.location_on_rounded,
                               color: Color(0xFFFF3B30),
                               size: 32,

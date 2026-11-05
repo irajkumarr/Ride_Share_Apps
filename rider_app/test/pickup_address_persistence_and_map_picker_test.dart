@@ -1,4 +1,3 @@
-import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -9,8 +8,6 @@ import 'package:rider_app/src/data/repo/places_repo.dart';
 import 'package:rider_app/src/modules/home/blocs/ride_search_cubit.dart';
 import 'package:rider_app/src/modules/home/widgets/destination_search_sheet.dart';
 import 'package:rider_app/src/modules/home/widgets/pickup_address_picker_sheet.dart';
-import 'package:shared_core/models/location/address_model.dart';
-import 'package:shared_core/models/location/lat_lng_model.dart';
 import 'package:shared_core/shared_core.dart';
 
 class MockLocalStorageService implements LocalStorageService {

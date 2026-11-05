@@ -111,9 +111,7 @@ class RideApiService {
   final ApiClient _apiClient;
   final Dio _dio;
 
-  RideApiService({required ApiClient apiClient, required Dio dio})
-      : _apiClient = apiClient,
-        _dio = dio;
+  RideApiService({required this._apiClient, required this._dio});
 
   /// Calculates route between two points strictly via OSRM routing API.
   Future<RouteModel> getRouteBetweenCoordinates({
@@ -179,7 +177,7 @@ class RideApiService {
           : request.destination.title,
       'vehicleType': backendVehicleType,
       'estimatedFare': request.fareNpr,
-      'distanceKm': request.route != null ? (request.route!.distanceInMeters / 1000.0) : null,
+      'distanceKm': (request.route.distanceInMeters / 1000.0),
     };
 
     AppLogger.info('Sending ride request to API: $payload');
@@ -205,7 +203,7 @@ class RideApiService {
 
   Future<String?> cancelRide(String rideId) async {
     final response = await _apiClient.post<Map<String, dynamic>>(ApiUrls.rideCancel(rideId));
-    if (response is Map<String, dynamic> && response['message'] != null) {
+    if (response['message'] != null) {
       return response['message']?.toString();
     }
     return 'Ride Cancelled';

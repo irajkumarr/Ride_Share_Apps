@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 import 'package:rider_app/src/data/local/auth_local_data_source.dart';
 import 'package:rider_app/src/data/remote/dto/user_dto.dart';
 import 'package:rider_app/src/modules/auth/blocs/current_user_cubit.dart';
-import 'package:shared_core/core/ui/widgets/common/skeleton_loader.dart';
 import 'package:shared_core/shared_core.dart';
 
 /// Minimal, modern Rider Profile & Account screen.

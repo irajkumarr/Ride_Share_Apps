@@ -325,7 +325,7 @@ class _TripCompletedSheetState extends State<TripCompletedSheet> {
                                           ? Image.network(
                                               widget.driver!.photoUrl,
                                               fit: BoxFit.cover,
-                                              errorBuilder: (_, __, ___) =>
+                                              errorBuilder: (_, _, _) =>
                                                   Center(
                                                     child: Text(
                                                       driverFirstName.substring(

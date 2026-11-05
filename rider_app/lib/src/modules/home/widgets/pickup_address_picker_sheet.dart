@@ -2,10 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:shared_core/models/location/address_model.dart';
-import 'package:shared_core/models/location/lat_lng_model.dart';
-import 'package:shared_core/services/location/location_service.dart';
 import 'package:shared_core/shared_core.dart';
 
 import '../../../data/repo/places_repo.dart';
@@ -503,7 +499,7 @@ class _PickupAddressPickerSheetState extends State<PickupAddressPickerSheet> {
       shrinkWrap: true,
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
       itemCount: _searchResults.length,
-      separatorBuilder: (_, __) =>
+      separatorBuilder: (_, _) =>
           const Divider(height: 1, color: Color(0xFFF1F5F9)),
       itemBuilder: (context, index) {
         final place = _searchResults[index];

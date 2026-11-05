@@ -6,9 +6,7 @@ class PlacesApiService {
   final ApiClient _apiClient;
   final Dio _dio;
 
-  PlacesApiService({required ApiClient apiClient, required Dio dio})
-    : _apiClient = apiClient,
-      _dio = dio;
+  PlacesApiService({required this._apiClient, required this._dio});
 
   /// Searches places based on [query] with optional proximity coordinates.
   Future<List<AddressModel>> searchPlaces(

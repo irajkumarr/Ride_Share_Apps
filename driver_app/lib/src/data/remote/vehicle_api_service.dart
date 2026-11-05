@@ -1,5 +1,4 @@
 import 'package:driver_app/src/data/remote/dto/vehicle_dto.dart';
-import 'package:flutter/material.dart';
 import 'package:shared_core/core/api/api_client.dart';
 import 'package:shared_core/core/utils/api_urls.dart';
 

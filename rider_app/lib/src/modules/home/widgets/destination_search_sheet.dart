@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:shared_core/shared_core.dart';
 
 import '../../../data/repo/places_repo.dart';
@@ -580,7 +579,7 @@ class _DestinationSearchSheetState extends State<DestinationSearchSheet> {
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
         itemCount: state.results.length,
-        separatorBuilder: (_, __) =>
+        separatorBuilder: (_, _) =>
             const Divider(height: 1, color: Color(0xFFF1F5F9)),
         itemBuilder: (context, index) {
           final place = state.results[index];
@@ -657,7 +656,7 @@ class _DestinationSearchSheetState extends State<DestinationSearchSheet> {
       keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
       padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
       itemCount: recents.length,
-      separatorBuilder: (_, __) =>
+      separatorBuilder: (_, _) =>
           const Divider(height: 1, color: Color(0xFFF1F5F9)),
       itemBuilder: (context, index) {
         final rec = recents[index];
@@ -790,7 +789,7 @@ class _EmptyState extends StatelessWidget {
   final String? title;
   final String? message;
 
-  const _EmptyState({this.query, this.title, this.message});
+  const _EmptyState({this.query}) : title = null : message;
 
   @override
   Widget build(BuildContext context) {

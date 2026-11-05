@@ -4,10 +4,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:shared_core/models/location/address_model.dart';
-import 'package:shared_core/models/location/lat_lng_model.dart';
-import 'package:shared_core/services/location/location_service.dart';
 import 'package:shared_core/shared_core.dart';
 
 import '../../../data/repo/places_repo.dart';

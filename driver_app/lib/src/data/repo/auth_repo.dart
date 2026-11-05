@@ -1,7 +1,6 @@
 import 'package:driver_app/src/data/local/auth_local_data_source.dart';
 import 'package:driver_app/src/data/remote/auth_api_service.dart';
 import 'package:driver_app/src/data/remote/dto/user_dto.dart';
-import 'package:flutter/material.dart';
 import 'package:shared_core/core/api/api_response.dart';
 import 'package:shared_core/core/error/exceptions.dart';
 

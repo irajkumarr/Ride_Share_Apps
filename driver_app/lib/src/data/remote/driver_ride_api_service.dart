@@ -61,11 +61,12 @@ class DriverRideApiService {
       final response = await _apiClient.get<Map<String, dynamic>>(
         ApiUrls.driverActiveRide,
       );
-      if (response != null && response['id'] != null) {
+      if (response['id'] != null) {
         return response;
       }
       return null;
     } catch (e) {}
+    return null;
   }
 
   /// Gets all rides (history & ongoing) for the authenticated driver.

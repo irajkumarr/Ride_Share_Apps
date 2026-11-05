@@ -38,15 +38,11 @@ class DriverStatusState {
 
 class DriverStatusCubit extends Cubit<DriverStatusState> {
   DriverStatusCubit({
-    required DriverRideApiService driverRideApi,
-    required WebSocketService webSocketService,
-    required LocationService locationService,
-    required AuthLocalDataSource authLocal,
-  }) : _driverRideApi = driverRideApi,
-       _webSocketService = webSocketService,
-       _locationService = locationService,
-       _authLocal = authLocal,
-       super(const DriverStatusState(status: DriverShiftStatus.offline));
+    required this._driverRideApi,
+    required this._webSocketService,
+    required this._locationService,
+    required this._authLocal,
+  }) : super(const DriverStatusState(status: DriverShiftStatus.offline));
 
   final DriverRideApiService _driverRideApi;
   final WebSocketService _webSocketService;
@@ -100,7 +96,7 @@ class DriverStatusCubit extends Cubit<DriverStatusState> {
       emit(
         state.copyWith(
           isUpdating: false,
-          errorMessage: "Failed to go online: " + e.toString(),
+          errorMessage: "Failed to go online: $e",
         ),
       );
     }
@@ -118,7 +114,7 @@ class DriverStatusCubit extends Cubit<DriverStatusState> {
       emit(
         state.copyWith(
           isUpdating: false,
-          errorMessage: "Failed to go offline: " + e.toString(),
+          errorMessage: "Failed to go offline: $e",
         ),
       );
     }
@@ -152,7 +148,7 @@ class DriverStatusCubit extends Cubit<DriverStatusState> {
         AppLogger.info('STOMP connected for driver.');
       },
       onError: (err) {
-        AppLogger.error('STOMP driver error: ' + err.toString());
+        AppLogger.error('STOMP driver error: $err');
       },
     );
   }

@@ -7,12 +7,10 @@ import '../remote/places_api_service.dart';
 
 class PlacesRepo {
   PlacesRepo({
-    required PlacesApiService api,
-    required RecentPlacesLocalDataSource local,
+    required this._api,
+    required this._local,
     LocalStorageService? storage,
-  }) : _api = api,
-       _local = local,
-       _storage =
+  }) : _storage =
            storage ??
            (sl.isRegistered<LocalStorageService>()
                ? sl<LocalStorageService>()
@@ -38,7 +36,7 @@ class PlacesRepo {
     try {
       final jsonStr = jsonEncode(address.toJson());
       if (_storage != null) {
-        await _storage!.setString(
+        await _storage.setString(
           LocalStorageKeys.savedPickupAddress,
           value: jsonStr,
         );
@@ -50,7 +48,7 @@ class PlacesRepo {
   AddressModel? getSavedPickupAddress() {
     try {
       if (_storage != null) {
-        final raw = _storage!.getString(LocalStorageKeys.savedPickupAddress);
+        final raw = _storage.getString(LocalStorageKeys.savedPickupAddress);
         if (raw != null && raw.isNotEmpty) {
           final decoded = jsonDecode(raw) as Map<String, dynamic>;
           return AddressModel.fromJson(decoded);
@@ -64,7 +62,7 @@ class PlacesRepo {
   Future<void> clearSavedPickupAddress() async {
     try {
       if (_storage != null) {
-        await _storage!.remove(LocalStorageKeys.savedPickupAddress);
+        await _storage.remove(LocalStorageKeys.savedPickupAddress);
       }
     } catch (_) {}
   }

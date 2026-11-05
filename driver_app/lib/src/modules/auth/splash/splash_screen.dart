@@ -289,10 +289,10 @@ class _SplashScreenState extends State<SplashScreen>
                   child: Image.asset(
                     'assets/icons/ridenest_logo.png',
                     fit: BoxFit.contain,
-                    errorBuilder: (_, __, ___) => Image.asset(
+                    errorBuilder: (_, _, _) => Image.asset(
                       'assets/icons/ridenest_logo_pro.png',
                       fit: BoxFit.contain,
-                      errorBuilder: (_, __, ___) => const Icon(
+                      errorBuilder: (_, _, _) => const Icon(
                         Icons.navigation_rounded,
                         color: Color(0xFFFF3333),
                         size: 54,

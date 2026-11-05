@@ -12,7 +12,6 @@ import 'blocs/ride_search_cubit.dart';
 import 'widgets/active_driver_card.dart';
 import 'widgets/destination_search_sheet.dart';
 import 'widgets/driver_searching_view.dart';
-import 'widgets/map_location_picker_sheet.dart';
 import 'widgets/pickup_address_picker_sheet.dart';
 import 'widgets/ride_booking_sheet.dart';
 import 'widgets/ridenest_illustrations.dart';
@@ -201,8 +200,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   void _selectQuickDestination(AddressModel place) {
-    if (_currentAddressModel == null) {
-      _currentAddressModel = AddressModel(
+    _currentAddressModel ??= AddressModel(
         id: 'current_gps',
         title: 'Your location',
         formattedAddress: 'Current GPS Location',
@@ -212,7 +210,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         ),
         country: 'Nepal',
       );
-    }
     context.read<RideSearchCubit>().setPickup(_currentAddressModel!);
     context.read<RideSearchCubit>().setDestination(place);
   }
@@ -336,11 +333,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       state.booking.destination.coordinates.longitude,
     );
 
-    final polylinePoints = state.booking.route != null
-        ? state.booking.route!.points
+    final polylinePoints = state.booking.route.points
               .map((p) => LatLng(p.latitude, p.longitude))
-              .toList()
-        : <LatLng>[pLatLng, dLatLng];
+              .toList();
 
     setState(() {
       _markers = {
@@ -513,13 +508,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     List<LatLng> points, {
     LatLng? pickup,
     LatLng? destination,
-    double bottomOffset = 0,
   }) {
     if (!_isMapMounted) return;
 
     final List<LatLng> targetPoints = [
-      if (pickup != null) pickup,
-      if (destination != null) destination,
+      ?pickup,
+      ?destination,
       ...points,
     ];
 

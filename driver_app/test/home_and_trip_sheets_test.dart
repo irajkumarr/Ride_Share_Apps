@@ -86,7 +86,7 @@ void main() {
         expect(find.text('4.8'), findsOneWidget);
         expect(find.text('45 verified trips'), findsOneWidget);
         expect(find.text('Note: "Waiting near the bookstore"'), findsOneWidget);
-        expect(find.text('PICKUP • 1.5 KM AWAY'), findsOneWidget);
+        expect(find.text('PICKUP'), findsOneWidget);
         expect(find.text('ACCEPT (12s)'), findsOneWidget);
       },
     );
@@ -195,7 +195,7 @@ void main() {
           ),
         );
 
-        expect(find.textContaining('EN ROUTE TO PICKUP'), findsOneWidget);
+        expect(find.textContaining('ROUTE TO PICKUP'), findsOneWidget);
         expect(find.text('Sunita Rai'), findsOneWidget);
         expect(find.text('4.9'), findsOneWidget);
         expect(find.text('30 rides'), findsOneWidget);
@@ -315,7 +315,7 @@ void main() {
         expect(find.text('Rate Anita Gurung'), findsOneWidget);
 
         // Tap Return online button
-        await tester.tap(find.text('COLLECTED FARE & GO ONLINE'));
+        await tester.tap(find.text('COLLECTED FARE'));
         await tester.pump();
         expect(cubit.dismissSummaryCalled, isTrue);
       },

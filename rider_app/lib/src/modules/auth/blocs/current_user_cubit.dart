@@ -1,6 +1,5 @@
 import 'package:rider_app/src/data/remote/dto/user_dto.dart';
 import 'package:rider_app/src/data/repo/auth_repo.dart';
-import 'package:shared_core/core/utils/base_cubit.dart';
 import 'package:shared_core/shared_core.dart';
 
 abstract class CurrentUserState {}

@@ -1,6 +1,5 @@
 import 'package:driver_app/src/data/remote/driver_ride_api_service.dart';
 import 'package:driver_app/src/data/remote/dto/driver_ride_history_dto.dart';
-import 'package:driver_app/src/data/remote/dto/ride_dispatch_dto.dart';
 
 class DriverRideRepo {
   DriverRideRepo({required this._api});
