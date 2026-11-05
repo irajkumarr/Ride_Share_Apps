@@ -830,7 +830,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 onConfirm: () async {
                   await context.read<DriverStatusCubit>().goOffline();
                   await sl<AuthLocalDataSource>().clear();
-                  if (context.mounted) {
+                  if (mounted) {
                     context.go(AppRoutes.login);
                   }
                 },

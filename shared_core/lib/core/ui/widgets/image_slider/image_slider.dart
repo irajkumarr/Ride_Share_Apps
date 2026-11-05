@@ -98,7 +98,8 @@ class ImageSlider extends StatefulWidget {
   //On image change event, passes previous image index and current image index as arguments
   final void Function(int, int)? onImageChange;
 
-  ImageSlider({
+  const ImageSlider({
+    super.key,
     required this.images,
     this.animationCurve = Curves.ease,
     this.animationDuration = const Duration(milliseconds: 300),
@@ -314,10 +315,11 @@ class ImageSliderState extends State<ImageSlider> {
                 if (widget.onImageChange != null) {
                   widget.onImageChange!(_currentImageIndex, currentPage);
                 }
-                if (widget.counterWidget == null)
+                if (widget.counterWidget == null) {
                   setState(() {
                     _currentImageIndex = currentPage;
                   });
+                }
               },
             );
 
@@ -398,7 +400,8 @@ class ImageSliderState extends State<ImageSlider> {
 
 /// An indicator showing the currently selected page of a PageController
 class DotsIndicator extends AnimatedWidget {
-  DotsIndicator({
+  const DotsIndicator({
+    super.key,
     required this.controller,
     this.itemCount,
     this.onPageSelected,
@@ -410,7 +413,7 @@ class DotsIndicator extends AnimatedWidget {
   }) : super(listenable: controller);
 
   // The PageController that this DotsIndicator is representing.
-  late final PageController controller;
+  final PageController controller;
 
   // The number of home_drawer managed by the PageController
   final int? itemCount;
@@ -442,13 +445,13 @@ class DotsIndicator extends AnimatedWidget {
     );
     var zoom = 1.0 + (dotIncreaseSize! - 1.0) * selectedness;
     final dotColor = zoom > 1.0 ? increasedColor : color;
-    return Container(
+    return SizedBox(
       width: dotSpacing,
       child: Center(
         child: Material(
           color: dotColor,
           type: MaterialType.circle,
-          child: Container(
+          child: SizedBox(
             width: dotSize! * zoom,
             height: dotSize! * zoom,
             child: InkWell(

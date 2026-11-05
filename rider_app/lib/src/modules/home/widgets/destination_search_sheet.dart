@@ -165,20 +165,6 @@ class _DestinationSearchSheetState extends State<DestinationSearchSheet> {
     }
   }
 
-  void _swapRoute() {
-    final cubit = context.read<RideSearchCubit>();
-    final pickup = cubit.currentPickup;
-    final destination = cubit.currentDestination;
-    if (pickup == null || destination == null) return;
-
-    HapticFeedback.lightImpact();
-    cubit.setPickup(destination);
-    cubit.setDestination(pickup);
-    final pickupText = _pickupController.text;
-    _pickupController.text = _destinationController.text;
-    _destinationController.text = pickupText;
-  }
-
   @override
   Widget build(BuildContext context) {
     return DraggableScrollableSheet(
@@ -786,16 +772,12 @@ class _HighlightedText extends StatelessWidget {
 
 class _EmptyState extends StatelessWidget {
   final String? query;
-  final String? title;
-  final String? message;
 
-  const _EmptyState({this.query}) : title = null : message;
+  const _EmptyState({this.query});
 
   @override
   Widget build(BuildContext context) {
-    final heading = title ?? 'No places found';
     final body =
-        message ??
         'We couldn\'t find "$query". Try a landmark or a nearby area.';
 
     return SingleChildScrollView(
@@ -818,9 +800,9 @@ class _EmptyState extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            Text(
-              heading,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+            const Text(
+              'No places found',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
             ),
             const SizedBox(height: 6),
             Text(

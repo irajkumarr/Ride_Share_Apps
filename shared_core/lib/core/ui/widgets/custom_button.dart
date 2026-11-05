@@ -44,12 +44,12 @@ class CustomButton extends StatelessWidget {
       fontSize: AppFontSize.size12,
     );
 
-    final handlePress = () {
+    void handlePress() {
       if (enableHaptics) {
         UiUtils.getVibrationEffect();
       }
       onPressed?.call();
-    };
+    }
 
     final innerChild = isLoading
         ? const CustomCircularProgressIndicator()

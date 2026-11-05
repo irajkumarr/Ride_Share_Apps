@@ -11,8 +11,6 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 class RideRequestMapMarkers {
   RideRequestMapMarkers._();
 
-  static BitmapDescriptor? _cachedPickupIcon;
-
   /// Marker for pickup location: Green circle with walking person icon and black ETA badge above
   static Future<BitmapDescriptor> getPickupMarkerIcon({
     String etaText = 'PICKUP • 2 min',

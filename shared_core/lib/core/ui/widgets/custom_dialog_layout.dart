@@ -212,7 +212,7 @@ class CloseAndConfirmButton extends StatelessWidget {
 
   Widget showCircularProgressIndicator({required BuildContext context}) {
     return const Padding(
-      padding: const EdgeInsets.all(5),
+      padding: EdgeInsets.all(5),
       child: CustomSizedBox(
         height: 30,
         width: 25,

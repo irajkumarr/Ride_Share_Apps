@@ -26,7 +26,6 @@ class MockLocalStorageService implements LocalStorageService {
     _storage.remove(key);
   }
 
-  @override
   bool has(String key) => _storage.containsKey(key);
 
   @override

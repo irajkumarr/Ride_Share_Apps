@@ -71,6 +71,7 @@ class ActiveDriverCard extends StatelessWidget {
     }
   }
 
+  // ignore: unused_element
   Future<void> _messageDriver(BuildContext context, String phoneNumber) async {
     HapticFeedback.lightImpact();
     final cleanPhone = phoneNumber.isNotEmpty

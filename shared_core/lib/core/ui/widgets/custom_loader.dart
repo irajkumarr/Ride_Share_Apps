@@ -38,10 +38,10 @@ class _CustomLoaderState extends State<CustomLoader> with SingleTickerProviderSt
       child: const Stack(
         alignment: Alignment.center,
         children: [
-          const CircleAvatar(
+          CircleAvatar(
             backgroundColor: AppColor.black,
             radius: 20,
-            backgroundImage: const AssetImage(
+            backgroundImage: AssetImage(
               CustomImageGetter.logo,
             ),
           ),
@@ -49,7 +49,7 @@ class _CustomLoaderState extends State<CustomLoader> with SingleTickerProviderSt
             height: 50,
             width: 50,
             child: CircularProgressIndicator(
-              valueColor: const AlwaysStoppedAnimation<Color>(AppColor.black),
+              valueColor: AlwaysStoppedAnimation<Color>(AppColor.black),
               strokeWidth: 1,
             ),
           ),

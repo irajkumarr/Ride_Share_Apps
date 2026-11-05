@@ -223,7 +223,7 @@ class SkeletonCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(borderRadius),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -256,8 +256,8 @@ class SkeletonCard extends StatelessWidget {
                   const CustomSizedBox(height: 8),
                   const Row(
                     children: [
-                      const SkeletonLoader.circle(size: 24),
-                      const CustomSizedBox(width: 8),
+                      SkeletonLoader.circle(size: 24),
+                      CustomSizedBox(width: 8),
                       SkeletonLoader(
                         width: 60,
                         height: 12,

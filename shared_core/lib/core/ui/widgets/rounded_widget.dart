@@ -19,7 +19,7 @@ class RoundedIcon extends StatelessWidget {
   final void Function() onPressed;
 
   const RoundedIcon({
-    Key? key,
+    super.key,
     required this.child,
     this.elevation,
     this.borderRadius,
@@ -33,7 +33,7 @@ class RoundedIcon extends StatelessWidget {
     this.offsetX,
     this.offsetY,
     required this.onPressed,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

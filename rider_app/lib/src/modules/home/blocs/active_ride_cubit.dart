@@ -63,10 +63,6 @@ class ActiveRideCubit extends BaseCubit<ActiveRideState> {
   final WebSocketService _webSocketService;
   final AuthLocalDataSource _authLocalDataSource;
 
-  Timer? _simulationTimer;
-  Timer? _fallbackAcceptanceTimer;
-  final int _simulationStep = 0;
-  List<LatLngModel> _currentPolylinePoints = [];
   String? _currentRideId;
 
   ActiveRideCubit({
@@ -187,7 +183,6 @@ class ActiveRideCubit extends BaseCubit<ActiveRideState> {
       ),
       loading: () => ActiveRideInitial(),
       success: (route) {
-        _currentPolylinePoints = route.points;
         final km = route.distanceInMeters / 1000;
         final mins = (route.durationInSeconds / 60).round();
         return RoutePreviewReady(

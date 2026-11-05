@@ -23,9 +23,11 @@ class TripCompletedSheet extends StatefulWidget {
 
 class _TripCompletedSheetState extends State<TripCompletedSheet> {
   int _selectedRating = 5;
+  // ignore: unused_field
   final Set<String> _selectedCompliments = {'Great driving 🛵', 'On time ⏱️'};
   int _selectedTipAmount = 0; // 0 = No tip, 10, 20, 50, -1 = custom
 
+  // ignore: unused_field
   final List<String> _compliments = [
     'Great driving 🛵',
     'On time ⏱️',
@@ -682,6 +684,7 @@ class _TripCompletedSheetState extends State<TripCompletedSheet> {
     );
   }
 
+  // ignore: unused_element
   Widget _buildTipChip({required String label, required int amount}) {
     final isSelected = _selectedTipAmount == amount;
     return Expanded(

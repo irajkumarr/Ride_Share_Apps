@@ -402,7 +402,7 @@ extension NumX on num {
   /// Converts a number of bytes to a human-readable string.
   /// `1536.toFileSize()` → `"1.5 KB"`
   String toFileSize() {
-    if (this < 1024) return '${this} B';
+    if (this < 1024) return '$this B';
     if (this < 1048576) return '${(this / 1024).toStringAsFixed(1)} KB';
     if (this < 1073741824) {
       return '${(this / 1048576).toStringAsFixed(1)} MB';

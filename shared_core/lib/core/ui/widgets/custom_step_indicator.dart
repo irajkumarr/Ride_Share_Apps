@@ -13,7 +13,7 @@ class CustomStepProgressBar extends StatelessWidget {
   final ScrollPhysics physics;
 
   const CustomStepProgressBar({
-    Key? key,
+    super.key,
     required this.steps,
     required this.currentStep,
     this.activeColor,
@@ -22,7 +22,7 @@ class CustomStepProgressBar extends StatelessWidget {
     this.circleSize = 24,
     this.lineWidth = 40,
     this.physics = const BouncingScrollPhysics(),
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

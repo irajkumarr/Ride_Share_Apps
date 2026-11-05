@@ -4,7 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 /// BaseBloc provides reusable helpers for Bloc event handling.
 abstract class BaseBloc<Event, State> extends Bloc<Event, State> {
-  BaseBloc(State initialState) : super(initialState);
+  BaseBloc(super.initialState);
 
   /// A reusable helper for try/catch Bloc state transitions.
   /// Usage:

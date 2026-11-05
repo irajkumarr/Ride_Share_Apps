@@ -8,7 +8,8 @@ class ScrollingText extends StatefulWidget {
   final Axis scrollAxis;
   final double ratioOfBlankToScreen;
 
-  ScrollingText({
+  const ScrollingText({
+    super.key,
     required this.text,
     required this.textStyle,
     this.scrollAxis = Axis.horizontal,

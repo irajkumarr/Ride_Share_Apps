@@ -6,10 +6,10 @@ import '../../utils/colors.dart';
 class CountdownTimer extends StatefulWidget {
   final Duration duration;
 
-  CountdownTimer({required this.duration});
+  const CountdownTimer({super.key, required this.duration});
 
   @override
-  _CountdownTimerState createState() => _CountdownTimerState();
+  State<CountdownTimer> createState() => _CountdownTimerState();
 }
 
 class _CountdownTimerState extends State<CountdownTimer> {

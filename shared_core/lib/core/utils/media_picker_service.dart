@@ -85,12 +85,12 @@ class MediaPickerService {
     FileType type = FileType.custom,
     List<String> allowedExtensions = const ['pdf', 'doc', 'docx'],
   }) async {
-    final List<PlatformFile>? result = await FilePicker.pickFiles(
+    final result = await FilePicker.pickFiles(
       type: type,
       allowedExtensions: type == FileType.custom ? allowedExtensions : null,
     );
 
-    if (result != null && result.single.path != null) {
+    if (result.isNotEmpty && result.single.path != null) {
       return File(result.single.path!);
     }
     return null;

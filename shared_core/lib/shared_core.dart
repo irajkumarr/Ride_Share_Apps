@@ -2,7 +2,7 @@
 ///
 /// Exports all core modules, configurations, models, services, and UI components
 /// intended for consumption across rider_app and driver_app.
-library shared_core;
+library;
 
 // ── Common ──────────────────────────────────────────────────────────────────
 export 'common/bloc/app_bloc_observer.dart';

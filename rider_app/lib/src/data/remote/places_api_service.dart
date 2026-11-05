@@ -3,6 +3,7 @@ import 'package:shared_core/shared_core.dart';
 
 /// Remote API service for geocoding and places autocomplete search.
 class PlacesApiService {
+  // ignore: unused_field
   final ApiClient _apiClient;
   final Dio _dio;
 

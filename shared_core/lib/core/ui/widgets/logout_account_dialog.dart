@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_core/core/ui/widgets/custom_container.dart';
 import 'package:shared_core/core/ui/widgets/custom_dialog_layout.dart';
 import 'package:shared_core/core/utils/colors.dart';

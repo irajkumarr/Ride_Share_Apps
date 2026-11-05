@@ -755,7 +755,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: LogoutAccountDialog(
                 onConfirm: () async {
                   await sl<AuthLocalDataSource>().clear();
-                  if (context.mounted) {
+                  if (mounted) {
                     context.go(AppRoutes.login);
                   }
                 },

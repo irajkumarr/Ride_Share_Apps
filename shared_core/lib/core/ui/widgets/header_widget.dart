@@ -66,7 +66,7 @@ class HeaderWidget extends StatelessWidget implements PreferredSizeWidget {
             title,
             fontSize: AppFontSize.size18,
             fontWeight: AppFontWeight.bold,
-            color: color ?? null,
+            color: color,
           ),
           const Spacer(),
           ?widget,

@@ -65,7 +65,9 @@ class DriverRideApiService {
         return response;
       }
       return null;
-    } catch (e) {}
+    } catch (_) {
+      // Return null if driver currently has no active ride or if request fails
+    }
     return null;
   }
 

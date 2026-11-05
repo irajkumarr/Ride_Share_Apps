@@ -65,7 +65,8 @@ class WidgetCarousel extends StatefulWidget {
   //Duration of the Auto play slider by seconds. Default 3 seconds
   final Duration autoplayDuration;
 
-  WidgetCarousel({
+  const WidgetCarousel({
+    super.key,
     required this.pages,
     this.animationCurve = Curves.ease,
     this.animationDuration = const Duration(milliseconds: 300),
@@ -145,7 +146,7 @@ class WidgetCarouselState extends State<WidgetCarousel> {
                 right: 0.0,
                 child: Container(
                   decoration: BoxDecoration(
-                    color: widget.dotBgColor == null ? AppColor.gray : widget.dotBgColor,
+                    color: widget.dotBgColor ?? AppColor.gray,
                     borderRadius: widget.borderRadius
                         ? (widget.noRadiusForIndicator
                               ? null
@@ -183,7 +184,8 @@ class WidgetCarouselState extends State<WidgetCarousel> {
 
 /// An indicator showing the currently selected page of a PageController
 class DotsIndicator extends AnimatedWidget {
-  DotsIndicator({
+  const DotsIndicator({
+    super.key,
     required this.controller,
     required this.itemCount,
     this.onPageSelected,
@@ -222,13 +224,13 @@ class DotsIndicator extends AnimatedWidget {
       ),
     );
     var zoom = 1.0 + (dotIncreaseSize! - 1.0) * selectedness;
-    return Container(
+    return SizedBox(
       width: dotSpacing,
       child: Center(
         child: Material(
           color: color,
           type: MaterialType.circle,
-          child: Container(
+          child: SizedBox(
             width: dotSize! * zoom,
             height: dotSize! * zoom,
             child: InkWell(

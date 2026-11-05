@@ -19,7 +19,7 @@ sealed class AppException implements Exception {
   final dynamic data;
 
   @override
-  String toString() => '${runtimeType}(statusCode: $statusCode, message: $message)';
+  String toString() => '$runtimeType(statusCode: $statusCode, message: $message)';
 }
 
 // ── Network ───────────────────────────────────────────────────────────────────

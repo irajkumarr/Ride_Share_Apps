@@ -331,7 +331,7 @@ class UiUtils {
           : (await getTemporaryDirectory()).path;
 
       downloadFilePath =
-          '$downloadFilePath/${customFileName != null ? customFileName : DateTime.now().toIso8601String()}';
+          '$downloadFilePath/${customFileName ?? DateTime.now().toIso8601String()}';
 
       if (await File(downloadFilePath).exists()) {
         if (isDownload) {

@@ -58,7 +58,7 @@ class BottomSheetLayout extends StatelessWidget {
               child: SingleChildScrollView(child: child),
             ),
           ),
-          if (bottomWidget != null) bottomWidget!,
+          ?bottomWidget,
         ],
       ),
     );

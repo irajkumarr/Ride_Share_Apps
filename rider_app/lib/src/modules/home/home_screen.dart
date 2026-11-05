@@ -27,6 +27,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   GoogleMapController? _mapController;
   LatLng _currentLocation = const LatLng(27.7172, 85.3240);
+  // ignore: unused_field
   bool _isLoadingLocation = true;
   AddressModel? _currentAddressModel;
   Set<Marker> _markers = {};
@@ -180,6 +181,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
     // Save chosen address to persistent local storage so next time app opens it shows this address
     await sl<PlacesRepo>().saveSavedPickupAddress(address);
+    if (!mounted) return;
 
     // Update RideSearchCubit so subsequent destination searches use this pickup
     context.read<RideSearchCubit>().setPickup(address);
@@ -449,6 +451,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   /// Dynamically computes distance in km between two [LatLng] points.
+  // ignore: unused_element
   double _calculateDistanceKm(LatLng start, LatLng end) {
     const double earthRadiusKm = 6371.0;
     final double dLat = _degreesToRadians(end.latitude - start.latitude);
@@ -472,6 +475,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   /// Calculates dynamic zoom level based on the distance in kilometers.
   /// Closer / shorter distances zoom in closely; longer distances scale smoothly
   /// based on continuous logarithmic projection rather than coarse step caps.
+  // ignore: unused_element
   double _calculateDynamicZoom(double distanceKm) {
     if (distanceKm <= 0.2) return 17.5;
     if (distanceKm <= 0.5) return 16.8;
@@ -2107,6 +2111,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   /// 2x2 Services Grid: Cargo (-10%), Delivery (-20%), Bike, Rides (from 4 min)
+  // ignore: unused_element
   Widget _buildServiceGrid() {
     return Column(
       children: [
@@ -2457,6 +2462,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   /// Promotional / Feature Cards: SAFE RIDES and NEED HELP?
+  // ignore: unused_element
   Widget _buildPromoBanners() {
     return Row(
       children: [

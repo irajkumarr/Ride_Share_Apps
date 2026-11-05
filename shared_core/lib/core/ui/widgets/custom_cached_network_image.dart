@@ -14,11 +14,11 @@ class CustomCachedNetworkImage extends StatelessWidget {
   const CustomCachedNetworkImage(
     this.imageUrl, {
     this.localImagePath,
-    Key? key,
+    super.key,
     this.fit,
     this.isUrlComplete,
     this.aspectRatio,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

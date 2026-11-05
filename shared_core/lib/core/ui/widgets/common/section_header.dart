@@ -147,7 +147,7 @@ class HorizontalSection extends StatelessWidget {
             scrollDirection: Axis.horizontal,
             padding: padding ?? const EdgeInsets.symmetric(horizontal: 16),
             itemCount: itemCount,
-            separatorBuilder: (_, __) => SizedBox(width: spacing),
+            separatorBuilder: (_, _) => SizedBox(width: spacing),
             itemBuilder: itemBuilder,
           ),
         ),
