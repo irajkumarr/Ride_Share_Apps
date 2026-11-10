@@ -1,4 +1,3 @@
-
 import 'package:rider_app/src/data/repo/auth_repo.dart';
 import 'package:shared_core/core/utils/base_cubit.dart';
 
@@ -26,10 +25,15 @@ class LoginCubit extends BaseCubit<LoginState> {
 
   final AuthRepo _repo;
 
-  Future<void> login({required String phone, required String password,required String fcmToken}) async {
+  Future<void> login({
+    required String phone,
+    required String password,
+    required String fcmToken,
+  }) async {
     await safeCall(
       label: 'Login',
-      call: () => _repo.login(phone: phone, password: password, fcmToken: fcmToken),
+      call: () =>
+          _repo.login(phone: phone, password: password, fcmToken: fcmToken),
       loading: () => LoginLoading(),
       success: (data) => LoginSuccess(data, 'Login successful.'),
       failure: (error) => LoginFailure(error),

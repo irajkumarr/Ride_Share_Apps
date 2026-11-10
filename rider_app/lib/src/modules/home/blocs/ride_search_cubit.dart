@@ -1,6 +1,7 @@
 import 'package:shared_core/core/utils/base_cubit.dart';
 import 'package:shared_core/models/location/address_model.dart';
 import 'package:shared_core/models/location/lat_lng_model.dart';
+
 import '../../../data/repo/places_repo.dart';
 
 abstract class RideSearchState {}
@@ -37,10 +38,7 @@ class RideLocationsSelected extends RideSearchState {
   final AddressModel pickup;
   final AddressModel destination;
 
-  RideLocationsSelected({
-    required this.pickup,
-    required this.destination,
-  });
+  RideLocationsSelected({required this.pickup, required this.destination});
 }
 
 class RideSearchFailure extends RideSearchState {
@@ -56,12 +54,12 @@ class RideSearchCubit extends BaseCubit<RideSearchState> {
   List<AddressModel> _cachedRecents = [];
 
   RideSearchCubit(this._repo)
-      : super(
-          RideSearchInitial(
-            favorites: _repo.getFavoritePlaces(),
-            recents: _repo.getRecentPlacesSync(),
-          ),
-        ) {
+    : super(
+        RideSearchInitial(
+          favorites: _repo.getFavoritePlaces(),
+          recents: _repo.getRecentPlacesSync(),
+        ),
+      ) {
     _cachedRecents = _repo.getRecentPlacesSync();
     loadRecents();
   }

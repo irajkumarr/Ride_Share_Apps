@@ -1,4 +1,5 @@
 import 'dart:convert';
+
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:shared_core/models/location/address_model.dart';
 
@@ -60,9 +61,13 @@ class RecentPlacesLocalDataSource {
 
       // Filter out duplicate
       final updatedList = currentList.where((p) {
-        final sameTitle = p.title.trim().toLowerCase() == place.title.trim().toLowerCase();
-        final sameCoords = (p.coordinates.latitude - place.coordinates.latitude).abs() < 0.0001 &&
-            (p.coordinates.longitude - place.coordinates.longitude).abs() < 0.0001;
+        final sameTitle =
+            p.title.trim().toLowerCase() == place.title.trim().toLowerCase();
+        final sameCoords =
+            (p.coordinates.latitude - place.coordinates.latitude).abs() <
+                0.0001 &&
+            (p.coordinates.longitude - place.coordinates.longitude).abs() <
+                0.0001;
         return !sameTitle && !sameCoords;
       }).toList();
 

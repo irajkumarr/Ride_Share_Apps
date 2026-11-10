@@ -124,6 +124,7 @@ class RideDispatchCubit extends Cubit<RideDispatchState> {
           dropoffLng: dropoffLng,
         );
 
+        _driverStatusCubit.setActiveRideId(rideId);
         await _driverStatusCubit.restoreOnRideStatus();
         subscribeToTopics();
 
@@ -200,6 +201,7 @@ class RideDispatchCubit extends Cubit<RideDispatchState> {
     try {
       // Use authoritative REST API for transactional ride acceptance
       await _driverRideApi.acceptRide(request.rideId);
+      _driverStatusCubit.setActiveRideId(request.rideId);
       _driverStatusCubit.setOnRide();
 
       emit(
@@ -225,6 +227,7 @@ class RideDispatchCubit extends Cubit<RideDispatchState> {
     } catch (e) {
       AppLogger.error('Error declining ride: $e');
     } finally {
+      _driverStatusCubit.setActiveRideId(null);
       emit(RideDispatchIdle());
     }
   }
@@ -248,6 +251,7 @@ class RideDispatchCubit extends Cubit<RideDispatchState> {
       }
 
       if (status == 'COMPLETED') {
+        _driverStatusCubit.setActiveRideId(null);
         _driverStatusCubit.setAvailable();
         emit(
           TripCompletedSummaryState(
@@ -274,6 +278,7 @@ class RideDispatchCubit extends Cubit<RideDispatchState> {
 
   void onRideStatusReceived(RideStatusPayloadDto payload) {
     if (payload.status == 'CANCELLED') {
+      _driverStatusCubit.setActiveRideId(null);
       _driverStatusCubit.setAvailable();
       emit(RideDispatchIdle());
     }

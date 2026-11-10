@@ -96,9 +96,7 @@ class _SplashScreenState extends State<SplashScreen>
         children: [
           // 1. Delicate Dot Matrix & Fluid Ambient Ribbon Wave
           const Positioned.fill(
-            child: CustomPaint(
-              painter: _RiderSplashBackgroundPainter(),
-            ),
+            child: CustomPaint(painter: _RiderSplashBackgroundPainter()),
           ),
 
           // 2. Soft Ambient Radial Glow Behind Card
@@ -177,7 +175,8 @@ class _SplashScreenState extends State<SplashScreen>
                       color: const Color(0xFFFF3B30),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFFFF3B30).withValues(alpha: 0.45),
+                          color: const Color(0xFFFF3B30)
+                              .withValues(alpha: 0.45),
                           blurRadius: 16,
                           spreadRadius: 3,
                         ),
@@ -415,4 +414,3 @@ class _RiderSplashBackgroundPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
-

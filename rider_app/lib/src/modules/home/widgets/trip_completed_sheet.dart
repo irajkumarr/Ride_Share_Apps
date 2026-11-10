@@ -327,23 +327,19 @@ class _TripCompletedSheetState extends State<TripCompletedSheet> {
                                           ? Image.network(
                                               widget.driver!.photoUrl,
                                               fit: BoxFit.cover,
-                                              errorBuilder: (_, _, _) =>
-                                                  Center(
-                                                    child: Text(
-                                                      driverFirstName.substring(
-                                                        0,
-                                                        1,
-                                                      ),
-                                                      style: const TextStyle(
-                                                        fontWeight:
-                                                            FontWeight.w900,
-                                                        fontSize: 18,
-                                                        color: Color(
-                                                          0xFF475569,
-                                                        ),
-                                                      ),
-                                                    ),
+                                              errorBuilder: (_, _, _) => Center(
+                                                child: Text(
+                                                  driverFirstName.substring(
+                                                    0,
+                                                    1,
                                                   ),
+                                                  style: const TextStyle(
+                                                    fontWeight: FontWeight.w900,
+                                                    fontSize: 18,
+                                                    color: Color(0xFF475569),
+                                                  ),
+                                                ),
+                                              ),
                                             )
                                           : Center(
                                               child: Text(

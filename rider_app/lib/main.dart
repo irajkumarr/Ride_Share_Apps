@@ -60,10 +60,7 @@ Future<void> _bootstrap(AppFlavor flavor) async {
       );
     }
 
-    await Future.wait([
-      dotenv.load(fileName: ".env"),
-      Hive.initFlutter(),
-    ]);
+    await Future.wait([dotenv.load(fileName: ".env"), Hive.initFlutter()]);
 
     // 5. Post-Critical Initialization
     await _registerHiveAdapters();

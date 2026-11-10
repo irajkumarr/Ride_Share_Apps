@@ -777,8 +777,7 @@ class _EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final body =
-        'We couldn\'t find "$query". Try a landmark or a nearby area.';
+    final body = 'We couldn\'t find "$query". Try a landmark or a nearby area.';
 
     return SingleChildScrollView(
       child: Padding(
