@@ -127,21 +127,31 @@ class _RideSelectionDrawerState extends State<RideSelectionDrawer> {
 
               // Route Brief Chip
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
                 decoration: BoxDecoration(
                   color: AppColor.darkGray,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.navigation_rounded, size: 16, color: AppColor.black),
+                    const Icon(
+                      Icons.navigation_rounded,
+                      size: 16,
+                      color: AppColor.black,
+                    ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         '${widget.pickup.title} → ${widget.destination.title}',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 13,
+                        ),
                       ),
                     ),
                   ],
@@ -164,7 +174,9 @@ class _RideSelectionDrawerState extends State<RideSelectionDrawer> {
                       color: isSelected ? AppColor.lightPurple : AppColor.white,
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(
-                        color: isSelected ? Colors.black : AppColor.borderGrey.withValues(alpha: 0.5),
+                        color: isSelected
+                            ? Colors.black
+                            : AppColor.borderGrey.withValues(alpha: 0.5),
                         width: isSelected ? 1.5 : 1,
                       ),
                     ),
@@ -173,12 +185,16 @@ class _RideSelectionDrawerState extends State<RideSelectionDrawer> {
                         Container(
                           padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
-                            color: isSelected ? Colors.black : AppColor.darkGray,
+                            color: isSelected
+                                ? Colors.black
+                                : AppColor.darkGray,
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Icon(
                             opt.icon,
-                            color: isSelected ? AppColor.primary : Colors.black87,
+                            color: isSelected
+                                ? AppColor.primary
+                                : Colors.black87,
                             size: 28,
                           ),
                         ),
@@ -191,18 +207,27 @@ class _RideSelectionDrawerState extends State<RideSelectionDrawer> {
                                 children: [
                                   Text(
                                     opt.name,
-                                    style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 15,
+                                    ),
                                   ),
                                   const SizedBox(width: 8),
                                   Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 6,
+                                      vertical: 2,
+                                    ),
                                     decoration: BoxDecoration(
                                       color: AppColor.primary,
                                       borderRadius: BorderRadius.circular(8),
                                     ),
                                     child: Text(
                                       '${opt.etaMinutes} min',
-                                      style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
+                                      style: const TextStyle(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
                                   ),
                                 ],
@@ -210,7 +235,10 @@ class _RideSelectionDrawerState extends State<RideSelectionDrawer> {
                               const SizedBox(height: 2),
                               Text(
                                 opt.description,
-                                style: const TextStyle(color: AppColor.gray, fontSize: 12),
+                                style: const TextStyle(
+                                  color: AppColor.gray,
+                                  fontSize: 12,
+                                ),
                               ),
                             ],
                           ),

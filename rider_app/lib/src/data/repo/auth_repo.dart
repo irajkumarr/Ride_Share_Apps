@@ -32,7 +32,11 @@ class AuthRepo {
     required String password,
     required String fcmToken,
   }) async {
-    final response = await _api.login(phone: phone, password: password,fcmToken: fcmToken);
+    final response = await _api.login(
+      phone: phone,
+      password: password,
+      fcmToken: fcmToken,
+    );
 
     await _local.saveTokens(accessToken: response.data?.token ?? '');
     await _local.cacheUser(response.data!);

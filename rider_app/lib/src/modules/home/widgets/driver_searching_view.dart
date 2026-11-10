@@ -1,6 +1,8 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:shared_core/shared_core.dart';
+
 import '../../../data/remote/ride_api_service.dart';
 
 class DriverSearchingView extends StatefulWidget {
@@ -107,7 +109,8 @@ class _DriverSearchingViewState extends State<DriverSearchingView>
                   icon: Icons.payments_rounded,
                   iconColor: const Color(0xFF0D9488),
                   title: 'Estimated Fare',
-                  subtitle: 'Rs. ${widget.booking.fareNpr.toStringAsFixed(0)} (${widget.booking.paymentMethod})',
+                  subtitle:
+                      'Rs. ${widget.booking.fareNpr.toStringAsFixed(0)} (${widget.booking.paymentMethod})',
                 ),
                 const SizedBox(height: 22),
               ],

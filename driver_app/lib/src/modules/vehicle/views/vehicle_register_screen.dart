@@ -507,7 +507,7 @@ class _VehicleRegisterScreenState extends State<VehicleRegisterScreen>
               onTap: _onSubmit,
               child: const Center(
                 child: Text(
-                  'Complete & Go Online',
+                  'Submit',
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,

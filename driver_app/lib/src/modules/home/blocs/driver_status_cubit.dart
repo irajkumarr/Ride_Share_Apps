@@ -51,6 +51,11 @@ class DriverStatusCubit extends Cubit<DriverStatusState> {
 
   Timer? _locationPingTimer;
   StreamSubscription<LatLngModel>? _positionStreamSub;
+  String? _activeRideId;
+
+  void setActiveRideId(String? rideId) {
+    _activeRideId = rideId;
+  }
 
   Future<void> toggleOnlineOffline() async {
     if (state.status == DriverShiftStatus.offline) {
@@ -106,6 +111,7 @@ class DriverStatusCubit extends Cubit<DriverStatusState> {
     emit(state.copyWith(isUpdating: true, errorMessage: null));
     try {
       _stopLocationPings();
+      _activeRideId = null;
       await _driverRideApi.updateDriverStatus("OFFLINE");
       emit(
         state.copyWith(status: DriverShiftStatus.offline, isUpdating: false),
@@ -180,14 +186,18 @@ class DriverStatusCubit extends Cubit<DriverStatusState> {
 
   void _sendLocationUpdate(LatLngModel pos) {
     if (_webSocketService.isConnected) {
+      final payload = <String, dynamic>{
+        'latitude': pos.latitude,
+        'longitude': pos.longitude,
+        'heading': pos.heading,
+        'speed': pos.speed,
+      };
+      if (_activeRideId != null) {
+        payload['rideId'] = _activeRideId;
+      }
       _webSocketService.send(
         destination: '/app/driver.location',
-        body: {
-          'latitude': pos.latitude,
-          'longitude': pos.longitude,
-          'heading': pos.heading,
-          'speed': pos.speed,
-        },
+        body: payload,
       );
     }
 

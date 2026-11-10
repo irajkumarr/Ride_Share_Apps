@@ -64,6 +64,7 @@ class ActiveRideCubit extends BaseCubit<ActiveRideState> {
   final AuthLocalDataSource _authLocalDataSource;
 
   String? _currentRideId;
+  Timer? _fallbackPollTimer;
 
   ActiveRideCubit({
     required this._rideRepo,
@@ -162,6 +163,7 @@ class ActiveRideCubit extends BaseCubit<ActiveRideState> {
               statusText: 'Trip in progress ($status)',
             ),
           );
+          _startFallbackPolling();
         } else {
           emit(DriverSearching(booking));
         }
@@ -340,6 +342,7 @@ class ActiveRideCubit extends BaseCubit<ActiveRideState> {
           statusText: message ?? 'Driver Accepted your ride request',
         ),
       );
+      _startFallbackPolling();
     } else if (status == 'ARRIVED') {
       if (state is DriverAssignedState) {
         final cur = state as DriverAssignedState;
@@ -366,6 +369,7 @@ class ActiveRideCubit extends BaseCubit<ActiveRideState> {
         );
       }
     } else if (status == 'COMPLETED') {
+      _stopFallbackPolling();
       DriverModel? currentDriver;
       if (state is DriverAssignedState) {
         currentDriver = (state as DriverAssignedState).driver;
@@ -378,9 +382,11 @@ class ActiveRideCubit extends BaseCubit<ActiveRideState> {
         ),
       );
     } else if (status == 'CANCELLED') {
+      _stopFallbackPolling();
       final msg = message ?? 'Ride has been cancelled';
       cancelRide(customMessage: msg);
     } else if (status == 'NO_DRIVERS') {
+      _stopFallbackPolling();
       final msg = message ?? 'No drivers currently available. Please try again';
       cancelRide(customMessage: msg);
     }
@@ -392,14 +398,22 @@ class ActiveRideCubit extends BaseCubit<ActiveRideState> {
   ) {
     final lat = (data['latitude'] as num?)?.toDouble();
     final lng = (data['longitude'] as num?)?.toDouble();
+    final heading = (data['heading'] as num?)?.toDouble();
+    final speed = (data['speed'] as num?)?.toDouble();
 
     if (lat != null && lng != null && state is DriverAssignedState) {
       final cur = state as DriverAssignedState;
-      final newPos = LatLngModel(latitude: lat, longitude: lng);
+      final newPos = LatLngModel(
+        latitude: lat,
+        longitude: lng,
+        heading: heading ?? cur.driverPosition.heading,
+        speed: speed ?? cur.driverPosition.speed,
+      );
+      final updatedDriver = cur.driver.copyWith(location: newPos);
       emit(
         DriverAssignedState(
-          booking: cur.booking,
-          driver: cur.driver,
+          booking: cur.booking.copyWith(driver: updatedDriver),
+          driver: updatedDriver,
           driverPosition: newPos,
           statusText: cur.statusText,
         ),
@@ -407,15 +421,73 @@ class ActiveRideCubit extends BaseCubit<ActiveRideState> {
     }
   }
 
+  void _startFallbackPolling() {
+    _stopFallbackPolling();
+    _fallbackPollTimer = Timer.periodic(const Duration(seconds: 10), (_) async {
+      if (_currentRideId == null || state is! DriverAssignedState) {
+        _stopFallbackPolling();
+        return;
+      }
+      try {
+        final rideData = await _rideRepo.getActiveRide();
+        if (rideData == null || state is! DriverAssignedState) return;
+        final cur = state as DriverAssignedState;
+        final status = rideData['status']?.toString().toUpperCase();
+
+        if (status == 'COMPLETED') {
+          _stopFallbackPolling();
+          emit(
+            TripCompletedState(
+              cur.booking,
+              driver: cur.driver,
+              message: "Ride Completed",
+            ),
+          );
+        } else if (status == 'CANCELLED') {
+          _stopFallbackPolling();
+          cancelRide(customMessage: 'Ride has been cancelled');
+        } else if (status == 'ARRIVED' &&
+            cur.booking.status != RideStatus.driverArriving) {
+          emit(
+            DriverAssignedState(
+              booking: cur.booking.copyWith(status: RideStatus.driverArriving),
+              driver: cur.driver,
+              driverPosition: cur.driverPosition,
+              statusText: 'Driver has arrived at pickup point',
+            ),
+          );
+        } else if (status == 'IN_PROGRESS' &&
+            cur.booking.status != RideStatus.tripInProgress) {
+          emit(
+            DriverAssignedState(
+              booking: cur.booking.copyWith(status: RideStatus.tripInProgress),
+              driver: cur.driver,
+              driverPosition: cur.driverPosition,
+              statusText:
+                  'Trip in progress to ${cur.booking.destination.title}',
+            ),
+          );
+        }
+      } catch (_) {}
+    });
+  }
+
+  void _stopFallbackPolling() {
+    _fallbackPollTimer?.cancel();
+    _fallbackPollTimer = null;
+  }
+
   /// Cleanly resets and returns to initial dashboard state after trip completion
   /// without triggering the cancel ride API.
   void resetTrip() {
+    _stopFallbackPolling();
     _currentRideId = null;
     _webSocketService.disconnect();
     emit(ActiveRideInitial());
   }
 
   Future<void> cancelRide({String? customMessage}) async {
+    _stopFallbackPolling();
     String? apiMsg;
     if (_currentRideId != null) {
       try {
@@ -433,6 +505,7 @@ class ActiveRideCubit extends BaseCubit<ActiveRideState> {
 
   @override
   Future<void> close() {
+    _stopFallbackPolling();
     _webSocketService.disconnect();
     return super.close();
   }

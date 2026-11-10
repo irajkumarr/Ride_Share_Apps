@@ -36,6 +36,32 @@ class DriverModel {
     required this.location,
   });
 
+  DriverModel copyWith({
+    String? id,
+    String? name,
+    String? photoUrl,
+    double? rating,
+    int? totalRides,
+    String? vehicleModel,
+    String? vehicleColor,
+    String? licensePlate,
+    String? phoneNumber,
+    LatLngModel? location,
+  }) {
+    return DriverModel(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      photoUrl: photoUrl ?? this.photoUrl,
+      rating: rating ?? this.rating,
+      totalRides: totalRides ?? this.totalRides,
+      vehicleModel: vehicleModel ?? this.vehicleModel,
+      vehicleColor: vehicleColor ?? this.vehicleColor,
+      licensePlate: licensePlate ?? this.licensePlate,
+      phoneNumber: phoneNumber ?? this.phoneNumber,
+      location: location ?? this.location,
+    );
+  }
+
   factory DriverModel.fromJson(Map<String, dynamic> json) {
     return DriverModel(
       id: json['id'] as String? ?? 'dr_101',
@@ -152,13 +178,17 @@ class RideApiService {
   }
 
   /// Directly calls backend REST API: POST /api/v1/rides/request
-  Future<RideBookingModel> createBookingRequest(RideBookingModel request) async {
+  Future<RideBookingModel> createBookingRequest(
+    RideBookingModel request,
+  ) async {
     // Map vehicle tier to backend enum (ECONOMY, PREMIUM, XL)
     String backendVehicleType = 'ECONOMY';
     final tier = request.vehicleTier.toLowerCase();
     if (tier.contains('xl') || tier.contains('van')) {
       backendVehicleType = 'XL';
-    } else if (tier.contains('comfort') || tier.contains('premium') || tier.contains('sedan')) {
+    } else if (tier.contains('comfort') ||
+        tier.contains('premium') ||
+        tier.contains('sedan')) {
       backendVehicleType = 'PREMIUM';
     } else {
       backendVehicleType = 'ECONOMY';
@@ -189,7 +219,8 @@ class RideApiService {
     if (response['data'] != null) {
       final data = response['data'] as Map<String, dynamic>;
       final rideId = data['id']?.toString() ?? '';
-      final estimatedFare = (data['estimatedFare'] as num?)?.toDouble() ?? request.fareNpr;
+      final estimatedFare =
+          (data['estimatedFare'] as num?)?.toDouble() ?? request.fareNpr;
 
       return request.copyWith(
         id: rideId,
@@ -198,11 +229,15 @@ class RideApiService {
       );
     }
 
-    throw Exception(response['message'] ?? 'Failed to request ride from server');
+    throw Exception(
+      response['message'] ?? 'Failed to request ride from server',
+    );
   }
 
   Future<String?> cancelRide(String rideId) async {
-    final response = await _apiClient.post<Map<String, dynamic>>(ApiUrls.rideCancel(rideId));
+    final response = await _apiClient.post<Map<String, dynamic>>(
+      ApiUrls.rideCancel(rideId),
+    );
     if (response['message'] != null) {
       return response['message']?.toString();
     }
@@ -211,8 +246,11 @@ class RideApiService {
 
   Future<Map<String, dynamic>?> getActiveRide() async {
     try {
-      final response = await _apiClient.get<Map<String, dynamic>>(ApiUrls.riderActiveRide);
-      if (response['data'] != null && response['data'] is Map<String, dynamic>) {
+      final response = await _apiClient.get<Map<String, dynamic>>(
+        ApiUrls.riderActiveRide,
+      );
+      if (response['data'] != null &&
+          response['data'] is Map<String, dynamic>) {
         return response['data'] as Map<String, dynamic>;
       }
       return null;
@@ -223,12 +261,12 @@ class RideApiService {
 
   /// Fetches all trips for the authenticated rider.
   Future<List<Map<String, dynamic>>> getAllRidesForRider() async {
-    final response = await _apiClient.get<Map<String, dynamic>>(ApiUrls.riderAllRides);
+    final response = await _apiClient.get<Map<String, dynamic>>(
+      ApiUrls.riderAllRides,
+    );
     if (response['data'] is List) {
       return (response['data'] as List).cast<Map<String, dynamic>>();
     }
     return [];
   }
 }
-
-

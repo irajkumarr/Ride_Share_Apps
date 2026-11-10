@@ -29,30 +29,33 @@ int calculateBackendFare({
 
 void main() {
   group('Fare Calculation Consistency (Frontend vs Backend)', () {
-    test('Bike tier: 6.4 km must calculate to 132 in both frontend and backend', () {
-      const baseFare = 30.0;
-      const perKm = 16.0;
-      const minFare = 45.0;
-      const distanceKm = 6.4;
+    test(
+      'Bike tier: 6.4 km must calculate to 132 in both frontend and backend',
+      () {
+        const baseFare = 30.0;
+        const perKm = 16.0;
+        const minFare = 45.0;
+        const distanceKm = 6.4;
 
-      final frontendFare = calculateTierFare(
-        baseFareNpr: baseFare,
-        perKmRate: perKm,
-        minFareNpr: minFare,
-        distanceKm: distanceKm,
-      );
+        final frontendFare = calculateTierFare(
+          baseFareNpr: baseFare,
+          perKmRate: perKm,
+          minFareNpr: minFare,
+          distanceKm: distanceKm,
+        );
 
-      final backendFare = calculateBackendFare(
-        baseFare: baseFare,
-        perKm: perKm,
-        minFare: minFare,
-        distanceKm: distanceKm,
-      );
+        final backendFare = calculateBackendFare(
+          baseFare: baseFare,
+          perKm: perKm,
+          minFare: minFare,
+          distanceKm: distanceKm,
+        );
 
-      expect(frontendFare, equals(132.0));
-      expect(backendFare, equals(132));
-      expect(frontendFare.toInt(), equals(backendFare));
-    });
+        expect(frontendFare, equals(132.0));
+        expect(backendFare, equals(132));
+        expect(frontendFare.toInt(), equals(backendFare));
+      },
+    );
 
     test('Bike tier: Minimum fare clamp for short distances (0.5 km)', () {
       const baseFare = 30.0;
@@ -127,4 +130,3 @@ void main() {
     });
   });
 }
-

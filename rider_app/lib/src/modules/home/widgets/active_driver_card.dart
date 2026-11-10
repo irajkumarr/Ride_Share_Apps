@@ -10,6 +10,8 @@ class ActiveDriverCard extends StatelessWidget {
   final DriverModel driver;
   final String statusText;
   final VoidCallback onCancel;
+  final int? etaMinutes;
+  final double? distanceKm;
 
   const ActiveDriverCard({
     super.key,
@@ -17,6 +19,8 @@ class ActiveDriverCard extends StatelessWidget {
     required this.driver,
     required this.statusText,
     required this.onCancel,
+    this.etaMinutes,
+    this.distanceKm,
   });
 
   String _formatPlate(String plate) {
@@ -197,10 +201,21 @@ class ActiveDriverCard extends StatelessWidget {
         ? booking.destination.title
         : 'Your Destination';
 
-    final etaMinutes = isOnTrip ? 6 : (isArrived ? 0 : 3);
+    final effectiveEtaMinutes =
+        etaMinutes ?? (isOnTrip ? 6 : (isArrived ? 0 : 3));
     final etaTime = TimeOfDay.fromDateTime(
-      DateTime.now().add(Duration(minutes: etaMinutes)),
+      DateTime.now().add(Duration(minutes: effectiveEtaMinutes)),
     ).format(context);
+
+    final String distanceSubtitle;
+    if (distanceKm != null && distanceKm! > 0) {
+      final formattedDist = distanceKm! < 1.0
+          ? '${(distanceKm! * 1000).round()} m'
+          : '${distanceKm!.toStringAsFixed(1)} km';
+      distanceSubtitle = ' • $formattedDist';
+    } else {
+      distanceSubtitle = '';
+    }
 
     return Container(
       decoration: const BoxDecoration(
@@ -298,8 +313,8 @@ class ActiveDriverCard extends StatelessWidget {
                           isArrived
                               ? 'Waiting at your pickup location'
                               : (isOnTrip
-                                    ? 'Arriving in ~$etaMinutes mins ($etaTime)'
-                                    : 'Pickup in ~$etaMinutes mins ($etaTime)'),
+                                    ? 'Arriving in ~$effectiveEtaMinutes mins ($etaTime$distanceSubtitle)'
+                                    : 'Pickup in ~$effectiveEtaMinutes mins ($etaTime$distanceSubtitle)'),
                           style: TextStyle(
                             fontSize: 13,
                             color: isArrived
