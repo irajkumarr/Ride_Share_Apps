@@ -92,7 +92,7 @@ class App extends StatelessWidget {
   ];
 
   String get _appTitle => switch (flavor) {
-    AppFlavor.dev => 'MyApp (Dev)',
-    AppFlavor.prod => 'MyApp',
+    AppFlavor.dev => 'RideNest (Dev)',
+    AppFlavor.prod => 'RideNest',
   };
 }

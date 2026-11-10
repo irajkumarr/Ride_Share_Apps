@@ -11,7 +11,7 @@ import 'package:shared_core/gen/assets.gen.dart';
 import '../../modules/auth/login/login_screen.dart';
 import '../../modules/auth/register/register_screen.dart';
 import '../../modules/auth/splash/splash_screen.dart';
-import '../../modules/home/home_screen.dart';
+import '../../modules/home/views/home_screen.dart';
 import '../../modules/home/profile_screen.dart';
 import '../../modules/ride_history/views/rider_ride_history_screen.dart';
 
